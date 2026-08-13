@@ -100,10 +100,12 @@ import StarterGallery from "./components/StarterGallery";
 import ShareModal from "./components/ShareModal";
 import FindReplaceModal from "./components/FindReplaceModal";
 import ShortcutsModal from "./components/ShortcutsModal";
+import ThemeGallery from "./components/ThemeGallery";
 import OnboardingTour, { tourCanShow, tourTurnedOff, markTourShown, turnOffTour, type TourStep } from "./components/OnboardingTour";
 import PricingModal from "./components/PricingModal";
 import { starterById } from "./lib/starterSites";
 import { fullTemplateById } from "./lib/templatesFull";
+import type { GeneratedTheme } from "./lib/themeEngine";
 
 type Tab = "chat" | "design" | "media" | "code" | "inspect" | "plan" | "history" | "posts" | "langs" | "pages" | "seo" | "analytics";
 
@@ -118,6 +120,7 @@ export default function App() {
   const [tourOpen, setTourOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [themesOpen, setThemesOpen] = useState(false);
   const [cloudHistory, setCloudHistory] = useState<Checkpoint[]>([]);
   const [presence, setPresence] = useState<PresenceInfo[]>([]);
   const [pro, setPro] = useState(() => proUnlocked());
@@ -889,6 +892,16 @@ export default function App() {
     const system = JSON.parse(JSON.stringify(preset.system)) as DesignSystem;
     changeDesign(system);
     showToast(`Applied ${preset.name} design`);
+  };
+
+  const applyGeneratedTheme = (theme: GeneratedTheme) => {
+    if (proTier !== "plus") {
+      setPricingOpen(true);
+      return;
+    }
+    changeDesign(JSON.parse(JSON.stringify(theme.system)) as DesignSystem);
+    setThemesOpen(false);
+    showToast(`Applied theme: ${theme.name}`);
   };
 
   const regenerateDesign = () => {
@@ -1819,6 +1832,7 @@ export default function App() {
                 onUploadBrand={uploadBrand}
                 onSetTone={setTone}
                 onHarmonize={harmonizeDesign}
+                onOpenThemes={() => setThemesOpen(true)}
               />
             )}
             {tab === "media" && (
@@ -2010,6 +2024,17 @@ export default function App() {
         />
       )}
       {shortcutsOpen && <ShortcutsModal onClose={() => setShortcutsOpen(false)} />}
+      {themesOpen && (
+        <ThemeGallery
+          tier={proTier}
+          onApply={applyGeneratedTheme}
+          onUpgrade={() => {
+            setThemesOpen(false);
+            setPricingOpen(true);
+          }}
+          onClose={() => setThemesOpen(false)}
+        />
+      )}
       <OnboardingTour
         active={tourOpen}
         steps={tourSteps}

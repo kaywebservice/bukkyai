@@ -10,6 +10,7 @@ type Props = {
   onUploadBrand: (f: File) => void;
   onSetTone: (t: "default" | "bold" | "minimal") => void;
   onHarmonize: () => void;
+  onOpenThemes: () => void;
 };
 
 function scoreTone(total: number): string {
@@ -61,6 +62,9 @@ export default function DesignPanel(p: Props) {
   const score = useMemo(() => scoreDesign(p.doc.design), [p.doc.design]);
   return (
     <div>
+      <button className="btn btn-primary" style={{ width: "100%", marginBottom: 12 }} onClick={p.onOpenThemes}>
+        ✦ Theme generator — 100+ themes
+      </button>
       <ScoreGauge score={score} onHarmonize={p.onHarmonize} />
       <div className="panel-label">Voice & tone</div>
       <textarea

@@ -5,6 +5,7 @@ import { singleFileHtml, multiPageHtml } from "./export";
 import { contrastRatio } from "./color";
 import { FULL_TEMPLATES } from "./templatesFull";
 import { readFileSync, readdirSync } from "node:fs";
+import { GENERATED_THEMES } from "./themeEngine";
 export type SmokeResult = { results: [string, boolean][]; pass: number; total: number };
 
 export function runSmoke(): SmokeResult {
@@ -153,6 +154,12 @@ export function runSmoke(): SmokeResult {
       if (foot && "note" in (foot.content as object)) (foot.content as { note?: string }).note = "Designed by Kaywebservice Enterprise Solutions.";
       return renderPage(bk, bk.pages[0], false).includes("https://bukkyai.duckdns.org/");
     })()],
+    ["Theme generator produces 100+ themes", GENERATED_THEMES.length >= 100],
+    ["Theme generator has multiple categories", (() => {
+      const cats = new Set(GENERATED_THEMES.map((t) => t.category));
+      return cats.size >= 5;
+    })()],
+    ["Themes are valid design systems", GENERATED_THEMES.every((t) => t.system.tokens.colors.background && t.system.tokens.fonts.heading && t.system.tokens.radius.md > 0)],
     ["Contrast math sane", contrastRatio("#241a12", "#f7f2ea") > 7],
   ];
 

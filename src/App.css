@@ -1753,6 +1753,101 @@ input[type="range"] {
   outline: 1px solid var(--chrome-accent);
 }
 
+/* ── Theme generator gallery ────────────────────────────────────── */
+.theme-modal {
+  width: 720px;
+  max-width: 94vw;
+}
+.theme-plus-banner {
+  background: color-mix(in srgb, var(--chrome-accent) 10%, var(--chrome-panel2));
+  border: 1px solid color-mix(in srgb, var(--chrome-accent) 45%, var(--chrome-border));
+  border-radius: 12px;
+  padding: 14px;
+}
+.theme-plus-banner b {
+  font-size: 14px;
+}
+.theme-plus-banner p {
+  font-size: 12.5px;
+  color: var(--chrome-muted);
+  margin: 4px 0 10px;
+}
+.theme-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.theme-cats,
+.theme-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  overflow-y: auto;
+  max-height: 50vh;
+  padding: 2px;
+}
+.theme-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  background: var(--chrome-panel2);
+  border: 1px solid var(--chrome-border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  font: inherit;
+  color: var(--chrome-text);
+  transition: border-color .15s, transform .15s;
+}
+.theme-card:hover {
+  border-color: var(--chrome-accent);
+  transform: translateY(-2px);
+}
+.theme-preview {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+.theme-preview-light {
+  background: #ffffff;
+}
+.theme-preview-dark {
+  background: #161616;
+}
+.theme-card-body {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.theme-card-body b {
+  font-size: 12.5px;
+}
+.theme-card-body span {
+  font-size: 11px;
+  color: var(--chrome-faint);
+}
+.theme-card-body .theme-fonts {
+  color: var(--chrome-muted);
+  font-size: 10.5px;
+}
+.theme-lock {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 14px;
+  opacity: .8;
+}
+
 /* ── Shortcuts panel ────────────────────────────────────────────── */
 .shortcut-row {
   display: flex;
