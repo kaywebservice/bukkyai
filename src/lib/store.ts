@@ -130,7 +130,11 @@ export function addAsset(projectId: string, file: File): Promise<MediaAsset | nu
       reader.onload = () => {
         void compressDataUrl(String(reader.result ?? ""))
           .catch(() => String(reader.result ?? ""))
-          .then((dataUrl) => {
+          .then(async (compressed) => {
+            let dataUrl = compressed;
+            const { uploadImageToHost } = await import("./publish");
+            const hosted = await uploadImageToHost(compressed);
+            if (hosted.url) dataUrl = hosted.url;
             const asset: MediaAsset = {
               id: uid("ast"),
               name: file.name,

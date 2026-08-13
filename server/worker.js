@@ -70,6 +70,24 @@ export default {
     if (request.method === "OPTIONS") {
       return new Response("ok", { headers: cors() });
     }
+
+    // ── Hosted checkout page (GET, branded with the site's design) ──────────
+    if (path === "/checkout" && request.method === "GET") {
+      const origin = url.origin;
+      return new Response(renderCheckoutPage(url.searchParams, env, origin), {
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    }
+
+    // ── Serve hosted images (GET /img/{id}) ─────────────────────────────────
+    if (path.startsWith("/img/") && request.method === "GET" && env.IMAGES) {
+      const id = path.slice(5).replace(/\.(png|jpg|jpeg|webp|gif)$/, "");
+      const val = await env.IMAGES.get(id, "arrayBuffer");
+      if (val === null) return new Response("Not found", { status: 404 });
+      const meta = await env.IMAGES.getWithMetadata(id).then((r) => (r && r.metadata) || {}).catch(() => ({}));
+      return new Response(val, { headers: { "content-type": meta.contentType || "image/png", "cache-control": "public, max-age=31536000, immutable" } });
+    }
+
     if (request.method !== "POST") {
       return json({ error: "POST only" }, 405, cors());
     }
@@ -77,6 +95,22 @@ export default {
     let body;
     try { body = JSON.parse(raw); } catch {
       return json({ error: "Invalid JSON" }, 400, cors());
+    }
+
+    // ── Image hosting: upload a data-URL image, serve it back at /img/{id} ──
+    if (path === "/api/image" && env.IMAGES) {
+      const dataUrl = String(body.dataUrl || "");
+      if (!dataUrl.startsWith("data:image/")) {
+        return json({ error: "Expected a data:image URL." }, 400, cors());
+      }
+      const m = dataUrl.match(/^data:image\/([a-z0-9.+-]+);base64,(.+)$/s);
+      if (!m) return json({ error: "Unsupported image data." }, 400, cors());
+      const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+      const raw = atob(m[2]);
+      const bytes = Uint8Array.from(raw, (c) => c.charCodeAt(0));
+      const ext = m[1].includes("png") ? "png" : m[1].includes("webp") ? "webp" : m[1].includes("jpeg") ? "jpg" : "png";
+      await env.IMAGES.put(id, bytes, { metadata: { contentType: `image/${ext}`, at: Date.now() } });
+      return json({ url: `${url.origin}/img/${id}.${ext}` }, 200, cors());
     }
 
     // ── Checkout: create a Creem session bound to the buyer's email ──────────
@@ -230,6 +264,99 @@ export default {
     return json({ error: "Not found" }, 404, cors());
   },
 };
+
+// Renders a branded, hosted checkout page (GET /checkout).
+function renderCheckoutPage(params, env, origin) {
+  const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const siteName = esc(params.get("site") || "This site");
+  const bg = esc(params.get("bg") || "#faf6ef");
+  const surface = esc(params.get("surface") || "#ffffff");
+  const text = esc(params.get("text") || "#1d1b16");
+  const accent = esc(params.get("accent") || "#6d5ae8");
+  const currency = esc(params.get("currency") || "$");
+  let total = Number(params.get("total") || 0);
+  if (Number.isNaN(total)) total = 0;
+  const items = params.get("items");
+  let rowsHtml = "";
+  if (items) {
+    try {
+      const list = JSON.parse(items);
+      rowsHtml = list.map((i) => `<div class="row"><span>${esc(i.name)} × ${esc(String(i.qty))}</span><span>${esc(currency)}${(Number(i.price) * Number(i.qty) || 0).toFixed(2)}</span></div>`).join("");
+    } catch {}
+  }
+  const workerBase = env.CREEM_API_KEY ? `${origin}/api/checkout` : "";
+  const paymentLink = esc(params.get("link") || "");
+  const orderNotify = esc(params.get("orderNotify") || "");
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Checkout — ${siteName}</title>
+<style>
+:root{--bg:${bg};--surface:${surface};--text:${text};--accent:${accent}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{width:min(440px,100%);background:var(--surface);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.12);padding:28px}
+h1{font-size:20px;margin-bottom:4px}
+.sub{color:#6b6355;font-size:13px;margin-bottom:20px}
+.row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:14px;border-bottom:1px solid #eee}
+.total{display:flex;justify-content:space-between;font-weight:800;font-size:17px;padding:14px 0 20px}
+label{display:block;font-size:12px;font-weight:700;margin:10px 0 4px;color:#555}
+input{width:100%;padding:11px 12px;border:1px solid #ddd;border-radius:10px;font-size:14px}
+.btn{display:block;width:100%;margin-top:18px;padding:14px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.note{font-size:12px;color:#888;text-align:center;margin-top:14px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>${siteName}</h1>
+  <div class="sub">Secure checkout · no account needed</div>
+  ${rowsHtml}
+  <div class="total"><span>Total</span><span>${esc(currency)}${total.toFixed(2)}</span></div>
+  <label>Email (for your receipt)</label>
+  <input id="email" type="email" placeholder="you@email.com"/>
+  ${workerBase ? '<label>Name</label><input id="name" type="text" placeholder="Your name"/>' : ""}
+  <button id="pay" class="btn">Pay ${esc(currency)}${total.toFixed(2)}</button>
+  <div class="note" id="status"></div>
+</div>
+<script>
+var pay = document.getElementById("pay");
+var statusEl = document.getElementById("status");
+var emailEl = document.getElementById("email");
+var nameEl = document.getElementById("name");
+var workerBase = ${JSON.stringify(workerBase)};
+var orderNotify = ${JSON.stringify(orderNotify)};
+var paymentLink = ${JSON.stringify(paymentLink)};
+var siteName = ${JSON.stringify(siteName)};
+pay.addEventListener("click", function () {
+  var email = emailEl.value.trim();
+  if (!/\\S+@\\S+\\.\\S+/.test(email)) { statusEl.textContent = "Enter a valid email."; return; }
+  pay.disabled = true;
+  statusEl.textContent = "Preparing secure checkout…";
+  if (orderNotify) {
+    try {
+      fetch(orderNotify, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subject: "New order — " + siteName, email: email, items: ${items ? JSON.stringify(items) : "[]"}, total: ${JSON.stringify(total)} }) });
+    } catch (e) {}
+  }
+  if (workerBase) {
+    fetch(workerBase, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email }) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (d.url) { window.location.href = d.url; } else { statusEl.textContent = d.error || "Checkout unavailable."; pay.disabled = false; } })
+      .catch(function () { statusEl.textContent = "Network error. Try again."; pay.disabled = false; });
+  } else if (paymentLink) {
+    window.location.href = paymentLink;
+  } else {
+    statusEl.textContent = "Payment not configured on this site yet.";
+    pay.disabled = false;
+  }
+});
+</script>
+</body>
+</html>`;
+}
 
 function cors() {
   return {

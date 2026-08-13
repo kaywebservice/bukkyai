@@ -151,6 +151,10 @@ window.__BKKY__ = ${JSON.stringify({
     coupons: doc.coupons ?? [],
     orderNotify: doc.orderNotify || "",
     emailService: doc.forms?.emailService || null,
+    checkoutPage: doc.stripePaymentLink
+      ? (import.meta.env.VITE_CHECKOUT_PAGE as string | undefined) ||
+        ((import.meta.env.VITE_PUBLISH_ENDPOINT as string | undefined) || "").replace(/\/publish$/, "").replace(/\/+$/, "") + "/checkout"
+      : "",
   })};
 </script>
 <script>
@@ -1349,14 +1353,32 @@ const SITE_FEATURES_SCRIPT = `(function () {
     }
     var checkout = e.target.closest ? e.target.closest("#bk-cart-checkout") : null;
     if (checkout) {
+      var checkoutUrl = cfg.checkoutPage;
+      if (checkoutUrl) {
+        var cartItems = loadCart();
+        var subtotal = cartItems.reduce(function (s, i) { return s + (Number(i.price) || 0) * i.qty; }, 0);
+        var disc2 = loadDiscount();
+        var amt = disc2 && disc2.percent ? subtotal * disc2.percent / 100 : 0;
+        var total2 = subtotal - amt;
+        var q = "site=" + encodeURIComponent(document.title) +
+          "&total=" + total2 +
+          "&currency=" + encodeURIComponent(cfg.currency || "$") +
+          "&items=" + encodeURIComponent(JSON.stringify(cartItems)) +
+          "&bg=" + encodeURIComponent(getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#ffffff") +
+          "&surface=" + encodeURIComponent(getComputedStyle(document.documentElement).getPropertyValue("--surface").trim() || "#ffffff") +
+          "&text=" + encodeURIComponent(getComputedStyle(document.documentElement).getPropertyValue("--text").trim() || "#111111") +
+          "&accent=" + encodeURIComponent(getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#6d5ae8");
+        window.location.href = checkoutUrl + (checkoutUrl.includes("?") ? "&" : "?") + q;
+        return;
+      }
       if (!cfg.stripeLink) return;
       if (cfg.orderNotify) {
-        var items = loadCart();
+        var items2 = loadCart();
         try {
           fetch(cfg.orderNotify, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ subject: "New order — " + document.title, items: items, total: items.reduce(function (s, i) { return s + (Number(i.price) || 0) * i.qty; }, 0) })
+            body: JSON.stringify({ subject: "New order — " + document.title, items: items2, total: items2.reduce(function (s, i) { return s + (Number(i.price) || 0) * i.qty; }, 0) })
           });
         } catch (err) {}
       }

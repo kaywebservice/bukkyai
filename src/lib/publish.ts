@@ -8,6 +8,24 @@ export function publishEndpoint(): string {
   return (import.meta.env.VITE_PUBLISH_ENDPOINT as string | undefined) ?? "";
 }
 
+export async function uploadImageToHost(dataUrl: string): Promise<{ url?: string; error?: string }> {
+  const endpoint = publishEndpoint();
+  if (!endpoint) return { error: "Publish endpoint not configured." };
+  try {
+    const res = await fetch(endpoint.replace(/\/publish$/, "").replace(/\/+$/, "") + "/api/image", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ dataUrl }),
+    });
+    const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+    if (!res.ok) return { error: data.error ?? `Upload returned ${res.status}` };
+    if (!data.url) return { error: "Upload returned no URL." };
+    return { url: data.url };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
 function apiBase(): string {
   return publishEndpoint().replace(/\/publish$/, "").replace(/\/+$/, "");
 }

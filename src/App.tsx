@@ -262,7 +262,23 @@ export default function App() {
 
   const shareCurrentProject = async (email: string, role: "editor" | "viewer") => {
     if (!authUid || !projectId) return { ok: false, error: "Open a project first." };
-    return shareProject(authUid, projectId, email, role);
+    const res = await shareProject(authUid, projectId, email, role);
+    if (res.ok && doc?.forms?.endpoint) {
+      const proj = projects.find((p) => p.id === projectId);
+      const inviteLink = `${window.location.origin}/app`;
+      try {
+        await fetch(doc.forms.endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+          body: new URLSearchParams({
+            _subject: `You've been invited to collaborate on "${proj?.name ?? "a bukkyai site"}"`,
+            email,
+            message: `You've been invited as a ${role}. Open ${inviteLink}, sign in with this email, and accept the invite to start editing.`,
+          }).toString(),
+        });
+      } catch {}
+    }
+    return res;
   };
 
   useEffect(() => {

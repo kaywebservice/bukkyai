@@ -5,3 +5,7 @@ compatibility_date = "2025-01-01"
 [[kv_namespaces]]
 binding = "ENTITLEMENTS"
 id = "d43294b11f124d8eb60f56718e8b72c0"
+
+[[kv_namespaces]]
+binding = "IMAGES"
+id = "9f005165eb0e47b2820eccfbd5f393c0"
