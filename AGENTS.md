@@ -134,6 +134,15 @@ masked errors locally that then broke the clean Vercel build. Keep it this way.
 
 ---
 
+## Pending user actions (remind at the start of each session)
+
+- **[TO DO] Deploy the worker:** `cd server && npx wrangler deploy` — needed so the referral endpoints (`/api/referral`, `/api/referral/visit`, `/api/referral/stats`) go live. Until deployed, the "Refer & earn" panel in the app shows an error and `/ref?ref=` links won't record visits.
+- **[TO DO] Search Console re-indexing:** after Vercel deploys a push, re-request indexing in Google Search Console for new/changed URLs (recent additions: `/blog/*` ×5, `/playground`, `/compare`, `/badge`, `/og/*.png` images, `/templates`, `/tools`, `/made-with`, 279 programmatic pages incl. new city×industry locals).
+- **[TO DO] Cross-post drafts:** `drafts/*.md` are ready to paste to Medium/LinkedIn/Hashnode (with canonical links) — I can't post, the user must. See `drafts/README.md` for per-platform steps.
+- **[TO DO] Creem side:** Plus price set to $35 in the UI; user should confirm the same price in Creem (annual plans optional).
+
+---
+
 ## Key conventions
 
 - **No comments in code unless asked** (but this file and obvious section headers are fine).
