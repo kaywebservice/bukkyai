@@ -62,6 +62,18 @@ export type SectionContent = {
     trust: string;
     bgVideo?: string;
   };
+  heroSlider?: {
+    heading?: string;
+    slides: {
+      eyebrow?: string;
+      title: string;
+      subtitle: string;
+      cta: { label: string; href: string };
+      image?: { url: string; alt: string };
+    }[];
+    autoplay?: boolean;
+    intervalSec?: number;
+  };
   logos?: { heading: string; items: string[] };
   features?: {
     heading: string;
@@ -72,6 +84,7 @@ export type SectionContent = {
    testimonials?: {
     heading: string;
     subheading?: string;
+    slider?: boolean;
     items: { quote: string; name: string; role: string }[];
   };
   pricing?: {
@@ -79,9 +92,11 @@ export type SectionContent = {
     subheading: string;
     currency: string;
     period: string;
+    billing?: { toggle: boolean; monthlyLabel?: string; yearlyLabel?: string; yearlySuffix?: string; saveLabel?: string };
     items: {
       name: string;
       price: string;
+      priceYearly?: string;
       description: string;
       features: string[];
       cta: { label: string; href: string };

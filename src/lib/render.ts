@@ -132,6 +132,7 @@ ${embedsHead}
 <body${editingMode ? ' class="bk-editing"' : ""}>
 <a href="#main" style="position:absolute;left:-9999px">Skip to content</a>
 ${renderNav(doc, previewSlugs)}
+${page.slug ? `<nav class="bk-breadcrumbs" aria-label="Breadcrumb"><div class="bk-container"><a href="/">Home</a><span class="bk-breadcrumb-sep">/</span><span>${esc(page.title || page.slug)}</span></div></nav>` : ""}
 <main id="main">
 ${sections.join("\n")}
 ${page.password && !editingMode ? `<div class="bk-page-gate" data-page-password="${esc(page.password)}"><div class="bk-page-gate-card"><h2>${esc(page.title)}</h2><p>This page is protected. Enter the password to view it.</p><input id="bk-page-pwd" type="password" placeholder="Password"/><button id="bk-page-pwd-go" class="bk-btn bk-btn-primary">Unlock</button><div class="bk-page-gate-err"></div></div></div>` : ""}
@@ -310,7 +311,174 @@ ${(doc.posts ?? []).map((post) => `  <url><loc>${siteBase(doc)}/post/${esc(post.
     });
   }
   files.push({ path: "404.html", content: renderNotFound(doc) });
+
+  // Product detail pages (/product/{sku}.html)
+  for (const pg of doc.pages) {
+    for (const sec of pg.sections) {
+      if (sec.type !== "products") continue;
+      const content = sec.content as { currency?: string; items?: { id: string; name: string; price: number; description: string; features?: string[]; image?: string; badge?: string; sku?: string; stock?: number }[] };
+      const currency = content.currency || "$";
+      for (const item of content.items ?? []) {
+        const slug = (item.sku || item.id || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        if (!slug) continue;
+        files.push({ path: `product/${slug}.html`, content: renderProductPage(doc, item, currency) });
+      }
+    }
+  }
+
+  // Blog post detail pages (/post/{slug}.html)
+  for (const post of doc.posts ?? []) {
+    if (!post.slug) continue;
+    files.push({ path: `post/${post.slug}.html`, content: renderPostPage(doc, post) });
+  }
+
   return { files };
+}
+
+export function renderProductPage(doc: SiteBlueprint, product: { id: string; name: string; price: number; description: string; features?: string[]; image?: string; badge?: string; sku?: string; stock?: number }, currency: string): string {
+  const c = doc.design.tokens.colors;
+  const f = doc.design.tokens.fonts;
+  const base = siteBase(doc);
+  const home = doc.pages[0];
+  const backLink = home?.slug ? `${base}/${home.slug}.html` : `${base}/`;
+  const features = (product.features ?? []).map((x) => `<li>${esc(x)}</li>`).join("");
+  return `<!doctype html>
+<html lang="${esc(doc.meta.lang)}">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>${esc(product.name)} — ${esc(doc.meta.title)}</title>
+<meta name="description" content="${esc(product.description || `${product.name} from ${doc.meta.title}`)}"/>
+<link rel="canonical" href="${base}/product/${esc(product.sku || product.id)}.html"/>
+<link rel="icon" href="${faviconDataUrl(doc)}"/>
+<link href="https://fonts.googleapis.com/css2?family=${esc(f.heading).replace(/ /g, "+")}:wght@400;600;700&family=${esc(f.body).replace(/ /g, "+")}:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:${c.background};--surface:${c.surface};--text:${c.text};--muted:${c.muted};--accent:${c.accent};--accent-c:${c.accentContrast};--border:${c.border};--head:${esc(f.heading)},Georgia,serif;--body:${esc(f.body)},system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.6}
+.wrap{max-width:960px;margin:0 auto;padding:40px 24px}
+.breadcrumb{font-size:13px;color:var(--muted);margin-bottom:24px}
+.breadcrumb a{color:var(--accent);text-decoration:none}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+.ph img{width:100%;border-radius:16px;aspect-ratio:4/3;object-fit:cover;background:var(--surface);border:1px solid var(--border)}
+.pinfo h1{font-family:var(--head);font-size:32px;margin-bottom:10px}
+.price{font-size:26px;font-weight:800;color:var(--accent);margin-bottom:12px}
+.desc{color:var(--muted);margin-bottom:16px}
+.feat{list-style:none;margin:0 0 24px}
+.feat li{padding:6px 0 6px 26px;position:relative}
+.feat li::before{content:"✓";position:absolute;left:0;color:var(--accent);font-weight:700}
+.btn{display:inline-block;padding:13px 24px;border-radius:10px;background:var(--accent);color:var(--accent-c);font-weight:700;text-decoration:none;border:none;cursor:pointer;font-size:15px}
+.btn:hover{filter:brightness(1.08)}
+.stock{font-size:13px;color:var(--muted);margin-top:12px}
+.more{margin-top:48px;padding-top:24px;border-top:1px solid var(--border)}
+.more h3{font-family:var(--head);margin-bottom:8px}
+@media(max-width:640px){.pgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="breadcrumb"><a href="${backLink}">Home</a> / <span>${esc(product.name)}</span></nav>
+  <div class="pgrid">
+    <div class="ph">${product.image ? `<img src="${attrSafe(product.image)}" alt="${esc(product.name)}"/>` : ""}</div>
+    <div class="pinfo">
+      ${product.badge ? `<span style="display:inline-block;background:var(--accent);color:var(--accent-c);font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;margin-bottom:10px">${esc(product.badge)}</span>` : ""}
+      <h1>${esc(product.name)}</h1>
+      <div class="price">${esc(currency)}${Number(product.price).toFixed(2)}</div>
+      <p class="desc">${esc(product.description || "")}</p>
+      ${features ? `<ul class="feat">${features}</ul>` : ""}
+      <button class="btn bk-add-to-cart" data-product-id="${esc(product.id)}" data-product-name="${esc(product.name)}" data-product-price="${product.price ?? 0}"${typeof product.stock === "number" ? ` data-stock="${product.stock}"` : ""}${typeof product.stock === "number" && product.stock <= 0 ? " disabled" : ""}>${typeof product.stock === "number" && product.stock <= 0 ? "Sold out" : "Add to cart"}</button>
+      ${typeof product.stock === "number" ? `<div class="stock">${product.stock > 0 ? (product.stock <= 5 ? `Only ${product.stock} left` : "In stock") : "Sold out"}</div>` : ""}
+    </div>
+  </div>
+</div>
+<script>
+var cfg = { currency: ${JSON.stringify(currency)}, stripeLink: "" };
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest ? e.target.closest(".bk-add-to-cart") : null;
+  if (!btn) return;
+  var cart = [];
+  try { cart = JSON.parse(localStorage.getItem("bk-cart") || "[]"); } catch (e) {}
+  cart.push({ id: btn.getAttribute("data-product-id"), name: btn.getAttribute("data-product-name"), price: Number(btn.getAttribute("data-product-price")) || 0, qty: 1 });
+  localStorage.setItem("bk-cart", JSON.stringify(cart));
+  btn.textContent = "Added ✓";
+});
+</script>
+</body>
+</html>`;
+}
+
+export function renderPostPage(doc: SiteBlueprint, post: { slug: string; title: string; excerpt: string; content: string; date: string; category?: string; author?: string; cover?: string }): string {
+  const c = doc.design.tokens.colors;
+  const f = doc.design.tokens.fonts;
+  const base = siteBase(doc);
+  const home = doc.pages[0];
+  const backLink = home?.slug ? `${base}/${home.slug}.html` : `${base}/`;
+  const related = (doc.posts ?? []).filter((p) => p.slug !== post.slug).slice(0, 2).map((p) => `
+    <a class="rel-card" href="${base}/post/${esc(p.slug)}.html">
+      ${p.cover ? `<img src="${attrSafe(p.cover)}" alt=""/>` : ""}
+      <b>${esc(p.title)}</b>
+    </a>`).join("");
+  const share = [
+    `https://twitter.com/intent/tweet?url=${encodeURIComponent(`${base}/post/${post.slug}.html`)}&text=${encodeURIComponent(post.title)}`,
+    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${base}/post/${post.slug}.html`)}`,
+    `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${base}/post/${post.slug}.html`)}`,
+  ];
+  return `<!doctype html>
+<html lang="${esc(doc.meta.lang)}">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>${esc(post.title)} — ${esc(doc.meta.title)}</title>
+<meta name="description" content="${esc(post.excerpt || "")}"/>
+<meta property="og:type" content="article"/>
+<meta property="og:title" content="${esc(post.title)}"/>
+<meta property="og:description" content="${esc(post.excerpt || "")}"/>
+${post.cover ? `<meta property="og:image" content="${attrSafe(post.cover)}"/>` : ""}
+<link rel="canonical" href="${base}/post/${esc(post.slug)}.html"/>
+<link rel="icon" href="${faviconDataUrl(doc)}"/>
+<link href="https://fonts.googleapis.com/css2?family=${esc(f.heading).replace(/ /g, "+")}:wght@400;600;700&family=${esc(f.body).replace(/ /g, "+")}:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:${c.background};--surface:${c.surface};--text:${c.text};--muted:${c.muted};--accent:${c.accent};--accent-c:${c.accentContrast};--border:${c.border};--head:${esc(f.heading)},Georgia,serif;--body:${esc(f.body)},system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.7}
+.wrap{max-width:720px;margin:0 auto;padding:40px 24px}
+.breadcrumb{font-size:13px;color:var(--muted);margin-bottom:24px}
+.breadcrumb a{color:var(--accent);text-decoration:none}
+.cover{width:100%;border-radius:16px;aspect-ratio:16/9;object-fit:cover;margin-bottom:24px}
+h1{font-family:var(--head);font-size:34px;line-height:1.15;margin-bottom:10px}
+.meta{color:var(--muted);font-size:14px;margin-bottom:24px}
+.cat{display:inline-block;background:var(--accent);color:var(--accent-c);font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;margin-bottom:12px}
+.body{font-size:16.5px}
+.body p{margin-bottom:18px}
+.body h2{font-family:var(--head);margin:28px 0 12px}
+.share{margin:32px 0;padding-top:20px;border-top:1px solid var(--border)}
+.share a{display:inline-block;margin-right:10px;padding:9px 16px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:13px;font-weight:600}
+.rel{margin-top:32px;padding-top:24px;border-top:1px solid var(--border)}
+.rel h3{font-family:var(--head);margin-bottom:16px}
+.rel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rel-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;text-decoration:none;color:var(--text)}
+.rel-card img{width:100%;height:100px;object-fit:cover}
+.rel-card b{display:block;padding:10px 12px;font-size:13px}
+@media(max-width:640px){.rel-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="breadcrumb"><a href="${backLink}">Home</a> / ${post.category ? `<a href="${base}/blog/${esc(post.category.toLowerCase().replace(/[^a-z0-9]+/g, "-"))}.html">${esc(post.category)}</a> / ` : ""}<span>${esc(post.title)}</span></nav>
+  ${post.cover ? `<img class="cover" src="${attrSafe(post.cover)}" alt="${esc(post.title)}"/>` : ""}
+  ${post.category ? `<span class="cat">${esc(post.category)}</span>` : ""}
+  <h1>${esc(post.title)}</h1>
+  <div class="meta">${post.date ? new Date(post.date).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }) : ""}${post.author ? ` · ${esc(post.author)}` : ""}</div>
+  <div class="body">${post.content || ""}</div>
+  <div class="share">
+    <a href="${share[0]}" target="_blank" rel="noopener">Share on X</a>
+    <a href="${share[1]}" target="_blank" rel="noopener">Share on Facebook</a>
+    <a href="${share[2]}" target="_blank" rel="noopener">Share on LinkedIn</a>
+  </div>
+  ${related ? `<div class="rel"><h3>Keep reading</h3><div class="rel-grid">${related}</div></div>` : ""}
+</div>
+</body>
+</html>`;
 }
 
 export function renderCategoryArchive(doc: SiteBlueprint, category: string): string {
@@ -576,6 +744,36 @@ function renderSection(
       );
     }
 
+    case "heroSlider": {
+      const h = c as typeof c & {
+        slides?: { eyebrow?: string; title?: string; subtitle?: string; cta?: { label: string; href: string }; image?: { url: string; alt: string } }[];
+        autoplay?: boolean;
+        intervalSec?: number;
+      };
+      const slides = h.slides ?? [];
+      const slidesHtml = slides.map(
+        (s, idx) => `
+  <div class="bk-slide" data-slide="${idx}" data-field-root>
+    ${s.image?.url ? `<div class="bk-slide-bg"><img src="${attrSafe(s.image.url)}" alt="${esc(s.image?.alt ?? "")}" loading="lazy"/></div><div class="bk-slide-scrim"></div>` : ""}
+    <div class="bk-slide-content">
+      ${s.eyebrow ? `<span class="bk-eyebrow">${te(`${r}.slides[${idx}].eyebrow`, s.eyebrow, "span")}</span>` : ""}
+      <h1 class="bk-slide-title">${te(`${r}.slides[${idx}].title`, s.title ?? "", "span")}</h1>
+      ${s.subtitle ? `<p class="bk-slide-sub">${te(`${r}.slides[${idx}].subtitle`, s.subtitle, "span")}</p>` : ""}
+      ${s.cta?.label ? `<div class="bk-btn-row"><a class="bk-btn bk-btn-primary" href="${attrSafe(s.cta.href)}">${te(`${r}.slides[${idx}].cta.label`, s.cta.label, "span")}</a></div>` : ""}
+    </div>
+  </div>`
+      ).join("");
+      const dots = slides.map((_, idx) => `<button class="bk-slide-dot" data-dot="${idx}" aria-label="Slide ${idx + 1}"></button>`).join("");
+      return wrap(
+        `<div class="bk-slider" data-slider${h.autoplay ? ` data-autoplay="${Number(h.intervalSec) || 5}"` : ""} ${d}>
+  <div class="bk-slider-viewport">${slidesHtml}</div>
+  <button class="bk-slider-prev" aria-label="Previous slide">‹</button>
+  <button class="bk-slider-next" aria-label="Next slide">›</button>
+  <div class="bk-slider-dots">${dots}</div>
+</div>`
+      );
+    }
+
     case "logos": {
       const h = c as typeof c & { heading?: string; items?: string[] };
       const items = (h.items ?? []).map((n, idx) => `<span class="bk-logo" data-field="${r}.items[${idx}]">${te("", n, "span")}</span>`).join("");
@@ -632,7 +830,7 @@ function renderSection(
 
     case "testimonials": {
       const h = c as typeof c & {
-        heading?: string; subheading?: string; items?: { quote: string; name: string; role: string }[];
+        heading?: string; subheading?: string; slider?: boolean; items?: { quote: string; name: string; role: string }[];
       };
       const cards = (h.items ?? []).map(
         (t, idx) => `
@@ -645,14 +843,19 @@ function renderSection(
     </div>
   </div>`
       ).join("");
+      const grid = h.slider
+        ? `<div class="bk-quote-slider"><div class="bk-quote-track">${cards}</div>
+             <button class="bk-quote-prev" aria-label="Previous">‹</button>
+             <button class="bk-quote-next" aria-label="Next">›</button>
+             <div class="bk-quote-dots"></div></div>`
+        : `<div class="bk-grid bk-grid-3">${cards}</div>`;
       return wrap(
         `<div class="bk-container"${d}>
   <div class="bk-section-head">
     <h2 class="bk-h2">${te(`${r}.heading`, h.heading ?? "", "span")}</h2>
     ${h.subheading ? te(`${r}.subheading`, h.subheading, "p", "bk-lede") : ""}
   </div>
-  <div class="bk-grid bk-grid-3">${cards}
-  </div>
+  ${grid}
 </div>`,
         "bk-section-alt"
       );
@@ -778,24 +981,38 @@ function renderSection(
     case "pricing": {
       const h = c as typeof c & {
         heading?: string; subheading?: string; currency?: string; period?: string;
-        items?: { name: string; price: string; description: string; features: string[]; cta: { label: string; href: string }; featured: boolean }[];
+        billing?: { toggle?: boolean; monthlyLabel?: string; yearlyLabel?: string; yearlySuffix?: string; saveLabel?: string };
+        items?: { name: string; price: string; priceYearly?: string; description: string; features: string[]; cta: { label: string; href: string }; featured: boolean }[];
       };
+      const billing = h.billing?.toggle;
       const cards = (h.items ?? []).map(
         (p, idx) => `
   <div class="bk-price${p.featured ? " bk-price-featured" : ""}"${d}>
     <div class="bk-price-name">${te(`${r}.items[${idx}].name`, p.name ?? "", "span")}</div>
-    <div class="bk-price-amount"><span class="bk-price-num">${te("", h.currency ?? "$", "span")}${te(`${r}.items[${idx}].price`, p.price ?? "", "span")}</span><span>${te(`${r}.period`, h.period ?? "", "span")}</span></div>
+    <div class="bk-price-amount">
+      <span class="bk-price-num" data-price>${te("", h.currency ?? "$", "span")}${te(`${r}.items[${idx}].price`, p.price ?? "", "span")}</span>
+      ${p.priceYearly ? `<span class="bk-price-num bk-price-yearly" data-price-yearly>${te("", h.currency ?? "$", "span")}${te(`${r}.items[${idx}].priceYearly`, p.priceYearly, "span")}</span>` : ""}
+      <span>${te(`${r}.period`, h.period ?? "", "span")}</span>
+      ${billing && p.priceYearly && h.billing?.saveLabel ? `<span class="bk-price-save">${esc(h.billing.saveLabel)}</span>` : ""}
+    </div>
     <p class="bk-price-desc">${te(`${r}.items[${idx}].description`, p.description ?? "", "span")}</p>
     <ul class="bk-price-feat">${(p.features ?? []).map((f) => `<li>${svgIcon("check", 16)}<span>${te(`${r}.items[${idx}].features[]`, f ?? "", "span")}</span></li>`).join("")}</ul>
     <a class="bk-btn ${p.featured ? "bk-btn-accent" : "bk-btn-primary"}" href="${attrSafe(p.cta.href)}">${te(`${r}.items[${idx}].cta.label`, p.cta.label ?? "Choose", "span")}</a>
   </div>`
       ).join("");
+      const toggleHtml = billing
+        ? `<div class="bk-billing-toggle" id="bk-billing">
+            <button class="bk-billing-btn bk-billing-on" id="bk-billing-monthly" type="button">${esc(h.billing?.monthlyLabel || "Monthly")}</button>
+            <button class="bk-billing-btn" id="bk-billing-yearly" type="button">${esc(h.billing?.yearlyLabel || "Yearly")}</button>
+          </div>`
+        : "";
       return wrap(
         `<div class="bk-container"${d}>
   <div class="bk-section-head">
     <h2 class="bk-h2">${te(`${r}.heading`, h.heading ?? "", "span")}</h2>
     ${h.subheading ? te(`${r}.subheading`, h.subheading, "p", "bk-lede") : ""}
   </div>
+  ${toggleHtml}
   <div class="bk-grid bk-grid-3">${cards}
   </div>
 </div>`
@@ -1020,12 +1237,14 @@ function renderSection(
         items?: { id: string; name: string; price: number; description: string; features?: string[]; image?: string; badge?: string; sku?: string; stock?: number }[];
       };
       const cards = (h.items ?? []).map(
-        (p, idx) => `
+        (p, idx) => {
+      const pSlug = (p.sku || p.id || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      return `
   <div class="bk-product"${d} data-product-id="${esc(p.id)}">
     ${p.image ? `<div class="bk-product-image"><img src="${attrSafe(p.image)}" alt="${esc(p.name)}" loading="lazy" data-bkimg="${r}.items[${idx}].image"/></div>` : `<div class="bk-product-image-placeholder"></div>`}
     ${p.badge ? `<span class="bk-product-badge">${esc(p.badge)}</span>` : ""}
     <div class="bk-product-content">
-      <h3 class="bk-h3">${te(`${r}.items[${idx}].name`, p.name ?? "", "span")}</h3>
+      ${pSlug ? `<h3 class="bk-h3"><a href="/product/${esc(pSlug)}.html">${te(`${r}.items[${idx}].name`, p.name ?? "", "span")}</a></h3>` : `<h3 class="bk-h3">${te(`${r}.items[${idx}].name`, p.name ?? "", "span")}</h3>`}
       <p class="bk-muted">${te(`${r}.items[${idx}].description`, p.description ?? "", "span")}</p>
       ${p.features && p.features.length ? `<ul class="bk-price-feat">${p.features.map((f) => `<li>${svgIcon("check", 16)}<span>${te(`${r}.items[${idx}].features[]`, f ?? "", "span")}</span></li>`).join("")}</ul>` : ""}
       <div class="bk-product-footer">
@@ -1035,7 +1254,7 @@ function renderSection(
       </div>
     </div>
   </div>`
-      ).join("");
+        }).join("");
       return wrap(
         `<div class="bk-container"${d}>
   <div class="bk-section-head">
@@ -1115,7 +1334,7 @@ function renderSection(
       <h3 class="bk-h3"><a href="#post-${esc(p.slug)}">${esc(p.title)}</a></h3>
       <time class="bk-post-date">${new Date(p.date).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}</time>
       ${h.showExcerpt !== false && p.excerpt ? `<p class="bk-muted">${esc(p.excerpt)}</p>` : ""}
-      <button class="bk-btn bk-btn-ghost bk-post-read" data-post-slug="${esc(p.slug)}">Read more</button>
+      <a class="bk-btn bk-btn-ghost" href="/post/${esc(p.slug)}.html">Read more</a>
     </div>
   </article>`
       ).join("");
@@ -1572,4 +1791,80 @@ const SITE_FEATURES_SCRIPT = `(function () {
     window.addEventListener("resize", parallaxUpdate);
     parallaxUpdate();
   }
+  // Hero sliders
+  var sliders = document.querySelectorAll("[data-slider]");
+  sliders.forEach(function (slider) {
+    var slides = Array.prototype.slice.call(slider.querySelectorAll(".bk-slide"));
+    var dots = Array.prototype.slice.call(slider.querySelectorAll(".bk-slide-dot"));
+    if (!slides.length) return;
+    var idx = 0;
+    var timer = null;
+    function show(i) {
+      idx = ((i % slides.length) + slides.length) % slides.length;
+      slides.forEach(function (s, j) { s.classList.toggle("bk-slide-active", j === idx); });
+      dots.forEach(function (d, j) { d.classList.toggle("bk-slide-dot-active", j === idx); });
+    }
+    function start() {
+      if (timer) clearInterval(timer);
+      var sec = Number(slider.getAttribute("data-autoplay")) || 0;
+      if (sec > 0) timer = setInterval(function () { show(idx + 1); }, sec * 1000);
+    }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+    slider.querySelector(".bk-slider-prev").addEventListener("click", function () { show(idx - 1); start(); });
+    slider.querySelector(".bk-slider-next").addEventListener("click", function () { show(idx + 1); start(); });
+    dots.forEach(function (d, j) { d.addEventListener("click", function () { show(j); start(); }); });
+    slider.addEventListener("mouseenter", stop);
+    slider.addEventListener("mouseleave", start);
+    show(0);
+    start();
+  });
+  // Pricing billing toggle
+  var billing = document.getElementById("bk-billing");
+  if (billing) {
+    var monthly = document.getElementById("bk-billing-monthly");
+    var yearly = document.getElementById("bk-billing-yearly");
+    var prices = Array.prototype.slice.call(document.querySelectorAll("[data-price]"));
+    var yearlyPrices = Array.prototype.slice.call(document.querySelectorAll("[data-price-yearly]"));
+    function applyBilling(yearlyMode) {
+      prices.forEach(function (el) { el.style.display = yearlyMode ? "none" : ""; });
+      yearlyPrices.forEach(function (el) { el.style.display = yearlyMode ? "" : "none"; });
+      if (monthly && yearly) {
+        monthly.classList.toggle("bk-billing-on", !yearlyMode);
+        yearly.classList.toggle("bk-billing-on", yearlyMode);
+      }
+    }
+    if (monthly) monthly.addEventListener("click", function () { applyBilling(false); });
+    if (yearly) yearly.addEventListener("click", function () { applyBilling(true); });
+  }
+  // Testimonial slider
+  var quoteSliders = document.querySelectorAll(".bk-quote-slider");
+  quoteSliders.forEach(function (wrap) {
+    var track = wrap.querySelector(".bk-quote-track");
+    if (!track) return;
+    var cards = Array.prototype.slice.call(track.children);
+    if (!cards.length) return;
+    var idx = 0;
+    var visible = cards.length > 1 ? 1 : 1;
+    var dotsBox = wrap.querySelector(".bk-quote-dots");
+    function render() {
+      cards.forEach(function (c, j) {
+        c.style.display = j === idx ? "" : "none";
+      });
+      if (dotsBox) {
+        dotsBox.innerHTML = "";
+        cards.forEach(function (_, j) {
+          var d = document.createElement("button");
+          d.className = "bk-quote-dot" + (j === idx ? " bk-quote-dot-active" : "");
+          d.addEventListener("click", function () { idx = j; render(); });
+          dotsBox.appendChild(d);
+        });
+      }
+    }
+    var prev = wrap.querySelector(".bk-quote-prev");
+    var next = wrap.querySelector(".bk-quote-next");
+    if (prev) prev.addEventListener("click", function () { idx = (idx - 1 + cards.length) % cards.length; render(); });
+    if (next) next.addEventListener("click", function () { idx = (idx + 1) % cards.length; render(); });
+    void visible;
+    render();
+  });
 })();`;

@@ -251,6 +251,15 @@ export const SECTION_TEMPLATES: SectionTemplate[] = [
     url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     caption: "Two-minute product tour",
   })),
+  tpl("heroSlider", "Hero slider", (b) => ({
+    ...b,
+    slides: [
+      { eyebrow: "Welcome", title: "Big idea, beautifully told.", subtitle: "Three slides, one message. bukkyai writes each one for you.", cta: { label: "Get started", href: "#contact" }, image: { url: "", alt: "" } },
+      { eyebrow: "Built for you", title: "Words that sound like you.", subtitle: "Your voice, your industry, your customers.", cta: { label: "See the work", href: "#gallery" }, image: { url: "", alt: "" } },
+    ],
+    autoplay: true,
+    intervalSec: 5,
+  })),
   tpl("map", "Location", (b) => ({
     ...b,
     heading: "Find us",

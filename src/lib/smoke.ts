@@ -1,5 +1,5 @@
 import { sampleProject } from "./blueprint";
-import { renderPage, renderStaticSite, renderMaintenance } from "./render";
+import { renderPage, renderStaticSite, renderMaintenance, renderProductPage, renderPostPage } from "./render";
 import { renderCss } from "./renderCss";
 import { singleFileHtml, multiPageHtml } from "./export";
 import { contrastRatio } from "./color";
@@ -68,6 +68,13 @@ export function runSmoke(): SmokeResult {
   const blogHtml = renderPage(blogDoc, blogDoc.pages[0], false);
   const blogHtmlEdit = renderPage(blogDoc, blogDoc.pages[0], true);
   const blogFiles = renderStaticSite(blogDoc).files;
+
+  const sliderDoc = JSON.parse(JSON.stringify(doc)) as typeof doc;
+  sliderDoc.pages[0].sections.push({
+    id: "slider",
+    type: "heroSlider",
+    content: { slides: [{ title: "One", subtitle: "", cta: { label: "Go", href: "#" }, image: { url: "", alt: "" } }], autoplay: true, intervalSec: 5 },
+  });
 
   const maintenanceDoc = JSON.parse(JSON.stringify(doc)) as typeof doc;
   maintenanceDoc.maintenance = { enabled: true, title: "Back soon", text: "Rebuilding.", email: "x@y.com" };
@@ -160,6 +167,14 @@ export function runSmoke(): SmokeResult {
       return cats.size >= 5;
     })()],
     ["Themes are valid design systems", GENERATED_THEMES.every((t) => t.system.tokens.colors.background && t.system.tokens.fonts.heading && t.system.tokens.radius.md > 0)],
+    ["Hero slider renders slides + controls", renderPage(sliderDoc, sliderDoc.pages[0], false).includes("bk-slider-viewport") && renderPage(sliderDoc, sliderDoc.pages[0], false).includes("bk-slide-dot")],
+    ["Product detail pages generated", renderStaticSite(shopDoc2).files.some((f) => f.path.startsWith("product/") && f.content.includes("Add to cart"))],
+    ["Post detail pages generated", renderStaticSite(blogDoc).files.some((f) => f.path === "post/one.html" && f.content.includes("Keep reading"))],
+    ["Breadcrumbs on non-home pages", (() => {
+      const bd = JSON.parse(JSON.stringify(doc)) as typeof doc;
+      bd.pages[0].slug = "about";
+      return renderPage(bd, bd.pages[0], false).includes("bk-breadcrumbs");
+    })()],
     ["Contrast math sane", contrastRatio("#241a12", "#f7f2ea") > 7],
   ];
 

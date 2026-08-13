@@ -9,6 +9,7 @@ import type {
 
 export const SECTION_TYPES: { type: SectionType; label: string }[] = [
   { type: "hero", label: "Hero" },
+  { type: "heroSlider", label: "Hero slider" },
   { type: "logos", label: "Logo cloud" },
   { type: "features", label: "Features" },
   { type: "stats", label: "Stats" },
@@ -84,6 +85,14 @@ export function emptyContent(type: SectionType): SectionContent[SectionType] {
         secondaryCta: { label: "Learn more", href: "#features" },
         image: { url: "", alt: "" },
         trust: "",
+      };
+    case "heroSlider":
+      return {
+        slides: [
+          { eyebrow: "", title: "", subtitle: "", cta: { label: "Learn more", href: "#features" }, image: { url: "", alt: "" } },
+        ],
+        autoplay: true,
+        intervalSec: 5,
       };
     case "logos":
       return { heading: "", items: [""] };

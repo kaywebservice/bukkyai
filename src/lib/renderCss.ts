@@ -96,6 +96,37 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.12;letter-spacing:-.01em;
 .bk-hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
 .bk-hero-bg-scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.55))}
 .bk-hero-centered .bk-hero-bg-scrim,.bk-hero-split .bk-hero-bg-scrim{z-index:-1}
+.bk-slider{position:relative;min-height:520px;display:flex;align-items:stretch;overflow:hidden}
+.bk-slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .6s ease;pointer-events:none;padding:40px 20px}
+.bk-slide.bk-slide-active{opacity:1;pointer-events:auto}
+.bk-slide-bg{position:absolute;inset:0;z-index:-2}
+.bk-slide-bg img{width:100%;height:100%;object-fit:cover}
+.bk-slide-scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.5))}
+.bk-slide-content{max-width:760px;text-align:center;color:#fff;text-shadow:0 1px 12px rgba(0,0,0,.4)}
+.bk-slide-content .bk-eyebrow{color:color-mix(in srgb,#fff 80%,transparent)}
+.bk-slide-title{font-family:var(--font-head);font-size:clamp(32px,5vw,56px);line-height:1.08;margin:0 0 16px}
+.bk-slide-sub{font-size:18px;color:color-mix(in srgb,#fff 85%,transparent);max-width:560px;margin:0 auto 24px}
+.bk-slider-prev,.bk-slider-next{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:46px;height:46px;border-radius:var(--rd-pill);border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.25);color:#fff;font-size:24px;cursor:pointer;line-height:1}
+.bk-slider-prev{left:16px}
+.bk-slider-next{right:16px}
+.bk-slider-prev:hover,.bk-slider-next:hover{background:rgba(0,0,0,.45)}
+.bk-slider-dots{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:5}
+.bk-slide-dot{width:10px;height:10px;border-radius:50%;border:none;background:rgba(255,255,255,.45);cursor:pointer;padding:0}
+.bk-slide-dot-active{background:#fff}
+.bk-billing-toggle{display:inline-flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rd-pill);padding:4px;margin-bottom:24px}
+.bk-billing-btn{border:none;background:transparent;padding:8px 18px;border-radius:var(--rd-pill);cursor:pointer;color:var(--muted);font-size:13px;font-weight:600}
+.bk-billing-on{background:var(--accent);color:var(--accent-c)}
+.bk-price-yearly{display:none}
+.bk-price-save{display:inline-block;margin-left:8px;background:var(--accent);color:var(--accent-c);font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px;vertical-align:middle}
+.bk-quote-slider{position:relative;padding:0 44px}
+.bk-quote-track{position:relative;min-height:120px}
+.bk-quote-prev,.bk-quote-next{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:20px;cursor:pointer}
+.bk-quote-prev{left:0}
+.bk-quote-next{right:0}
+.bk-quote-dots{display:flex;justify-content:center;gap:6px;margin-top:16px}
+.bk-quote-dot{width:8px;height:8px;border-radius:50%;border:none;background:var(--border);cursor:pointer;padding:0}
+.bk-quote-dot-active{background:var(--accent)}
+@media (max-width:640px){.bk-quote-slider{padding:0 8px}.bk-quote-prev{left:-4px}.bk-quote-next{right:-4px}}
 .bk-art{position:relative;border-radius:var(--rd-lg);overflow:hidden;aspect-ratio:4/3;background:var(--surface);border:1px solid var(--border);
   background-image:
     linear-gradient(150deg, color-mix(in srgb,var(--primary) 7%,transparent), transparent 45%),
@@ -308,6 +339,10 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.12;letter-spacing:-.01em;
 
 /* nav extras */
 .bk-announcement{background:var(--accent);color:var(--accent-c);text-align:center;font-size:var(--fs-small);padding:8px 16px;font-weight:600}
+.bk-breadcrumbs{border-bottom:1px solid var(--border);background:var(--surface);padding:10px 0;font-size:13px;color:var(--muted)}
+.bk-breadcrumbs a{color:var(--muted);text-decoration:none}
+.bk-breadcrumbs a:hover{color:var(--accent)}
+.bk-breadcrumb-sep{margin:0 8px;color:var(--border-strong)}
 .bk-announcement a{color:inherit;text-decoration:underline}
 .bk-nav-sticky{position:sticky;top:0;z-index:1000;background:var(--bg);transition:box-shadow .2s,background .2s}
 .bk-nav-sticky.bk-nav-scrolled{box-shadow:var(--sh-md)}
