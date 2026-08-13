@@ -93,7 +93,7 @@ import AnalyticsView from "./components/AnalyticsView";
 import AuthModal from "./components/AuthModal";
 import StarterGallery from "./components/StarterGallery";
 import ShareModal from "./components/ShareModal";
-import OnboardingTour, { tourCompleted, markTourDone, type TourStep } from "./components/OnboardingTour";
+import OnboardingTour, { tourCanShow, tourTurnedOff, markTourShown, turnOffTour, type TourStep } from "./components/OnboardingTour";
 import PricingModal from "./components/PricingModal";
 import { starterById } from "./lib/starterSites";
 
@@ -152,10 +152,21 @@ export default function App() {
     });
   }, []);
 
-  // First-run onboarding tour — auto-shows once, re-openable via Help.
+  // Onboarding tour — shows up to 3 times, re-triggered by sign-in/sign-out,
+  // with a permanent "Don't show again" opt-out.
+  const lastAuthForTour = useRef<string | null>(null);
   useEffect(() => {
-    if (!tourCompleted()) setTourOpen(true);
-  }, []);
+    if (tourTurnedOff()) {
+      lastAuthForTour.current = authUid;
+      return;
+    }
+    if (!tourCanShow()) return;
+    if (authUid !== lastAuthForTour.current) {
+      lastAuthForTour.current = authUid;
+      markTourShown();
+      setTourOpen(true);
+    }
+  }, [authUid]);
 
   // Pull cloud projects into the local list when signed in + sync on
   useEffect(() => {
@@ -1224,43 +1235,146 @@ export default function App() {
     {
       target: ".welcome",
       title: "Welcome to bukkyai",
-      body: "Describe your business in a sentence — bukkyai plans your site, designs a design system, and writes every page. This is where it all starts.",
-      action: () => {
-        if (projectId) setTab("chat");
-      },
+      body: "Describe your business in a sentence — bukkyai plans your site, designs a design system, and writes every page. This tour walks you through every feature.",
+      prepare: () => { if (!projectId) setTab("chat"); },
     },
     {
       target: ".brief-input",
-      title: "Write your brief",
+      title: "1. Write your brief",
       body: "Type what your site is about here — e.g. \"a bakery in Austin called June & Oak, warm and artisanal\". Then hit Plan my site.",
       align: "below",
     },
     {
-      target: ".app-main .left-rail",
-      title: "Pages & sections",
+      target: ".left-rail",
+      title: "2. Pages & sections",
       body: "Your pages and sections live here. Add new sections from templates, reorder them, or delete ones you don't need.",
       align: "right",
     },
     {
       target: ".preview-area",
-      title: "The live preview",
-      body: "This is your site, rendered live. Flip on Edit mode to click any text and edit it directly, or switch between desktop/tablet/mobile.",
+      title: "3. The live preview",
+      body: "Your site renders here in real time. This is exactly what visitors will see — every edit applies instantly.",
       align: "above",
+    },
+    {
+      target: ".preview-toolbar",
+      title: "4. Edit mode & devices",
+      body: "Flip on Edit mode to click any text and edit it directly in the preview. Switch between desktop, tablet and mobile, or zoom with Fit / 100%.",
+      align: "below",
     },
     {
       target: ".right-panel .tabs",
-      title: "Design & content tabs",
-      body: "Everything you tweak lives here: Design (colors, fonts), Media, Code, Inspect, Plan, History, Blog posts, SEO, Analytics.",
+      title: "5. The tabs",
+      body: "The next several steps cover every tab in this panel: Chat, Design, Media, Code, Inspect, Plan, History, Posts, Pages, Lang, SEO and Analytics.",
       align: "above",
     },
     {
-      target: ".header",
-      title: "Export & publish",
-      body: "When you're ready, use Export or Publish & share from the header to get a live link, a zip, or a React project. You're all set — go build something great.",
+      target: ".right-panel .tabs button:nth-child(1)",
+      title: "6. Chat",
+      body: "Ask anything about your site or type an instruction — \"make the hero CTA red\" — and bukkyai edits the blueprint for you.",
       align: "below",
-      action: () => {
-        if (projectId) setTab("chat");
-      },
+      prepare: () => setTab("chat"),
+    },
+    {
+      target: ".right-panel .tabs button:nth-child(2)",
+      title: "7. Design",
+      body: "Voice & tone, one-click design presets, the design-harmony score with a Harmonize button, and uploading a brand kit (logo + colors).",
+      align: "below",
+      prepare: () => setTab("design"),
+    },
+    {
+      target: ".right-panel .tabs button:nth-child(3)",
+      title: "8. Media",
+      body: "Your image library. Upload images (auto-compressed), or generate new ones with AI from a prompt.",
+      align: "below",
+      prepare: () => setTab("media"),
+    },
+    {
+      target: ".right-panel .tabs button:nth-child(4)",
+      title: "9. Code",
+      body: "The blueprint's code view — inspect the generated CSS and structure, or copy it for your own use.",
+      align: "below",
+      prepare: () => setTab("code"),
+    },
+    {
+      target: ".right-panel .tabs button:nth-child(5)",
+      title: "10. Inspect",
+      body: "Select any section in the preview, then edit every field here: images, text, layout, animations and even rewrite with AI.",
+      align: "below",
+      prepare: () => setTab("inspect"),
+    },
+    {
+      target: ".right-panel .tabs button:nth-child(6)",
+      title: "11. Plan",
+      body: "See the site structure bukkyai planned — pages and their sections — before or after building.",
+      align: "below",
+      prepare: () => setTab("plan"),
+    },
+    {
+      target: ".right-panel .tabs button:nth-child(7)",
+      title: "12. History",
+      body: "Every change is checkpointed. Travel back in time to any earlier version of your site and restore it.",
+      align: "below",
+      prepare: () => setTab("history"),
+    },
+    {
+      target: ".right-panel .tabs button:nth-child(8)",
+      title: "13. Posts",
+      body: "Your blog. Write posts, import Markdown files, and set cover images, categories and authors.",
+      align: "below",
+      prepare: () => setTab("posts"),
+    },
+    {
+      target: ".right-panel .tabs button:nth-child(9)",
+      title: "14. Pages",
+      body: "Manage the site's pages — add, rename, and delete them. The site can be as many pages as you want.",
+      align: "below",
+      prepare: () => setTab("pages"),
+    },
+    {
+      target: ".right-panel .tabs button:nth-child(10)",
+      title: "15. Languages",
+      body: "Add languages to make your site multi-lingual. Visitors get a language switcher in the nav.",
+      align: "below",
+      prepare: () => setTab("langs"),
+    },
+    {
+      target: ".right-panel .tabs button:nth-child(11)",
+      title: "16. SEO",
+      body: "A live quality score, WCAG contrast checks, AI auto-fix, and a share-image generator for your pages.",
+      align: "below",
+      prepare: () => setTab("seo"),
+    },
+    {
+      target: ".right-panel .tabs button:nth-child(12)",
+      title: "17. Analytics",
+      body: "Connect Plausible or GoatCounter in Settings, then view or embed your traffic dashboard here.",
+      align: "below",
+      prepare: () => setTab("analytics"),
+    },
+    {
+      target: ".project-picker",
+      title: "18. Projects",
+      body: "Switch projects, create new ones, rename, duplicate, or delete — all from this picker.",
+      align: "below",
+    },
+    {
+      target: ".header .auth-chip",
+      title: "19. Sign in & cloud sync",
+      body: "Sign in with Google or email to sync projects to the cloud, invite collaborators, and keep working from any device.",
+      align: "below",
+    },
+    {
+      target: ".header .btn",
+      title: "20. Settings",
+      body: "Configure your AI provider (your key stays local), form endpoints, analytics, cookie consent, redirects, custom fonts, commerce coupons and more.",
+      align: "below",
+    },
+    {
+      target: ".header .btn",
+      title: "21. Publish & share",
+      body: "Open the export menu: publish a live link (Pro), deploy to GitHub Pages, or download a zip / React project / CMS export. You're all set!",
+      align: "above",
     },
   ];
 
@@ -1652,10 +1766,8 @@ export default function App() {
       <OnboardingTour
         active={tourOpen}
         steps={tourSteps}
-        onClose={() => {
-          setTourOpen(false);
-          markTourDone();
-        }}
+        onClose={() => setTourOpen(false)}
+        onTurnOff={() => turnOffTour()}
       />
     </div>
   );

@@ -1298,6 +1298,15 @@ input[type="range"] {
   gap: 5px;
   margin-bottom: 10px;
 }
+.tour-step-count {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--chrome-faint);
+  letter-spacing: 0.04em;
+}
 .tour-dot {
   width: 7px;
   height: 7px;
