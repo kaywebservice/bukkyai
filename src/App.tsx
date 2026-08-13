@@ -187,18 +187,29 @@ export default function App() {
   // Onboarding tour — shows up to 3 times, re-triggered by sign-in/sign-out,
   // with a permanent "Don't show again" opt-out.
   const lastAuthForTour = useRef<string | null>(null);
+  const tourGateShown = useRef(false);
   useEffect(() => {
     if (tourTurnedOff()) {
       lastAuthForTour.current = authUid;
       return;
     }
     if (!tourCanShow()) return;
+    // Fires on first load too (authUid may be null) — but only once the
+    // auth gate has been passed, so the guide isn't hidden behind it.
+    if (gateOpen) return;
+    if (!tourGateShown.current) {
+      tourGateShown.current = true;
+      lastAuthForTour.current = authUid;
+      markTourShown();
+      setTourOpen(true);
+      return;
+    }
     if (authUid !== lastAuthForTour.current) {
       lastAuthForTour.current = authUid;
       markTourShown();
       setTourOpen(true);
     }
-  }, [authUid]);
+  }, [authUid, gateOpen]);
 
   // "?" opens the keyboard shortcuts panel (when not typing in a field).
   useEffect(() => {
