@@ -13,6 +13,7 @@ const staticPages = [
   ["/features", 0.9, "weekly"],
   ["/templates", 0.9, "weekly"],
   ["/tools", 0.8, "weekly"],
+  ["/made-with", 0.8, "weekly"],
   ["/pricing", 0.9, "weekly"],
   ["/faq", 0.6, "monthly"],
   ["/contact", 0.5, "monthly"],
@@ -35,6 +36,7 @@ try {
         : cat === "use" ? `/use-cases/${base.slice("use-cases-".length)}`
         : cat === "compare" ? `/compare/${rest}`
         : cat === "how" ? `/how-to/${base.slice("how-to-".length)}`
+        : cat === "local" ? `/local/${rest.replace(/-/, "/")}`   // rest = {city}-{industry}
         : `/${base}`;
       return route;
     })
@@ -48,7 +50,8 @@ for (const [path, prio, freq] of staticPages) {
   urls.push(`  <url><loc>${SITE}${path}</loc><changefreq>${freq}</changefreq><priority>${prio}</priority></url>`);
 }
 for (const path of progPages) {
-  urls.push(`  <url><loc>${SITE}${path}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>`);
+  const prio = path.startsWith("/local/") ? 0.5 : 0.7;
+  urls.push(`  <url><loc>${SITE}${path}</loc><changefreq>monthly</changefreq><priority>${prio}</priority></url>`);
 }
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Made with bukkyai — demo sites</title>
+<meta name="description" content="Real websites built with bukkyai — a bakery, SaaS, studio, wellness, hotel and restaurant, each generated from a one-line description." />
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="icon" href="/icon-192.png" />
+<meta name="theme-color" content="#f7f3ea" />
+<meta name="google-site-verification" content="vzREjfhomsn9KoFEywBS7ebsa7Wo-ttVmnc8jPh7l70" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/marketing.css" />
+<style>
+  .mw-hero { padding: 76px 0 40px; text-align: center; }
+  .mw-hero h1 { font-family: var(--font-display); font-size: clamp(34px, 5vw, 52px); letter-spacing: -.02em; margin-bottom: 14px; }
+  .mw-hero p { color: var(--muted); font-size: 17px; max-width: 620px; margin: 0 auto; }
+  .mw-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .mw-card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: transform .15s, box-shadow .15s; }
+  .mw-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  .mw-thumb { height: 150px; display: flex; align-items: center; justify-content: center; color: #fff; font-family: var(--font-display); font-size: 24px; font-weight: 700; }
+  .mw-body { padding: 18px; }
+  .mw-body b { font-size: 16px; }
+  .mw-body p { font-size: 13px; color: var(--muted); margin: 6px 0 14px; }
+  .mw-body .btn { width: 100%; }
+  @media (max-width: 760px) { .mw-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="mw-hero">
+  <div class="wrap">
+    <span class="eyebrow">Made with bukkyai</span>
+    <h1>Real sites, one sentence each.</h1>
+    <p>Every site below was generated from a single description — plan, design, copy and all pages — then edited and published.</p>
+  </div>
+</header>
+
+<section style="padding-top: 10px">
+  <div class="wrap">
+    <div class="mw-grid">
+      <div class="mw-card">
+        <div class="mw-thumb" style="background:linear-gradient(135deg,#d9b98c,#b3541e)">June &amp; Oak</div>
+        <div class="mw-body"><b>Bakery &amp; café</b><p>"A bakery in Austin called June &amp; Oak. Warm, artisanal, wood-fired bread, coffee."</p><a class="btn" href="/app?template=bakery">Open this demo</a></div>
+      </div>
+      <div class="mw-card">
+        <div class="mw-thumb" style="background:linear-gradient(135deg,#8aa29e,#3d5a52)">Northwind</div>
+        <div class="mw-body"><b>SaaS product</b><p>"Product analytics for teams — unify metrics into one dashboard, set up in minutes."</p><a class="btn" href="/app?template=saas">Open this demo</a></div>
+      </div>
+      <div class="mw-card">
+        <div class="mw-thumb" style="background:linear-gradient(135deg,#c9bda3,#6b6355)">Atelier</div>
+        <div class="mw-body"><b>Design studio</b><p>"A two-person design studio in Lisbon. Identity and web, done carefully."</p><a class="btn" href="/app?template=studio">Open this demo</a></div>
+      </div>
+      <div class="mw-card">
+        <div class="mw-thumb" style="background:linear-gradient(135deg,#a8c3a0,#4d6b45)">Verdant</div>
+        <div class="mw-body"><b>Wellness brand</b><p>"Botanical skincare, grown not manufactured. Refillable, plastic-free, honest."</p><a class="btn" href="/app?template=wellness">Open this demo</a></div>
+      </div>
+      <div class="mw-card">
+        <div class="mw-thumb" style="background:linear-gradient(135deg,#7f92a8,#24374a)">Harbor House</div>
+        <div class="mw-body"><b>Boutique hotel</b><p>"A 14-room boutique hotel by the water. Small enough to remember your name."</p><a class="btn" href="/app?template=hotel">Open this demo</a></div>
+      </div>
+      <div class="mw-card">
+        <div class="mw-thumb" style="background:linear-gradient(135deg,#c98f6e,#7a3c1e)">Metro</div>
+        <div class="mw-body"><b>Restaurant &amp; bar</b><p>"A neighborhood kitchen and bar on Division Street. Open late, and the burger's a genuine argument."</p><a class="btn" href="/app?template=restaurant">Open this demo</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2>Your site could be here.</h2>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/app">Build yours — it's free</a>
+    </div>
+  </div>
+</section>
+
+<script src="/marketing.js"></script>
+</body>
+</html>

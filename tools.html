@@ -75,6 +75,28 @@
       <div class="tool-result" id="ds-out"></div>
     </div>
 
+    <div class="tool-card">
+      <h2>Image Compressor</h2>
+      <p>Compress a photo in your browser and download it as a lighter WebP. No upload — everything stays on your device.</p>
+      <div class="tool-row">
+        <label class="btn btn-primary" style="cursor:pointer">Choose image
+          <input type="file" accept="image/*" hidden onchange="compressImg(this)" />
+        </label>
+      </div>
+      <div class="tool-result" id="img-out"></div>
+    </div>
+
+    <div class="tool-card">
+      <h2>Favicon Generator</h2>
+      <p>Enter a brand color and a letter — get a ready-to-use favicon and copy the SVG.</p>
+      <div class="tool-row">
+        <input id="fc-letter" placeholder="B" maxlength="2" style="max-width:90px" />
+        <input id="fc-color" type="color" value="#b3541e" style="max-width:70px;height:44px" />
+        <button class="btn btn-primary" onclick="genFavicon()">Generate</button>
+      </div>
+      <div class="tool-result" id="fc-out"></div>
+    </div>
+
   </div>
 </section>
 
@@ -127,6 +149,40 @@
     };
     var p = palettes[mood] || palettes.warm;
     out.innerHTML = '<b>Starter design system:</b><div style="margin-top:8px">Background <span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:' + p.bg + ';border:1px solid #ccc;vertical-align:middle"></span> ' + p.bg + '</div><div>Text ' + p.text + '</div><div>Accent <span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:' + p.accent + ';vertical-align:middle"></span> ' + p.accent + '</div><div>Fonts: ' + p.fonts + '</div><div style="margin-top:10px">Open bukkyai and pick a preset to apply a full, accessible version of this system.</div>';
+  }
+  function compressImg(input) {
+    var out = document.getElementById("img-out");
+    var file = input.files && input.files[0];
+    if (!file) return;
+    out.innerHTML = "Compressing…";
+    var reader = new FileReader();
+    reader.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var w = img.width, h = img.height;
+        var scale = Math.min(1, 1600 / Math.max(w, h));
+        var c = document.createElement("canvas");
+        c.width = Math.round(w * scale); c.height = Math.round(h * scale);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        var webp = c.toDataURL("image/webp", 0.8);
+        var saved = Math.max(0, Math.round((1 - webp.length / file.size) * 100));
+        var a = document.createElement("a");
+        a.href = webp; a.download = file.name.replace(/\.[^.]+$/, "") + ".webp";
+        a.textContent = "Download " + (file.size / 1024).toFixed(0) + "KB → " + (webp.length / 1024).toFixed(0) + "KB (" + saved + "% smaller)";
+        out.innerHTML = "";
+        out.appendChild(a);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  function genFavicon() {
+    var letter = (document.getElementById("fc-letter").value || "B").slice(0, 2).toUpperCase();
+    var color = document.getElementById("fc-color").value || "#b3541e";
+    var out = document.getElementById("fc-out");
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="' + color + '"/><text x="32" y="42" font-family="ui-sans-serif,Arial" font-size="30" font-weight="700" fill="#fff" text-anchor="middle">' + letter + '</text></svg>';
+    var data = "data:image/svg+xml," + encodeURIComponent(svg);
+    out.innerHTML = '<img src="' + data + '" alt="favicon" style="width:48px;height:48px;border-radius:8px;border:1px solid var(--border)"/><br/><pre style="background:var(--panel2);padding:12px;border-radius:8px;font-size:12px;overflow-x:auto">&lt;link rel="icon" href="' + data + '" /&gt;</pre>';
   }
 </script>
 </body>

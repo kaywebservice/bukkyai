@@ -3,7 +3,7 @@
 import { writeFileSync, mkdirSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { TEMPLATES, INDUSTRIES, USE_CASES, COMPARISONS, HOW_TOS } from "./prog-data.mjs";
+import { TEMPLATES, INDUSTRIES, USE_CASES, COMPARISONS, HOW_TOS, CITIES, LOCAL_INDUSTRIES } from "./prog-data.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = join(root, "programmatic");
@@ -11,12 +11,14 @@ mkdirSync(outDir, { recursive: true });
 
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function pageShell({ title, meta, h1, blurb, accent, grad, body, slug, cat }) {
+function pageShell({ title, meta, h1, blurb, accent, grad, body, slug, cat, related }) {
   const links = [
     '<a href="/features">Website builder</a>',
+    '<a href="/tools">Free tools</a>',
     '<a href="/templates">Templates</a>',
     '<a href="/pricing">Pricing</a>',
     '<a href="/app">Open editor</a>',
+    ...(related || []),
   ].join(" · ");
   return `<!doctype html>
 <html lang="en">
@@ -94,9 +96,13 @@ for (const t of TEMPLATES) {
     <p style="color:var(--muted);margin-bottom:22px">Pick the template, then describe your ${t.name.toLowerCase()} — bukkyai rewrites it into your own site with real words.</p>
     ${t.features.map((f) => `<div class="prog-check">${f}</div>`).join("\n")}
     <div style="margin-top:26px">
-      <p style="color:var(--muted)">The ${t.name} template is one of six full, ready-made sites — bakery, SaaS, studio, wellness, hotel and restaurant. Each has multiple pages, a bespoke design and blog posts, all editable.</p>
+      <p style="color:var(--muted)">The ${t.name} template is one of a dozen full, ready-made sites. Each has multiple pages, a bespoke design and blog posts — all editable, all yours.</p>
     </div>`;
-  writeFileSync(join(outDir, `templates-${t.slug}.html`), pageShell({ title: t.title, meta: t.meta, h1: t.h1, blurb: t.blurb, accent: t.accent, grad: t.grad, body, slug: t.slug, cat: "Template" }));
+  const related = [
+    '<a href="/industries">Industry websites</a>',
+    '<a href="/use-cases/small-business">Small business sites</a>',
+  ];
+  writeFileSync(join(outDir, `templates-${t.slug}.html`), pageShell({ title: t.title, meta: t.meta, h1: t.h1, blurb: t.blurb, accent: t.accent, grad: t.grad, body, slug: t.slug, cat: "Template", related }));
   count++;
 }
 
@@ -114,7 +120,7 @@ for (const i of INDUSTRIES) {
     <div style="margin-top:26px">
       <p style="color:var(--muted)">Most ${i.name.toLowerCase()} sites take days. With bukkyai, describe your business and approve the plan — the site builds itself in minutes.</p>
     </div>`;
-  writeFileSync(join(outDir, `industries-${i.slug}.html`), pageShell({ title: i.title, meta: i.meta, h1: i.h1, blurb: i.blurb, accent: i.accent, grad: i.grad, body, slug: i.slug, cat: "Industry" }));
+  writeFileSync(join(outDir, `industries-${i.slug}.html`), pageShell({ title: i.title, meta: i.meta, h1: i.h1, blurb: i.blurb, accent: i.accent, grad: i.grad, body, slug: i.slug, cat: "Industry", related: ['<a href="/templates">Templates</a>', '<a href="/local">Local websites</a>'] }));
   count++;
 }
 
@@ -131,7 +137,7 @@ for (const u of USE_CASES) {
     <div style="margin-top:26px">
       <p style="color:var(--muted)">Whether it's a ${u.name.toLowerCase()} page or a full multi-page site, you own the result — export it as HTML, a ZIP, or a React project.</p>
     </div>`;
-  writeFileSync(join(outDir, `use-cases-${u.slug}.html`), pageShell({ title: u.title, meta: u.meta, h1: u.h1, blurb: u.blurb, accent: u.accent, grad: u.grad, body, slug: u.slug, cat: "Use case" }));
+  writeFileSync(join(outDir, `use-cases-${u.slug}.html`), pageShell({ title: u.title, meta: u.meta, h1: u.h1, blurb: u.blurb, accent: u.accent, grad: u.grad, body, slug: u.slug, cat: "Use case", related: ['<a href="/templates">Templates</a>', '<a href="/industries">Industry websites</a>'] }));
   count++;
 }
 
@@ -167,5 +173,62 @@ for (const h of HOW_TOS) {
   writeFileSync(join(outDir, `how-to-${h.slug}.html`), pageShell({ title: h.title, meta: h.meta, h1: h.h1, blurb: `Follow along — ${h.name.toLowerCase()}, in minutes.`, accent: "#2f6f63", grad: "#8aa29e,#3d5a52", body, slug: h.slug, cat: "Guide" }));
   count++;
 }
+
+// Local pages → /local/{city}/{industry} (city × industry programmatic local SEO)
+for (const city of CITIES) {
+  for (const [slug, name] of LOCAL_INDUSTRIES) {
+    const citySlug = city.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const nameL = name.toLowerCase();
+    const body = `
+      <div class="section-label" style="color:var(--accent)">${esc(city)} · ${esc(name)}</div>
+      <h2>${esc(name)} websites in ${esc(city)}.</h2>
+      <p style="color:var(--muted);margin-bottom:22px">You run a ${nameL} in ${esc(city)}. bukkyai builds you a full website — written, designed and ready to bring in local customers.</p>
+      <div class="prog-check">A complete multi-page site, built from a sentence</div>
+      <div class="prog-check">Copy written for a ${nameL} in ${esc(city)}</div>
+      <div class="prog-check">Menu/services, hours, map and contact</div>
+      <div class="prog-check">Local SEO, mobile and a booking/contact form</div>
+      <div class="prog-check">Edit in the preview, publish to your own domain</div>
+      <div style="margin-top:26px">
+        <p style="color:var(--muted)">Most ${nameL} sites in ${esc(city)} take weeks and cost thousands. With bukkyai, describe your business and approve the plan — your site builds itself in minutes, and you own every file.</p>
+      </div>`;
+    const related = [
+      `<a href="/industries/${slug}">${name} websites</a>`,
+      '<a href="/templates">Templates</a>',
+    ];
+    writeFileSync(
+      join(outDir, `local-${citySlug}-${slug}.html`),
+      pageShell({
+        title: `${name} Website Builder in ${city}`,
+        meta: `Build a ${nameL} website in ${city} — written, designed and ready in minutes with bukkyai. Local SEO, booking and a contact form included.`,
+        h1: `${name} Website Builder in ${city}`,
+        blurb: `A ${nameL} website for ${esc(city)} — built, written and designed from one sentence about your business.`,
+        accent: "#8a6d3b",
+        grad: "#c9b99a,#8a6d3b",
+        body,
+        slug: `${citySlug}-${slug}`,
+        cat: `${city} · ${name}`,
+        related,
+      })
+    );
+    count++;
+  }
+}
+
+// Local index page → /local
+const localRows = CITIES.map((city) => {
+  const citySlug = city.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const links = LOCAL_INDUSTRIES.map(([slug, name]) => `<a href="/local/${citySlug}/${slug}" style="color:var(--accent)">${name}</a>`).join(" · ");
+  return `<div style="padding:8px 0;border-bottom:1px solid var(--border)"><b>${city}</b><div style="color:var(--muted);font-size:13px;margin-top:4px">${links}</div></div>`;
+}).join("\n");
+const localIndexBody = `
+  <div class="section-label" style="color:var(--accent)">Local</div>
+  <h2>Local website builders, city by city.</h2>
+  <p style="color:var(--muted);margin-bottom:26px">A local business website for your city — built, written and designed in minutes, and you own every file.</p>
+  ${localRows}
+  <div style="margin-top:26px">
+    <p style="color:var(--muted)">Don't see your city? Describe your business in bukkyai — the result is your site, regardless of location.</p>
+  </div>`;
+writeFileSync(join(outDir, "local.html"), pageShell({ title: "Local Website Builders", meta: "Build a local business website for your city with bukkyai — bakery, salon, plumber, photographer and more, written and designed in minutes.", h1: "Local Website Builders", blurb: "A local business website for any city, built from one sentence.", accent: "#8a6d3b", grad: "#c9b99a,#8a6d3b", body: localIndexBody, slug: "local", cat: "Local", related: ['<a href="/industries">Industry websites</a>', '<a href="/templates">Templates</a>'] }));
+count++;
 
 console.log(`generated ${count} programmatic pages`);

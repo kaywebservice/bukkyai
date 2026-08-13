@@ -27,6 +27,7 @@ export default defineConfig({
         faq: "faq.html",
         contact: "contact.html",
         tools: "tools.html",
+        madeWith: "made-with.html",
         ...progInputs,
       },
     },

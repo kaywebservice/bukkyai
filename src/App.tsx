@@ -103,6 +103,7 @@ import ShortcutsModal from "./components/ShortcutsModal";
 import OnboardingTour, { tourCanShow, tourTurnedOff, markTourShown, turnOffTour, type TourStep } from "./components/OnboardingTour";
 import PricingModal from "./components/PricingModal";
 import { starterById } from "./lib/starterSites";
+import { fullTemplateById } from "./lib/templatesFull";
 
 type Tab = "chat" | "design" | "media" | "code" | "inspect" | "plan" | "history" | "posts" | "langs" | "pages" | "seo" | "analytics";
 
@@ -173,6 +174,41 @@ export default function App() {
     window.history.replaceState(null, "", window.location.pathname);
     buyPro(t);
     setPricingOpen(true);
+  }, [gateOpen, authUid]);
+
+  // Open a specific full template from ?template= (used by /made-with demos).
+  const pendingTemplate = useRef<string | null>(null);
+  useEffect(() => {
+    const tmpl = new URLSearchParams(window.location.search).get("template");
+    if (tmpl) pendingTemplate.current = tmpl;
+  }, []);
+  useEffect(() => {
+    if (gateOpen) return;
+    const tmpl = pendingTemplate.current;
+    if (!tmpl) return;
+    pendingTemplate.current = null;
+    window.history.replaceState(null, "", window.location.pathname);
+    const map: Record<string, string> = {
+      bakery: "tpl-bakery",
+      saas: "tpl-saas",
+      studio: "tpl-atelier",
+      atelier: "tpl-atelier",
+      wellness: "tpl-verdant",
+      verdant: "tpl-verdant",
+      hotel: "tpl-harbor",
+      harbor: "tpl-harbor",
+      restaurant: "tpl-metro",
+      metro: "tpl-metro",
+    };
+    const id = map[tmpl] || tmpl;
+    const tpl = fullTemplateById(id);
+    if (!tpl) return;
+    const { meta } = createProject(tpl.name);
+    const doc = tpl.build();
+    persistDoc(meta.id, doc);
+    setProjects(listProjects());
+    openProject(meta.id);
+    pushMsg({ role: "assistant", text: `Loaded the ${tpl.name} template — every page written and designed. Make it yours.` });
   }, [gateOpen, authUid]);
 
   useEffect(() => {

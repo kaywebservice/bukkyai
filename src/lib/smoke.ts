@@ -138,13 +138,13 @@ export function runSmoke(): SmokeResult {
     ["Marketing sitemap exists with programmatic URLs", (() => {
       try {
         const s = readFileSync("public/sitemap.xml", "utf8");
-        return s.includes("/compare/wix") && s.includes("/templates/bakery") && s.includes("/industries/real-estate");
+        return s.includes("/compare/wix") && s.includes("/templates/bakery") && s.includes("/industries/real-estate") && s.includes("/local/austin/bakery");
       } catch { return false; }
     })()],
-    ["Programmatic pages generated (24+)", (() => {
+    ["Programmatic pages generated (100+)", (() => {
       try {
         const n = readdirSync("programmatic").filter((f: string) => f.endsWith(".html")).length;
-        return n >= 24;
+        return n >= 100;
       } catch { return false; }
     })()],
     ["Backlink in published footer", (() => {

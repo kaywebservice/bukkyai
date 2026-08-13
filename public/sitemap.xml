@@ -4,6 +4,7 @@
   <url><loc>https://bukkyai.duckdns.org/features</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://bukkyai.duckdns.org/templates</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://bukkyai.duckdns.org/tools</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/made-with</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://bukkyai.duckdns.org/pricing</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://bukkyai.duckdns.org/faq</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bukkyai.duckdns.org/contact</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
@@ -15,20 +16,167 @@
   <url><loc>https://bukkyai.duckdns.org/how-to/make-a-portfolio</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/how-to/make-a-restaurant-website</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/how-to/make-a-website</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/industries/accountant</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/industries/barbershop</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/industries/coach</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/industries/consulting</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/industries/contractor</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/industries/dental</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/industries/fitness</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/industries/food-truck</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/industries/landscaping</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/industries/law-firm</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/industries/mechanic</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/industries/nonprofit</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/industries/photography</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/industries/plumber</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/industries/real-estate</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/industries/salon</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/industries/tutoring</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/industries/wedding</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/industries/yoga</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/atlanta/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/atlanta/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/atlanta/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/atlanta/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/atlanta/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/atlanta/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/atlanta/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/atlanta/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/austin/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/austin/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/austin/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/austin/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/austin/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/austin/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/austin/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/austin/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/boston/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/boston/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/boston/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/boston/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/boston/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/boston/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/boston/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/boston/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/brooklyn/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/brooklyn/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/brooklyn/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/brooklyn/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/brooklyn/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/brooklyn/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/brooklyn/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/brooklyn/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/chicago/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/chicago/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/chicago/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/chicago/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/chicago/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/chicago/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/chicago/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/chicago/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/dallas/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/dallas/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/dallas/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/dallas/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/dallas/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/dallas/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/dallas/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/dallas/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/denver/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/denver/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/denver/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/denver/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/denver/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/denver/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/denver/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/denver/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/houston/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/houston/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/houston/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/houston/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/houston/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/houston/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/houston/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/houston/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/miami/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/miami/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/miami/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/miami/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/miami/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/miami/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/miami/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/miami/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/nashville/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/nashville/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/nashville/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/nashville/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/nashville/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/nashville/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/nashville/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/nashville/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/orlando/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/orlando/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/orlando/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/orlando/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/orlando/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/orlando/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/orlando/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/orlando/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/phoenix/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/phoenix/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/phoenix/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/phoenix/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/phoenix/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/phoenix/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/phoenix/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/phoenix/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/portland/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/portland/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/portland/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/portland/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/portland/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/portland/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/portland/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/portland/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/san/diego-bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/san/diego-barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/san/diego-fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/san/diego-landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/san/diego-photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/san/diego-plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/san/diego-restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/san/diego-salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/seattle/bakery</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/seattle/barbershop</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/seattle/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/seattle/landscaping</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/seattle/photography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/seattle/plumber</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/seattle/restaurant</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/local/seattle/salon</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://bukkyai.duckdns.org/templates/bakery</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/templates/clinic</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/templates/fitness-studio</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/templates/hotel</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/templates/photography</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/templates/portfolio</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/templates/real-estate</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/templates/restaurant</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/templates/saas</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/templates/salon</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/templates/wellness</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/use-cases/agency</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/use-cases/blog</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/use-cases/course</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/use-cases/event</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/use-cases/freelancer</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/use-cases/landing-page</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/use-cases/membership</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/use-cases/online-store</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/use-cases/portfolio</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/use-cases/restaurant</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/use-cases/small-business</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/use-cases/wedding</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>

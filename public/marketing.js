@@ -32,6 +32,7 @@
         '<a class="nav-link' + isActive("features") + '" href="/features">Features</a>' +
         '<a class="nav-link' + isActive("tools") + '" href="/tools">Tools</a>' +
         '<a class="nav-link' + isActive("templates") + '" href="/templates">Templates</a>' +
+        '<a class="nav-link' + isActive("made-with") + '" href="/made-with">Made with</a>' +
         '<a class="nav-link' + isActive("pricing") + '" href="/pricing">Pricing</a>' +
         '<a class="nav-link' + isActive("faq") + '" href="/faq">FAQ</a>' +
       '</div>' +
@@ -45,6 +46,7 @@
       '<a href="/features">Website builder</a>' +
       '<a href="/tools">Free tools</a>' +
       '<a href="/templates">Templates</a>' +
+      '<a href="/made-with">Made with bukkyai</a>' +
       '<a href="/pricing">Pricing</a>' +
       '<span class="m-group-title">Resources</span>' +
       '<a href="/faq">FAQ</a>' +
