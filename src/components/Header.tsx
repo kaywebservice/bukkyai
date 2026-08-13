@@ -9,6 +9,7 @@ type Props = {
   busyLabel: string;
   onSelectProject: (id: string) => void;
   onDeleteProject: () => void;
+  onRenameProject: () => void;
   onNewProject: () => void;
   onDemo: () => void;
   onImport: (file: File) => void;
@@ -68,6 +69,14 @@ export default function Header(p: Props) {
             </option>
           ))}
         </select>
+        <button
+          className="btn btn-sm btn-ghost"
+          onClick={p.onRenameProject}
+          title="Rename the active project"
+          disabled={!p.activeId}
+        >
+          ✎
+        </button>
         <button
           className="btn btn-sm btn-ghost"
           onClick={p.onDeleteProject}

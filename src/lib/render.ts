@@ -683,11 +683,12 @@ function renderSection(
         (s) => `<a class="bk-social" href="${attrSafe(s.href)}" aria-label="${esc(s.label)}">${svgIcon(s.icon, 17)}</a>`
       ).join("");
       return `
-<footer class="bk-footer"${d}>${cols}${socials}
+<footer class="bk-footer"${d} data-type="footer">${cols}${socials}
   <div class="bk-footer-bottom">
     <span>${te(`${r}.copyright`, h.copyright ?? "", "span")}</span>
     <span>${esc(doc.meta.title)}</span>
   </div>
+  ${h.note ? `<p class="bk-footer-note">${te(`${r}.note`, h.note, "span")}</p>` : ""}
 </footer>`;
     }
 

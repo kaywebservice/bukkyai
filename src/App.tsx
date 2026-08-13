@@ -4,6 +4,7 @@ import type {
   Checkpoint,
   DesignSystem,
   LLMSettings,
+  Page,
   SectionContent,
   SectionMotion,
   SectionType,
@@ -55,6 +56,7 @@ import {
   persistPlan,
   persistProjectsList,
   removeAsset,
+  renameProject,
   saveSettings,
   type ProjectMeta,
 } from "./lib/store";
@@ -82,12 +84,14 @@ import HistoryView from "./components/HistoryView";
 import SettingsModal from "./components/SettingsModal";
 import PostsView from "./components/PostsView";
 import LanguagesView from "./components/LanguagesView";
+import PagesManager from "./components/PagesManager";
+import SeoPanel from "./components/SeoPanel";
 import AuthModal from "./components/AuthModal";
 import StarterGallery from "./components/StarterGallery";
 import PricingModal from "./components/PricingModal";
 import { starterById } from "./lib/starterSites";
 
-type Tab = "chat" | "design" | "media" | "code" | "inspect" | "plan" | "history" | "posts" | "langs";
+type Tab = "chat" | "design" | "media" | "code" | "inspect" | "plan" | "history" | "posts" | "langs" | "pages" | "seo";
 
 export default function App() {
   const [projects, setProjects] = useState<ProjectMeta[]>([]);
@@ -300,6 +304,16 @@ export default function App() {
       setProjects(listProjects());
       openProject(meta.id);
     }
+  };
+
+  const renameActiveProject = () => {
+    if (!projectId) return;
+    const cur = projects.find((p) => p.id === projectId)?.name ?? "";
+    const name = (window.prompt("Project name", cur) ?? "").trim();
+    if (!name || name === cur) return;
+    renameProject(projectId, name);
+    setProjects(listProjects());
+    showToast("Project renamed");
   };
 
   const deleteActiveProject = () => {
@@ -711,6 +725,52 @@ export default function App() {
     mutate(next, `Added ${tpl.name} section from template`, "manual");
   };
 
+  const addPage = () => {
+    if (!doc) return;
+    const next = JSON.parse(JSON.stringify(doc)) as SiteBlueprint;
+    next.pages.push({
+      id: uid("pg"),
+      slug: "",
+      title: `Page ${next.pages.length + 1}`,
+      description: "",
+      sections: [],
+    });
+    mutate(next, `Added page ${next.pages.length}`, "manual");
+    setPageIdx(next.pages.length - 1);
+    setSelected(null);
+  };
+
+  const renamePage = (idx: number, patch: Partial<Pick<Page, "slug" | "title" | "description">>) => {
+    if (!doc) return;
+    const next = JSON.parse(JSON.stringify(doc)) as SiteBlueprint;
+    const cur = next.pages[idx];
+    if (!cur) return;
+    if (patch.slug !== undefined) {
+      const slug = (patch.slug || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      next.pages[idx] = { ...cur, slug };
+    } else {
+      next.pages[idx] = { ...cur, ...patch };
+    }
+    mutate(next, `Edited page "${next.pages[idx].title || next.pages[idx].slug || "Untitled"}"`, "manual");
+  };
+
+  const deletePage = (idx: number) => {
+    if (!doc) return;
+    if (doc.pages.length <= 1) {
+      showToast("Keep at least one page");
+      return;
+    }
+    if (!window.confirm(`Delete page "${doc.pages[idx]?.title || "Untitled"}"?`)) return;
+    const next = JSON.parse(JSON.stringify(doc)) as SiteBlueprint;
+    next.pages.splice(idx, 1);
+    mutate(next, `Deleted page ${idx + 1}`, "manual");
+    if (pageIdx >= next.pages.length) setPageIdx(next.pages.length - 1);
+    setSelected(null);
+  };
+
   const moveSection = (fromP: number, fromS: number, toP: number, toS: number) => {
     if (!doc) return;
     const next = JSON.parse(JSON.stringify(doc)) as SiteBlueprint;
@@ -953,6 +1013,7 @@ export default function App() {
         busyLabel={busyLabel}
         onSelectProject={(id) => openProject(id)}
         onDeleteProject={deleteActiveProject}
+        onRenameProject={renameActiveProject}
         onNewProject={newProject}
         onDemo={loadDemo}
         onImport={importFile}
@@ -1136,7 +1197,11 @@ export default function App() {
             <button className={`tab${tab === "posts" ? " active" : ""}`} onClick={() => setTab("posts")}>
               Posts{doc?.posts?.length ? <span className="tab-badge">{doc.posts.length}</span> : null}
             </button>
+            <button className={`tab${tab === "pages" ? " active" : ""}`} onClick={() => setTab("pages")}>
+              Pages{doc && doc.pages.length > 1 ? <span className="tab-badge">{doc.pages.length}</span> : null}
+            </button>
             <button className={`tab${tab === "langs" ? " active" : ""}`} onClick={() => setTab("langs")}>Lang</button>
+            <button className={`tab${tab === "seo" ? " active" : ""}`} onClick={() => setTab("seo")}>SEO</button>
           </div>
 
           <div className="panel-body">
@@ -1201,6 +1266,28 @@ export default function App() {
             )}
             {tab === "langs" && doc && (
               <LanguagesView doc={doc} onChange={updateDoc} onTranslateAll={translateAllFor} busy={busy} />
+            )}
+            {tab === "pages" && doc && (
+              <PagesManager
+                doc={doc}
+                pageIdx={pageIdx}
+                onSelectPage={(i) => {
+                  setPageIdx(i);
+                  setSelected(null);
+                }}
+                onAddPage={addPage}
+                onRenamePage={renamePage}
+                onDeletePage={deletePage}
+              />
+            )}
+            {tab === "seo" && doc && (
+              <SeoPanel
+                doc={doc}
+                settings={settings}
+                busy={busy}
+                onStatus={(l) => setBusyLabel(l)}
+                onApplyDoc={(d, label, source) => mutate(d, label, source)}
+              />
             )}
           </div>
         </div>
