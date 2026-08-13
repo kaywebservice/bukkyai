@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ProjectMeta } from "../lib/store";
 import { authConfigured, onAuthChange } from "../lib/auth";
+import InstallAppButton from "./InstallAppButton";
 
 type Props = {
   projects: ProjectMeta[];
@@ -186,6 +187,7 @@ export default function Header(p: Props) {
       <button className="btn btn-ghost" onClick={p.onPricing} title="Pricing">
         Pricing
       </button>
+      <InstallAppButton />
       {user ? (
         <button className="auth-chip" onClick={p.onAuth} title="Account">
           {user.photo ? (

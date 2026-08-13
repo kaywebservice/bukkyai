@@ -7,7 +7,10 @@
   <meta name="description" content="bukkyai turns a plain-English brief into a complete, live website: design system, every page written for you, then publish to your own URL." />
   <meta property="og:title" content="bukkyai — AI website builder" />
   <meta property="og:description" content="Describe your site. bukkyai builds it — design, copy, pages, then live on the web." />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%238b7bff'/%3E%3Ccircle cx='20' cy='20' r='10' fill='%23fff'/%3E%3Ccircle cx='44' cy='44' r='10' fill='%23fff' opacity='0.8'/%3E%3C/svg%3E" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/icon-192.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <meta name="theme-color" content="#111019" />
   <style>
     :root {
       --bg: #0d0d12;
@@ -202,5 +205,12 @@
       <span><a href="/app">Launch builder</a> · <a href="/landing.html">About</a></span>
     </div>
   </footer>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/sw.js").catch(function () {});
+      });
+    }
+  </script>
 </body>
 </html>
