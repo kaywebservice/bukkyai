@@ -7,6 +7,7 @@ type Props = {
   posts: Post[];
   onChange: (posts: Post[]) => void;
   onGenerateImage: (field: string) => Promise<string | null>;
+  onGeneratePosts?: () => void;
   busy?: boolean;
 };
 
@@ -45,6 +46,11 @@ export default function PostsView(p: Props) {
         <button className="btn btn-primary" style={{ flex: 1 }} onClick={addPost} disabled={p.busy}>
           + New post
         </button>
+        {p.onGeneratePosts && (
+          <button className="btn btn-ghost" style={{ whiteSpace: "nowrap" }} onClick={p.onGeneratePosts} disabled={p.busy}>
+            ✦ Write 3 with AI
+          </button>
+        )}
         <label className="btn btn-ghost" style={{ whiteSpace: "nowrap" }}>
           Import .md
           <input

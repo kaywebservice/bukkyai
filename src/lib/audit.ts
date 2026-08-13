@@ -68,6 +68,18 @@ export function auditSite(doc: SiteBlueprint): AuditResult {
   }
   push(brokenNav === 0, "Navigation links resolve", brokenNav ? `${brokenNav} nav link(s) don't point anywhere` : "All nav links resolve", "seo", true);
 
+  // Deep link check: every href in section content (CTAs, footer, cards…).
+  const pageLinks = new Set<string>();
+  for (const p of pages) for (const s of p.sections) collectHrefs(s.content as Record<string, unknown>, pageLinks);
+  let brokenLinks = 0;
+  for (const href of pageLinks) {
+    if (href.startsWith("#")) continue;
+    if (href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:")) continue;
+    const ok = doc.pages.some((p) => href === `/${p.slug}` || href === `/${p.slug}.html`);
+    if (!ok) brokenLinks++;
+  }
+  push(brokenLinks === 0, "In-content links resolve", brokenLinks ? `${brokenLinks} internal link(s) point to missing pages` : "All internal links resolve", "seo", true);
+
   const checks: { label: string; a: string; b: string }[] = [
     { label: "Text on background", a: doc.design.tokens.colors.text, b: doc.design.tokens.colors.background },
     { label: "Muted text", a: doc.design.tokens.colors.muted, b: doc.design.tokens.colors.background },
@@ -130,14 +142,30 @@ export function auditSite(doc: SiteBlueprint): AuditResult {
   return { score, issues };
 }
 
+function collectHrefs(value: unknown, out: Set<string>): void {
+  if (typeof value === "string") {
+    if (value.startsWith("/") && !value.startsWith("//")) out.add(value);
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) collectHrefs(item, out);
+    return;
+  }
+  if (value && typeof value === "object") {
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (k === "href" && typeof v === "string" && v.startsWith("/") && !v.startsWith("//")) out.add(v);
+      else collectHrefs(v, out);
+    }
+  }
+}
+
 export function seoAutoFixPrompt(_doc: SiteBlueprint, issues: AuditIssue[]): string {
   const failing = issues.filter((i) => !i.ok && i.fixable);
   const list = failing.map((i) => `- ${i.label}: ${i.detail}`).join("\n");
   return `Fix the following issues in my site (structure and untouched copy must stay EXACTLY the same; only fix the listed issues — titles, descriptions, nav links, empty fields, alts):\n\n${list}`;
 }
 
-export function renderSmokeTest(_doc: SiteBlueprint): string[] {
-  const warnings: string[] = [];
+export function renderSmokeTest(_doc: SiteBlueprint): string[] {  const warnings: string[] = [];
   const home = _doc.pages[0];
   if (!home) {
     warnings.push("No pages — add content before exporting.");

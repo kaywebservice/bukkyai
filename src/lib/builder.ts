@@ -2,6 +2,7 @@ import type {
   DesignSystem,
   LLMSettings,
   Page,
+  Post,
   Section,
   SectionContent,
   SectionType,
@@ -382,4 +383,42 @@ export async function translateSite(
     if (typeof val === "string" && val.trim() && key !== val) map[key] = val;
   }
   return { translations: map };
+}
+
+const BLOG_POSTS_SYSTEM = `You write real, publishable blog posts for a business website.
+Return STRICT JSON: { "posts": [ { "title", "excerpt", "content", "category", "slug" } ] }.
+Rules:
+- 3 posts, each 180-320 words, in the site's voice.
+- content is plain HTML paragraphs (no headings inside <p>; you may use <h2>).
+- Topics must be genuinely relevant to the business described.
+- excerpt: 1-2 sentences. slug: url-safe lowercase kebab-case. category: one short word.`;
+
+export async function generateBlogPosts(
+  doc: SiteBlueprint,
+  settings: LLMSettings,
+  cb: BuildCallbacks
+): Promise<{ posts: Post[]; error?: string }> {
+  const brief = doc.meta.description || doc.meta.title || "a small business website";
+  const voice = doc.voice ?? "your site's voice";
+  cb.onStatus("Writing three blog posts…");
+  const res = await callJSON<{ posts?: { title?: string; excerpt?: string; content?: string; category?: string; slug?: string }[] }>(
+    settings,
+    BLOG_POSTS_SYSTEM,
+    `Site: ${doc.meta.title}\nAbout: ${brief}\nVoice: ${voice}\n\nWrite 3 blog posts that would be genuinely useful to the site's audience.`
+  );
+  if (res.error) return { posts: [], error: res.error };
+  const raw = res.data?.posts ?? [];
+  const posts: Post[] = raw
+    .filter((p) => p?.title && p?.content)
+    .map((p) => ({
+      id: uid("post"),
+      slug: (p.slug || p.title!.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")).slice(0, 60),
+      title: p.title!,
+      excerpt: p.excerpt ?? "",
+      content: p.content!,
+      date: new Date().toISOString(),
+      category: p.category || "News",
+    }));
+  if (posts.length === 0) return { posts: [], error: "The model didn't return any usable posts. Try again." };
+  return { posts };
 }

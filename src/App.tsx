@@ -27,6 +27,7 @@ import {
   fieldRewrite,
   generateDesign,
   generatePlan,
+  generateBlogPosts,
   regenerateSection,
   toneRewrite,
   translateSite,
@@ -94,6 +95,8 @@ import AnalyticsView from "./components/AnalyticsView";
 import AuthModal from "./components/AuthModal";
 import StarterGallery from "./components/StarterGallery";
 import ShareModal from "./components/ShareModal";
+import FindReplaceModal from "./components/FindReplaceModal";
+import ShortcutsModal from "./components/ShortcutsModal";
 import OnboardingTour, { tourCanShow, tourTurnedOff, markTourShown, turnOffTour, type TourStep } from "./components/OnboardingTour";
 import PricingModal from "./components/PricingModal";
 import { starterById } from "./lib/starterSites";
@@ -109,6 +112,8 @@ export default function App() {
   const [invites, setInvites] = useState<{ id: string; name: string; role: string }[]>([]);
   const [shareOpen, setShareOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [findOpen, setFindOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [presence, setPresence] = useState<PresenceInfo[]>([]);
   const [pro, setPro] = useState(() => proUnlocked());
   const [pageIdx, setPageIdx] = useState(0);
@@ -170,6 +175,17 @@ export default function App() {
       setTourOpen(true);
     }
   }, [authUid]);
+
+  // "?" opens the keyboard shortcuts panel (when not typing in a field).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.key === "?" && !e.metaKey && !e.ctrlKey && !e.altKey) setShortcutsOpen(true);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
 
   // Pull cloud projects into the local list when signed in + sync on
   useEffect(() => {
@@ -731,7 +747,7 @@ export default function App() {
 
   const generateOgImage = () => {
     if (!doc) return;
-    runBusy("Rendering share image…", async () => {
+    runBusy("Rendering share image.", async () => {
       const url = await renderOgImage(doc);
       if (!url) return;
       const next = { ...doc, meta: { ...doc.meta, ogImage: url } };
@@ -739,6 +755,27 @@ export default function App() {
       showToast("Share image generated");
     });
   };
+
+  const generatePosts = () => {
+    if (!doc) return;
+    if (!settings.apiKey?.trim()) {
+      pushMsg({ role: "assistant", text: "Add an API key first (Settings) so the AI can write posts.", kind: "error" });
+      setSettingsOpen(true);
+      return;
+    }
+    runBusy("Writing three blog posts…", async () => {
+      const res = await generateBlogPosts(doc, settings, { onStatus: (label) => setBusyLabel(label) });
+      if (res.error || res.posts.length === 0) {
+        pushMsg({ role: "assistant", text: res.error ?? "Post generation failed.", kind: "error" });
+        return;
+      }
+      const existing = doc.posts ?? [];
+      mutate({ ...doc, posts: [...res.posts, ...existing] }, "AI wrote 3 blog posts", "content");
+      pushMsg({ role: "assistant", text: `Wrote ${res.posts.length} posts: ${res.posts.map((p) => `"${p.title}"`).join(", ")}. Edit them in the Posts tab.` });
+      showToast("3 posts written");
+    });
+  };
+
 
   const applyPreset = (name: string) => {
     const preset = DESIGN_PRESETS.find((p) => p.name === name);
@@ -1054,7 +1091,7 @@ export default function App() {
     pushMsg({ role: "system", text: `AI provider set to ${s.provider}. Everything still runs locally — no credits, no limits.` });
   };
 
-  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; customFonts?: string; emailServiceProvider?: string; emailServiceEndpoint?: string; emailServiceApiKey?: string; emailServiceListId?: string; coupons?: string; orderNotify?: string }) => {
+  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; customFonts?: string; emailServiceProvider?: string; emailServiceEndpoint?: string; emailServiceApiKey?: string; emailServiceListId?: string; coupons?: string; orderNotify?: string; maintenanceEnabled?: boolean; maintenanceTitle?: string; maintenanceText?: string; maintenanceEmail?: string }) => {
     if (!doc) return;
     const next = { ...doc };
     if (m.password !== undefined) next.password = m.password;
@@ -1074,6 +1111,11 @@ export default function App() {
       if (!next.coupons.length) next.coupons = undefined;
     }
     if (m.orderNotify !== undefined) next.orderNotify = m.orderNotify.trim() || undefined;
+    if (m.maintenanceEnabled !== undefined) {
+      next.maintenance = m.maintenanceEnabled
+        ? { enabled: true, title: m.maintenanceTitle?.trim() || undefined, text: m.maintenanceText?.trim() || undefined, email: m.maintenanceEmail?.trim() || undefined }
+        : undefined;
+    }
     if (m.emailServiceProvider !== undefined) {
       if (!m.emailServiceProvider || !m.emailServiceEndpoint?.trim()) {
         next.forms = { ...(next.forms ?? {}), emailService: undefined };
@@ -1494,6 +1536,16 @@ export default function App() {
           onClose={() => setShareOpen(false)}
         />
       )}
+      {findOpen && doc && (
+        <FindReplaceModal
+          doc={doc}
+          onApply={(next, count) => {
+            mutate(next, `Find & replace (${count} changes)`, "edit");
+            showToast(`Replaced ${count} occurrence${count === 1 ? "" : "s"}`);
+          }}
+          onClose={() => setFindOpen(false)}
+        />
+      )}
 
       <div className="app-main">
         <LeftRail
@@ -1696,6 +1748,7 @@ export default function App() {
                 posts={doc.posts ?? []}
                 onChange={(posts) => mutate({ ...doc, posts }, "Updated blog posts", "manual")}
                 onGenerateImage={async () => generateMediaImageForPost()}
+                onGeneratePosts={generatePosts}
                 busy={busy}
               />
             )}
@@ -1703,17 +1756,22 @@ export default function App() {
               <LanguagesView doc={doc} onChange={updateDoc} onTranslateAll={translateAllFor} busy={busy} />
             )}
             {tab === "pages" && doc && (
-              <PagesManager
-                doc={doc}
-                pageIdx={pageIdx}
-                onSelectPage={(i) => {
-                  setPageIdx(i);
-                  setSelected(null);
-                }}
-                onAddPage={addPage}
-                onRenamePage={renamePage}
-                onDeletePage={deletePage}
-              />
+              <>
+                <PagesManager
+                  doc={doc}
+                  pageIdx={pageIdx}
+                  onSelectPage={(i) => {
+                    setPageIdx(i);
+                    setSelected(null);
+                  }}
+                  onAddPage={addPage}
+                  onRenamePage={renamePage}
+                  onDeletePage={deletePage}
+                />
+                <button className="btn" style={{ width: "100%", marginTop: 6 }} onClick={() => setFindOpen(true)}>
+                  Find & replace
+                </button>
+              </>
             )}
             {tab === "seo" && doc && (
               <SeoPanel
@@ -1767,6 +1825,10 @@ export default function App() {
             emailServiceListId: doc?.forms?.emailService?.listId ?? "",
             coupons: (doc?.coupons ?? []).map((c) => `${c.code} ${c.percentOff}`).join("\n"),
             orderNotify: doc?.orderNotify ?? "",
+            maintenanceEnabled: doc?.maintenance?.enabled,
+            maintenanceTitle: doc?.maintenance?.title,
+            maintenanceText: doc?.maintenance?.text,
+            maintenanceEmail: doc?.maintenance?.email,
           }}
           cloudOn={cloudOn}
           signedIn={Boolean(authUid)}
@@ -1824,6 +1886,7 @@ export default function App() {
           }}
         />
       )}
+      {shortcutsOpen && <ShortcutsModal onClose={() => setShortcutsOpen(false)} />}
       <OnboardingTour
         active={tourOpen}
         steps={tourSteps}

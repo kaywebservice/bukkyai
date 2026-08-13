@@ -1,5 +1,5 @@
 import { sampleProject } from "./blueprint";
-import { renderPage, renderStaticSite } from "./render";
+import { renderPage, renderStaticSite, renderMaintenance } from "./render";
 import { renderCss } from "./renderCss";
 import { singleFileHtml } from "./export";
 import { contrastRatio } from "./color";
@@ -65,6 +65,11 @@ export function runSmoke(): SmokeResult {
   blogDoc.pages[0].sections.push({ id: "pg_blog", type: "posts", content: { heading: "Blog" } });
   const blogHtml = renderPage(blogDoc, blogDoc.pages[0], false);
 
+  const maintenanceDoc = JSON.parse(JSON.stringify(doc)) as typeof doc;
+  maintenanceDoc.maintenance = { enabled: true, title: "Back soon", text: "Rebuilding.", email: "x@y.com" };
+  const maintenanceHtml = renderMaintenance(maintenanceDoc);
+  const maintenanceFiles = renderStaticSite(maintenanceDoc).files;
+
   const templatesOk = FULL_TEMPLATES.every((t) => {
     try {
       const tpl = t.build();
@@ -121,6 +126,8 @@ export function runSmoke(): SmokeResult {
     ["Blog category chips render", blogHtml.includes("bk-chip") && blogHtml.includes("Guides")],
     ["Comment form in post modal", blogHtml.includes("bk-comment-form")],
     ["Full templates build and render (6, multi-page)", templatesOk],
+    ["Maintenance mode renders coming-soon page", maintenanceHtml.includes("Back soon") && maintenanceHtml.includes("x@y.com")],
+    ["Maintenance mode publishes single index.html", maintenanceFiles.length === 1 && maintenanceFiles[0].path === "index.html"],
     ["Contrast math sane", contrastRatio("#241a12", "#f7f2ea") > 7],
   ];
 

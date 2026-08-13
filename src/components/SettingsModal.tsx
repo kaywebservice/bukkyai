@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { LLMSettings } from "../lib/types";
 import { defaultModel } from "../lib/llm";
 
-type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; customFonts?: string; emailServiceProvider?: string; emailServiceEndpoint?: string; emailServiceApiKey?: string; emailServiceListId?: string; coupons?: string; orderNotify?: string };
+type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; customFonts?: string; emailServiceProvider?: string; emailServiceEndpoint?: string; emailServiceApiKey?: string; emailServiceListId?: string; coupons?: string; orderNotify?: string; maintenanceEnabled?: boolean; maintenanceTitle?: string; maintenanceText?: string; maintenanceEmail?: string };
 type Props = {
   settings: LLMSettings & { githubToken?: string };
   siteMeta?: SiteMeta;
@@ -46,6 +46,10 @@ export default function SettingsModal(p: Props) {
     emailServiceListId: p.siteMeta?.emailServiceListId ?? "",
     coupons: p.siteMeta?.coupons ?? "",
     orderNotify: p.siteMeta?.orderNotify ?? "",
+    maintenanceEnabled: p.siteMeta?.maintenanceEnabled ?? false,
+    maintenanceTitle: p.siteMeta?.maintenanceTitle ?? "",
+    maintenanceText: p.siteMeta?.maintenanceText ?? "",
+    maintenanceEmail: p.siteMeta?.maintenanceEmail ?? "",
   });
 
   const provider = s.provider;
@@ -365,6 +369,26 @@ export default function SettingsModal(p: Props) {
               <label>List / audience ID (optional)</label>
               <input value={meta.emailServiceListId} onChange={(e) => setMeta({ ...meta, emailServiceListId: e.target.value })} />
             </div>
+          </>
+        )}
+
+        <div className="panel-label">Maintenance mode</div>
+        <div className="settings-row">
+          <label>
+            <input
+              type="checkbox"
+              checked={Boolean(meta.maintenanceEnabled)}
+              onChange={(e) => setMeta({ ...meta, maintenanceEnabled: e.target.checked })}
+              style={{ width: "auto" }}
+            />
+            Show a "coming soon" page on publish
+          </label>
+        </div>
+        {meta.maintenanceEnabled && (
+          <>
+            <div className="settings-row"><label>Title</label><input value={meta.maintenanceTitle} onChange={(e) => setMeta({ ...meta, maintenanceTitle: e.target.value })} placeholder="We'll be right back." /></div>
+            <div className="settings-row"><label>Message</label><textarea rows={2} value={meta.maintenanceText} onChange={(e) => setMeta({ ...meta, maintenanceText: e.target.value })} placeholder="We're putting the finishing touches on…" /></div>
+            <div className="settings-row"><label>Contact email (optional)</label><input value={meta.maintenanceEmail} onChange={(e) => setMeta({ ...meta, maintenanceEmail: e.target.value })} placeholder="hello@…" /></div>
           </>
         )}
 

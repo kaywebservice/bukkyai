@@ -255,6 +255,7 @@ export type SiteBlueprint = {
   redirects?: RedirectRule[];
   cookieConsent?: CookieConsent;
   theme?: SiteTheme;
+  maintenance?: { enabled: boolean; title?: string; text?: string; email?: string };
   announcement?: { text: string; href?: string };
   popup?: { enabled: boolean; title?: string; text?: string; buttonLabel?: string; ctaUrl?: string; delaySec?: number };
   customFonts?: { name: string; url: string; weight?: string; style?: string }[];

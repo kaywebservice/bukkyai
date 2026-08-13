@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { MediaAsset } from "../lib/store";
 
 type Props = {
@@ -11,6 +12,9 @@ type Props = {
 };
 
 export default function MediaView(p: Props) {
+  const [q, setQ] = useState("");
+  const query = q.trim().toLowerCase();
+  const visible = query ? p.assets.filter((a) => a.name.toLowerCase().includes(query)) : p.assets;
   return (
     <>
       <div className="panel-label">Media library</div>
@@ -33,9 +37,21 @@ export default function MediaView(p: Props) {
         </button>
       </div>
 
+      {p.assets.length > 1 && (
+        <input
+          className="chat-input"
+          style={{ width: "100%", marginTop: 8, minHeight: 36 }}
+          placeholder="Search images…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+      )}
+
       {!p.assets.length ? (
         <div className="settings-note">No images uploaded yet. Drag one in via the upload button, or pick a
           hero/gallery image by rewriting that section with AI.</div>
+      ) : visible.length === 0 ? (
+        <div className="settings-note" style={{ marginTop: 8 }}>No images match “{q}”.</div>
       ) : (
         <div
           style={{
@@ -45,7 +61,7 @@ export default function MediaView(p: Props) {
             marginTop: 8,
           }}
         >
-          {p.assets.map((a) => (
+          {visible.map((a) => (
             <div key={a.id} className="inspector-section" style={{ padding: 8 }}>
               <img
                 src={a.dataUrl}
@@ -74,3 +90,4 @@ export default function MediaView(p: Props) {
     </>
   );
 }
+

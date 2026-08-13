@@ -261,6 +261,9 @@ ${doc.popup?.enabled ? `<div id="bk-popup" class="bk-popup" role="dialog" aria-l
 }
 
 export function renderStaticSite(doc: SiteBlueprint): { files: { path: string; content: string }[] } {
+  if (doc.maintenance?.enabled) {
+    return { files: [{ path: "index.html", content: renderMaintenance(doc) }] };
+  }
   const pages = doc.pages.length ? doc.pages : [emptyHomePage(doc)];
   const files: { path: string; content: string }[] = [];
   const slugs = pages.map((p) => p.slug);
@@ -327,6 +330,38 @@ ${items}
   </channel>
 </rss>
 `;
+}
+
+export function renderMaintenance(doc: SiteBlueprint): string {
+  const c = doc.design.tokens.colors;
+  const m = doc.maintenance ?? { enabled: true } as NonNullable<SiteBlueprint["maintenance"]>;
+  return `<!doctype html>
+<html lang="${esc(doc.meta.lang)}">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>${esc(m.title || `${doc.meta.title} — coming soon`)}</title>
+<meta name="robots" content="noindex,nofollow"/>
+<style>
+:root{--bg:${c.background};--text:${c.text};--muted:${c.muted};--accent:${c.accent};--accent-c:${c.accentContrast}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+.card{max-width:480px}
+.mark{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--accent),${c.accent});display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--accent-c);margin:0 auto 24px}
+h1{font-size:30px;letter-spacing:-0.02em;margin-bottom:12px}
+p{color:var(--muted);font-size:16px;line-height:1.6;margin-bottom:24px}
+${m.email ? `.mail{color:var(--accent);text-decoration:none;font-weight:600}` : ""}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="mark">${esc(doc.meta.title.slice(0, 1))}</div>
+  <h1>${esc(m.title || "We'll be right back.")}</h1>
+  <p>${esc(m.text || `We're putting the finishing touches on ${doc.meta.title}. Check back soon!`)}</p>
+  ${m.email ? `<a class="mail" href="mailto:${esc(m.email)}">${esc(m.email)}</a>` : ""}
+</div>
+</body>
+</html>`;
 }
 
 export function renderNotFound(doc: SiteBlueprint): string {
