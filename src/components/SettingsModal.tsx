@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { LLMSettings } from "../lib/types";
 import { defaultModel } from "../lib/llm";
 
-type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string };
+type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string };
 type Props = {
   settings: LLMSettings & { githubToken?: string };
   siteMeta?: SiteMeta;
@@ -23,6 +23,10 @@ export default function SettingsModal(p: Props) {
     embedBody: p.siteMeta?.embedBody ?? "",
     formEndpoint: p.siteMeta?.formEndpoint ?? "",
     analyticsDomain: p.siteMeta?.analyticsDomain ?? "",
+    cookieEnabled: p.siteMeta?.cookieEnabled ?? false,
+    cookieText: p.siteMeta?.cookieText ?? "",
+    cookiePolicyUrl: p.siteMeta?.cookiePolicyUrl ?? "",
+    redirects: p.siteMeta?.redirects ?? "",
   });
 
   const provider = s.provider;
@@ -187,6 +191,53 @@ export default function SettingsModal(p: Props) {
             placeholder="<script>…</script> injected before </body>"
             onChange={(e) => setMeta({ ...meta, embedBody: e.target.value })}
           />
+        </div>
+
+        <div className="panel-label">Privacy & redirects</div>
+        <div className="settings-row">
+          <label>
+            <input
+              type="checkbox"
+              checked={Boolean(meta.cookieEnabled)}
+              onChange={(e) => setMeta({ ...meta, cookieEnabled: e.target.checked })}
+              style={{ width: "auto" }}
+            />
+            Show cookie consent banner
+          </label>
+        </div>
+        {meta.cookieEnabled && (
+          <>
+            <div className="settings-row">
+              <label>Banner text</label>
+              <textarea
+                rows={2}
+                value={meta.cookieText}
+                placeholder="We use cookies to improve your experience…"
+                onChange={(e) => setMeta({ ...meta, cookieText: e.target.value })}
+              />
+            </div>
+            <div className="settings-row">
+              <label>Policy URL</label>
+              <input
+                value={meta.cookiePolicyUrl}
+                placeholder="https://…/privacy"
+                onChange={(e) => setMeta({ ...meta, cookiePolicyUrl: e.target.value })}
+              />
+            </div>
+          </>
+        )}
+        <div className="settings-row">
+          <label>Redirects (from → to)</label>
+          <textarea
+            rows={3}
+            value={meta.redirects}
+            placeholder={"/old-page → /new-page\n/old.html → /new.html"}
+            onChange={(e) => setMeta({ ...meta, redirects: e.target.value })}
+          />
+          <div className="settings-note">
+            One per line, "from → to". Emitted as <code>_redirects</code> for Netlify/Vercel plus
+            redirects.json. Only applies to the static publish, not the preview.
+          </div>
         </div>
 
         <div className="modal-actions">

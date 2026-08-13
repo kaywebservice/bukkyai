@@ -34,6 +34,7 @@ import {
 } from "./lib/builder";
 import { DESIGN_PRESETS } from "./lib/presets";
 import { harmonizeDesign as harmonize } from "./lib/harmony";
+import { generateOgImage as renderOgImage } from "./lib/ogImage";
 import { canGenerateImages, generateSiteImage } from "./lib/images";
 import { authConfigured, onAuthChange } from "./lib/auth";
 import { deleteCloudProject, listCloudProjects, saveProjectToCloud } from "./lib/cloud";
@@ -611,6 +612,17 @@ export default function App() {
     showToast(`Harmony ${res.before.total} → ${res.after.total}: ${res.changes[0] ?? "no changes needed"}`);
   };
 
+  const generateOgImage = () => {
+    if (!doc) return;
+    runBusy("Rendering share image…", async () => {
+      const url = await renderOgImage(doc);
+      if (!url) return;
+      const next = { ...doc, meta: { ...doc.meta, ogImage: url } };
+      mutate(next, "Generated OG share image", "design");
+      showToast("Share image generated");
+    });
+  };
+
   const applyPreset = (name: string) => {
     const preset = DESIGN_PRESETS.find((p) => p.name === name);
     if (!preset) return;
@@ -925,7 +937,7 @@ export default function App() {
     pushMsg({ role: "system", text: `AI provider set to ${s.provider}. Everything still runs locally — no credits, no limits.` });
   };
 
-  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string }) => {
+  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string }) => {
     if (!doc) return;
     const next = { ...doc };
     if (m.password !== undefined) next.password = m.password;
@@ -939,6 +951,25 @@ export default function App() {
       if (!d) next.analytics = undefined;
       else if (d.includes(".")) next.analytics = { plausible: d };
       else next.analytics = { goatcounter: d };
+    }
+    if (m.cookieEnabled !== undefined) {
+      next.cookieConsent = m.cookieEnabled
+        ? { enabled: true, text: m.cookieText?.trim() || undefined, policyUrl: m.cookiePolicyUrl?.trim() || undefined }
+        : undefined;
+    }
+    if (m.redirects !== undefined) {
+      const rules = (m.redirects ?? "")
+        .split(/\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const m2 = line.split(/\s*(?:→|->|=>|\s)\s*/, 2);
+          const from = (m2[0] ?? "").trim();
+          const to = (m2[1] ?? "").trim();
+          return from && to ? { from, to } : null;
+        })
+        .filter((r): r is { from: string; to: string } => r !== null);
+      next.redirects = rules.length ? rules : undefined;
     }
     const head = m.embedHead ?? "";
     const body = m.embedBody ?? "";
@@ -1336,6 +1367,7 @@ export default function App() {
                 busy={busy}
                 onStatus={(l) => setBusyLabel(l)}
                 onApplyDoc={(d, label, source) => mutate(d, label, source)}
+                onGenerateOg={generateOgImage}
               />
             )}
           </div>
@@ -1354,6 +1386,10 @@ export default function App() {
             embedBody: doc?.embeds?.body?.[0],
             formEndpoint: doc?.forms?.endpoint,
             analyticsDomain: doc?.analytics ? (doc.analytics.plausible ?? doc.analytics.goatcounter ?? "") : "",
+            cookieEnabled: doc?.cookieConsent?.enabled,
+            cookieText: doc?.cookieConsent?.text,
+            cookiePolicyUrl: doc?.cookieConsent?.policyUrl,
+            redirects: (doc?.redirects ?? []).map((r) => `${r.from} → ${r.to}`).join("\n"),
           }}
           cloudOn={cloudOn}
           signedIn={Boolean(authUid)}

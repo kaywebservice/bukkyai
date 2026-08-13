@@ -1,5 +1,5 @@
 import type { SiteBlueprint } from "./types";
-import { renderPage, renderStaticSite } from "./render";
+import { renderPage, renderStaticSite, faviconDataUrl } from "./render";
 import { renderCss } from "./renderCss";
 import { googleFontsLink } from "./fontPairs";
 import JSZip from "jszip";
@@ -125,9 +125,37 @@ export default defineConfig({ plugins: [react()] });
 `,
 };
 
+function reactIndexHtml(doc: SiteBlueprint): string {
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const title = `${doc.meta.title}`;
+  const desc = doc.meta.description || "";
+  const ogImage = doc.meta.ogImage
+    ? `\n    <meta property="og:image" content="${esc(doc.meta.ogImage)}" />\n    <meta name="twitter:card" content="summary_large_image" />`
+    : "";
+  return `<!doctype html>
+<html lang="${esc(doc.meta.lang || "en")}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${esc(title)}</title>
+    <meta name="description" content="${esc(desc)}" />
+    <meta property="og:title" content="${esc(title)}" />
+    <meta property="og:description" content="${esc(desc)}" />
+    <meta property="og:type" content="website" />${ogImage}
+    <link rel="icon" href="${faviconDataUrl(doc)}" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+`;
+}
+
 export async function downloadReactProject(doc: SiteBlueprint): Promise<void> {
   const zip = new JSZip();
   for (const [path, content] of Object.entries(REACT_TEMPLATE)) zip.file(path, content);
+  zip.file("index.html", reactIndexHtml(doc));
   const libFiles: [string, string][] = [
     ["src/lib/types.ts", typesTs],
     ["src/lib/icons.ts", iconsTs],

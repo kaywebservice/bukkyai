@@ -9,6 +9,7 @@ type Props = {
   busy: boolean;
   onStatus: (label: string) => void;
   onApplyDoc: (doc: SiteBlueprint, label: string, source: "edit") => void;
+  onGenerateOg: () => void;
 };
 
 type Issue = ReturnType<typeof auditSite>["issues"][number];
@@ -65,6 +66,9 @@ export default function SeoPanel(p: Props) {
           disabled={p.busy}
         >
           Refresh
+        </button>
+        <button className="btn btn-sm btn-ghost" onClick={p.onGenerateOg} disabled={p.busy}>
+          Generate share image
         </button>
       </div>
 

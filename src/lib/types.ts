@@ -192,6 +192,7 @@ export type Post = {
   date: string;
   cover?: string;
   category?: string;
+  author?: string;
 };
 
 export type CartItem = {
@@ -220,6 +221,14 @@ export type Page = {
 
 export type NavLink = { label: string; href: string };
 
+export type RedirectRule = { from: string; to: string };
+
+export type CookieConsent = {
+  enabled: boolean;
+  text?: string;
+  policyUrl?: string;
+};
+
 export type SiteBlueprint = {
   version: number;
   meta: { title: string; description: string; lang: string; ogImage?: string };
@@ -234,6 +243,8 @@ export type SiteBlueprint = {
   languages?: { default: string; supported: string[]; translations?: Record<string, Record<string, string>> };
   password?: string;
   stripePaymentLink?: string;
+  redirects?: RedirectRule[];
+  cookieConsent?: CookieConsent;
 };
 
 export type CheckpointSource = "init" | "plan" | "design" | "content" | "edit" | "manual";

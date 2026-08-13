@@ -92,6 +92,10 @@ export function renderPage(
   const ogImage = doc.meta.ogImage
     ? `<meta property="og:image" content="${attrSafe(doc.meta.ogImage)}"/>\n<meta name="twitter:card" content="summary_large_image"/>`
     : "";
+  const hreflang = (doc.languages?.supported ?? []).length > 1
+    ? (doc.languages?.supported ?? []).map((c) => `<link rel="alternate" hreflang="${esc(c)}" href="?lang=${esc(c)}"/>`).join("\n") +
+      `\n<link rel="alternate" hreflang="x-default" href="${esc(page.slug ? `/${page.slug}.html` : "/")}"/>`
+    : "";
   const jsonLd = buildJsonLd(doc, page);
   let html = `
 <!doctype html>
@@ -106,6 +110,7 @@ export function renderPage(
 <meta property="og:type" content="website"/>
 <link rel="icon" href="${faviconDataUrl(doc)}"/>
 ${ogImage}
+${hreflang}
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="${googleFontsLink(doc.design.tokens.fonts.heading, doc.design.tokens.fonts.body)}" rel="stylesheet"/>
@@ -132,6 +137,7 @@ window.__BKKY__ = ${JSON.stringify({
     translations: doc.languages?.translations || {},
     supported: doc.languages?.supported ?? [],
     defaultLang: doc.languages?.default ?? doc.meta.lang,
+    cookie: doc.cookieConsent ? { enabled: !!doc.cookieConsent.enabled, text: doc.cookieConsent.text || "", policyUrl: doc.cookieConsent.policyUrl || "" } : null,
   })};
 </script>
 <script>
@@ -198,6 +204,10 @@ document.addEventListener("click", function(e){
 ${SITE_FEATURES_SCRIPT}
 </script>
 ${embedsBody}
+${doc.cookieConsent?.enabled ? `<div id="bk-cookie" class="bk-cookie" role="dialog" aria-label="Cookie consent">
+  <div class="bk-cookie-text">${esc(doc.cookieConsent.text || "We use cookies to improve your experience. By continuing you agree to our use of cookies.")}${doc.cookieConsent.policyUrl ? ` <a href="${attrSafe(doc.cookieConsent.policyUrl)}" target="_blank" rel="noopener">Learn more</a>` : ""}</div>
+  <div class="bk-cookie-actions"><button id="bk-cookie-accept" class="bk-btn bk-btn-primary">Accept</button><button id="bk-cookie-decline" class="bk-btn">Decline</button></div>
+</div>` : ""}
 </body>
 </html>`;
 
@@ -222,9 +232,87 @@ export function renderStaticSite(doc: SiteBlueprint): { files: { path: string; c
     content: `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${pages.map((p) => `  <url><loc>https://example.com${p.slug ? `/${p.slug}.html` : "/"}</loc><priority>${p.slug ? "0.8" : "1.0"}</priority></url>`).join("\n")}
+${(doc.posts ?? []).map((post) => `  <url><loc>https://example.com/post/${esc(post.slug)}.html</loc><lastmod>${esc((post.date || "").slice(0, 10))}</lastmod><priority>0.7</priority></url>`).join("\n")}
 </urlset>`,
   });
+  files.push({
+    path: "feed.xml",
+    content: rssFeed(doc),
+  });
+  if ((doc.redirects ?? []).length > 0) {
+    files.push({
+      path: "_redirects",
+      content: (doc.redirects ?? [])
+        .map((r) => `${r.from} ${r.to} 301`)
+        .join("\n") + "\n",
+    });
+    files.push({
+      path: "redirects.json",
+      content: JSON.stringify(doc.redirects ?? [], null, 2),
+    });
+  }
+  files.push({ path: "404.html", content: renderNotFound(doc) });
   return { files };
+}
+
+export function rssFeed(doc: SiteBlueprint): string {
+  const posts = doc.posts ?? [];
+  const base = "https://example.com";
+  const items = posts.map((post) => {
+    const link = `${base}/post/${esc(post.slug)}.html`;
+    const desc = esc(post.excerpt || (post.content || "").replace(/<[^>]*>/g, "").slice(0, 300));
+    const pubDate = post.date ? new Date(post.date).toUTCString() : "";
+    const author = post.author ? `\n      <author>${esc(post.author)}</author>` : "";
+    return `    <item>
+      <title>${esc(post.title)}</title>
+      <link>${link}</link>
+      <guid>${link}</guid>
+      ${pubDate ? `<pubDate>${pubDate}</pubDate>` : ""}
+      <description>${desc}</description>${author}
+    </item>`;
+  }).join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>${esc(doc.meta.title)}</title>
+    <link>${base}/</link>
+    <description>${esc(doc.meta.description)}</description>
+    <atom:link href="${base}/feed.xml" rel="self" type="application/rss+xml"/>
+${items}
+  </channel>
+</rss>
+`;
+}
+
+export function renderNotFound(doc: SiteBlueprint): string {
+  const c = doc.design.tokens.colors;
+  return `<!doctype html>
+<html lang="${esc(doc.meta.lang)}">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Page not found — ${esc(doc.meta.title)}</title>
+<meta name="robots" content="noindex"/>
+<style>
+:root{--bg:${c.background};--surface:${c.surface};--text:${c.text};--muted:${c.muted};--accent:${c.accent}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{text-align:center;max-width:460px}
+.big{font-size:88px;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--accent),${c.accentContrast});-webkit-background-clip:text;background-clip:text;color:transparent}
+h1{font-size:24px;margin:14px 0 8px}
+p{color:var(--muted);font-size:15px;line-height:1.6}
+a{display:inline-block;margin-top:22px;background:var(--accent);color:${c.accentContrast};text-decoration:none;padding:11px 22px;border-radius:10px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="big">404</div>
+  <h1>This page wandered off.</h1>
+  <p>${esc(doc.meta.title)} couldn't find what you're looking for. The link may be old, or the page may have moved.</p>
+  <a href="/">Back to home</a>
+</div>
+</body>
+</html>`;
 }
 
 function emptyHomePage(doc: SiteBlueprint): Page {
@@ -274,9 +362,15 @@ function renderNav(doc: SiteBlueprint, previewSlugs?: string[]): string {
   <div class="bk-nav-inner">
     <a class="bk-nav-brand" href="${brandHref}">${brand}</a>
     ${links || cta ? `<nav class="bk-nav-links" aria-label="Primary">${links}${cta}</nav>` : ""}
-    <div class="bk-nav-extra">${langSwitch}${cartBtn}</div>
+    <div class="bk-nav-extra"><button id="bk-search-toggle" class="bk-search-toggle" aria-label="Search">${svgIcon("search", 18)}</button>${langSwitch}${cartBtn}</div>
   </div>
 </header>
+<div id="bk-search-overlay" class="bk-search-overlay" aria-hidden="true">
+  <div class="bk-search-box">
+    <input id="bk-search-input" type="search" placeholder="Search this site…" aria-label="Search" autocomplete="off"/>
+    <ul id="bk-search-results" class="bk-search-results"></ul>
+  </div>
+</div>
 ${hasProducts ? `<div id="bk-cart-drawer" class="bk-cart-drawer"><div class="bk-cart-drawer-inner"><div class="bk-cart-drawer-head"><b>Your cart</b><button id="bk-cart-close" aria-label="Close">x</button></div><div id="bk-cart-items" class="bk-cart-items"></div></div></div>` : ""}`;
 }
 
@@ -874,9 +968,70 @@ const SITE_FEATURES_SCRIPT = `(function () {
       try { sessionStorage.setItem("bk-pwd-ok", cfg.password); } catch {}
     }
   }
+  // Cookie consent banner
+  if (cfg.cookie && cfg.cookie.enabled) {
+    var cookieKey = "bk-cookie-ok";
+    var cookieChoice = null;
+    try { cookieChoice = localStorage.getItem(cookieKey); } catch {}
+    if (!cookieChoice) {
+      var banner = document.getElementById("bk-cookie");
+      if (banner) {
+        banner.style.display = "flex";
+        var accept = document.getElementById("bk-cookie-accept");
+        var decline = document.getElementById("bk-cookie-decline");
+        var setCookie = function (v) {
+          try { localStorage.setItem(cookieKey, v); } catch {}
+          banner.style.display = "none";
+        };
+        if (accept) accept.addEventListener("click", function () { setCookie("accepted"); });
+        if (decline) decline.addEventListener("click", function () { setCookie("declined"); });
+      }
+    }
+  }
+  // Site search
+  var searchToggle = document.getElementById("bk-search-toggle");
+  var searchOverlay = document.getElementById("bk-search-overlay");
+  var searchInput = document.getElementById("bk-search-input");
+  var searchResults = document.getElementById("bk-search-results");
+  if (searchToggle && searchOverlay) {
+    var searchIndex = (cfg.posts || []).map(function (p) {
+      return { title: p.title, excerpt: p.excerpt || "", content: p.content || "", slug: p.slug, type: "post" };
+    });
+    var sections = document.querySelectorAll("[data-field]");
+    sections.forEach(function (el) {
+      var t = (el.textContent || "").trim();
+      if (t.length > 2) searchIndex.push({ title: t, excerpt: "", content: "", slug: "", type: "text" });
+    });
+    var closeSearch = function () {
+      searchOverlay.style.display = "none";
+      searchOverlay.setAttribute("aria-hidden", "true");
+    };
+    searchToggle.addEventListener("click", function () {
+      searchOverlay.style.display = "flex";
+      searchOverlay.setAttribute("aria-hidden", "false");
+      searchInput.value = "";
+      searchResults.innerHTML = "";
+      searchInput.focus();
+    });
+    searchOverlay.addEventListener("click", function (e) { if (e.target === searchOverlay) closeSearch(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSearch(); });
+    searchInput.addEventListener("input", function () {
+      var q = searchInput.value.trim().toLowerCase();
+      if (q.length < 2) { searchResults.innerHTML = ""; return; }
+      var hits = searchIndex.filter(function (item) {
+        return (item.title + " " + item.excerpt + " " + item.content).toLowerCase().indexOf(q) !== -1;
+      }).slice(0, 10);
+      searchResults.innerHTML = hits.length
+        ? hits.map(function (h) {
+            return '<li class="bk-search-hit">' + (h.type === "post" && h.slug
+              ? '<a href="/post/' + h.slug + '.html">' + h.title + "</a>"
+              : "<span>" + h.title + "</span>") + "</li>";
+          }).join("")
+        : '<li class="bk-search-empty">No matches.</li>';
+    });
+  }
   // Language switcher
-  var langSel = document.getElementById("bk-lang-switch");
-  if (langSel) {
+  var langSel = document.getElementById("bk-lang-switch");  if (langSel) {
     var applyLang = function (lang) {
       var map = (cfg.translations || {})[lang] || {};
       document.documentElement.lang = lang;

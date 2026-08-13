@@ -23,6 +23,14 @@ export function runSmoke(): SmokeResult {
   formsDoc.analytics = { plausible: "example.com" };
   const formsHtml = renderPage(formsDoc, formsDoc.pages[0], false);
 
+  const seoDoc = JSON.parse(JSON.stringify(doc)) as typeof doc;
+  seoDoc.posts = [{ id: "p1", slug: "hello-world", title: "Hello world", excerpt: "First post", content: "<p>Body</p>", date: "2026-01-01T00:00:00.000Z", author: "Ada" }];
+  seoDoc.languages = { default: "en", supported: ["en", "es"] };
+  seoDoc.cookieConsent = { enabled: true, text: "We use cookies.", policyUrl: "/privacy" };
+  seoDoc.redirects = [{ from: "/old", to: "/new" }];
+  const seoHtml = renderPage(seoDoc, seoDoc.pages[0], false);
+  const seoFiles = renderStaticSite(seoDoc).files;
+
   const results: [string, boolean][] = [
     ["HTML starts with doctype", html.trimStart().startsWith("<!doctype html>")],
     ["Page title present", html.includes("<title>")],
@@ -42,7 +50,14 @@ export function runSmoke(): SmokeResult {
     ["Form endpoint flows into page config", formsHtml.includes('"formEndpoint":"https://formspree.io/f/abcd1234"')],
     ["Analytics domain flows into head", formsHtml.includes('src="https://plausible.io/js/script.js"')],
     ["Single-file export works", singleFileHtml(doc).includes("<!doctype html>")],
-    ["Static export has sitemap+robots", renderStaticSite(doc).files.some((f) => f.path === "sitemap.xml") && renderStaticSite(doc).files.some((f) => f.path === "robots.txt")],
+    ["Static export has sitemap+robots", seoFiles.some((f) => f.path === "sitemap.xml") && seoFiles.some((f) => f.path === "robots.txt")],
+    ["RSS feed generated for posts", seoFiles.some((f) => f.path === "feed.xml" && f.content.includes("<rss") && f.content.includes("Hello world"))],
+    ["Sitemap includes post URLs", seoFiles.find((f) => f.path === "sitemap.xml")?.content.includes("/post/hello-world.html") ?? false],
+    ["Custom 404 page emitted", seoFiles.some((f) => f.path === "404.html" && f.content.includes("404"))],
+    ["Redirects emitted", seoFiles.some((f) => f.path === "_redirects" && f.content.includes("/old /new 301"))],
+    ["Cookie banner rendered", seoHtml.includes('id="bk-cookie"') && seoHtml.includes("We use cookies.")],
+    ["Search overlay rendered", seoHtml.includes('id="bk-search-overlay"')],
+    ["Hreflang alternates present", seoHtml.includes('hreflang="es"')],
     ["Contrast math sane", contrastRatio("#241a12", "#f7f2ea") > 7],
   ];
 
