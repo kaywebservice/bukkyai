@@ -1,0 +1,64 @@
+type Props = {
+  onClose: () => void;
+  onBuy: () => void;
+  configured?: boolean;
+};
+
+export default function PricingModal(p: Props) {
+  return (
+    <div className="modal-overlay" onClick={p.onClose}>
+      <div className="modal pricing-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="inspector-head">
+          <h2 style={{ margin: 0, fontSize: 18 }}>bukkyai</h2>
+          <button className="btn btn-sm btn-ghost" onClick={p.onClose}>
+            Close
+          </button>
+        </div>
+        <p className="settings-note">
+          An AI website builder that's yours forever — unlimited edits, no credits, no cloud lock-in.
+          Describe a site, get the whole thing built, then polish it visually.
+        </p>
+
+        <div className="pricing-tiers">
+          <div className="pricing-tier">
+            <b>Free</b>
+            <div className="pricing-price">$0</div>
+            <ul>
+              <li>Unlimited local projects</li>
+              <li>AI plan → build (multi-page)</li>
+              <li>Visual canvas editor</li>
+              <li>AI image generation</li>
+              <li>Static HTML / zip export</li>
+              <li>Blog, i18n, animations, cart</li>
+            </ul>
+          </div>
+          <div className="pricing-tier pricing-tier-featured">
+            <b>Pro</b>
+            <div className="pricing-price">$19<span>/mo</span></div>
+            <ul>
+              <li>Everything in Free</li>
+              <li>One-click publish & share links</li>
+              <li>Cloud save across devices</li>
+              <li>Firebase auth / member areas</li>
+              <li>Checkout with payments</li>
+              <li>Priority support</li>
+            </ul>
+            <button
+              className="btn btn-primary"
+              style={{ width: "100%", marginTop: 10 }}
+              onClick={p.onBuy}
+              disabled={!p.configured}
+            >
+              {p.configured ? "Get Pro" : "Configure payment link first"}
+            </button>
+            {!p.configured && (
+              <div className="settings-note" style={{ marginTop: 6 }}>
+                Set a payment link in Settings to enable checkout.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

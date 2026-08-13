@@ -1,0 +1,129 @@
+import { useState } from "react";
+import type { Post } from "../lib/types";
+import { uid } from "../lib/blueprint";
+
+type Props = {
+  posts: Post[];
+  onChange: (posts: Post[]) => void;
+  onGenerateImage: (field: string) => Promise<string | null>;
+  busy?: boolean;
+};
+
+const slugify = (s: string) =>
+  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `post-${Date.now().toString(36)}`;
+
+export default function PostsView(p: Props) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const update = (post: Post) => {
+    p.onChange(p.posts.map((x) => (x.id === post.id ? post : x)));
+  };
+
+  const addPost = () => {
+    const post: Post = {
+      id: uid("post"),
+      slug: `post-${Date.now().toString(36)}`,
+      title: "New post",
+      excerpt: "",
+      content: "",
+      date: new Date().toISOString(),
+      category: "News",
+    };
+    p.onChange([post, ...p.posts]);
+    setEditingId(post.id);
+  };
+
+  const remove = (id: string) => {
+    p.onChange(p.posts.filter((x) => x.id !== id));
+    if (editingId === id) setEditingId(null);
+  };
+
+  const editing = p.posts.find((x) => x.id === editingId) ?? null;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="panel-label">Blog posts</div>
+      <button className="btn btn-primary" style={{ width: "100%" }} onClick={addPost} disabled={p.busy}>
+        + New post
+      </button>
+
+      {editing && (
+        <div className="inspector-section">
+          <div className="inspector-head">
+            <b>Edit post</b>
+            <button className="btn btn-sm btn-ghost" onClick={() => setEditingId(null)}>
+              Done
+            </button>
+          </div>
+          <div className="json-field">
+            <label>Title</label>
+            <input
+              value={editing.title}
+              onChange={(e) => update({ ...editing, title: e.target.value, slug: slugify(e.target.value) })}
+            />
+          </div>
+          <div className="json-field">
+            <label>Slug</label>
+            <input value={editing.slug} onChange={(e) => update({ ...editing, slug: slugify(e.target.value) })} />
+          </div>
+          <div className="json-field">
+            <label>Category</label>
+            <input value={editing.category ?? ""} onChange={(e) => update({ ...editing, category: e.target.value })} />
+          </div>
+          <div className="json-field">
+            <label>Date</label>
+            <input type="date" value={editing.date.slice(0, 10)} onChange={(e) => update({ ...editing, date: new Date(e.target.value).toISOString() })} />
+          </div>
+          <div className="json-field">
+            <label>Excerpt</label>
+            <textarea rows={2} value={editing.excerpt} onChange={(e) => update({ ...editing, excerpt: e.target.value })} />
+          </div>
+          <div className="json-field">
+            <label>Cover image</label>
+            <div className="field-inline" style={{ gap: 6 }}>
+              <input value={editing.cover ?? ""} onChange={(e) => update({ ...editing, cover: e.target.value })} />
+              <button
+                className="btn btn-sm btn-ghost"
+                disabled={p.busy}
+                onClick={async () => {
+                  const url = await p.onGenerateImage("cover");
+                  if (url) update({ ...editing, cover: url });
+                }}
+              >
+                {p.busy ? "…" : "✦"}
+              </button>
+            </div>
+            {editing.cover ? (
+              <img src={editing.cover} alt="" style={{ width: "100%", borderRadius: 8, marginTop: 6, maxHeight: 160, objectFit: "cover" }} />
+            ) : null}
+          </div>
+          <div className="json-field">
+            <label>Body (HTML allowed)</label>
+            <textarea rows={10} value={editing.content} onChange={(e) => update({ ...editing, content: e.target.value })} />
+          </div>
+          <button className="btn" style={{ width: "100%", color: "var(--chrome-danger, #c0392b)" }} onClick={() => remove(editing.id)}>
+            Delete post
+          </button>
+        </div>
+      )}
+
+      {!editing && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {p.posts.length === 0 ? (
+            <div className="settings-note">No posts yet. Add one, then drop a "Blog posts" section onto any page.</div>
+          ) : (
+            p.posts.map((post) => (
+              <div key={post.id} className="inspector-section" style={{ padding: 10, cursor: "pointer" }} onClick={() => setEditingId(post.id)}>
+                <b>{post.title}</b>
+                <div style={{ fontSize: 11, color: "var(--chrome-faint)", marginTop: 2 }}>
+                  {post.category ? `${post.category} · ` : ""}
+                  {new Date(post.date).toLocaleDateString()} · /{post.slug}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
