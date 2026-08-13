@@ -163,8 +163,18 @@ export function removeAsset(projectId: string, id: string): void {
   );
 }
 
-export function importProjectFromJson(json: string): { meta: ProjectMeta; doc: SiteBlueprint } | { error: string } {
-  try {
+export function saveProjectAs(doc: SiteBlueprint, name: string): string {
+  const id = uid("prj");
+  const meta: ProjectMeta = { id, name, at: Date.now() };
+  persistDoc(id, doc);
+  persistHistory(id, []);
+  const projects = listProjects();
+  projects.unshift(meta);
+  write(K_PROJECTS, projects);
+  return id;
+}
+
+export function importProjectFromJson(json: string): { meta: ProjectMeta; doc: SiteBlueprint } | { error: string } {  try {
     const parsed = JSON.parse(json) as SiteBlueprint;
     if (!parsed.meta || !parsed.design || !Array.isArray(parsed.pages)) {
       return { error: "Not a valid bukkyai blueprint. Expected meta, design, and pages." };

@@ -11,7 +11,7 @@
 //       }
 //     }
 //   }
-import type { SiteBlueprint } from "./types";
+import type { Checkpoint, SiteBlueprint } from "./types";
 
 let fsPromise: Promise<import("firebase/firestore").Firestore> | null = null;
 
@@ -37,9 +37,10 @@ export type CloudProject = {
   name: string;
   at: number;
   doc: SiteBlueprint;
+  history?: Checkpoint[];
 };
 
-export async function saveProjectToCloud(uid: string, projectId: string, name: string, doc: SiteBlueprint): Promise<{ ok: boolean; error?: string }> {
+export async function saveProjectToCloud(uid: string, projectId: string, name: string, doc: SiteBlueprint, history?: Checkpoint[]): Promise<{ ok: boolean; error?: string }> {
   try {
     const db = await getDb();
     const { doc: d, setDoc } = await import("firebase/firestore");
@@ -47,6 +48,7 @@ export async function saveProjectToCloud(uid: string, projectId: string, name: s
       name,
       at: Date.now(),
       doc: JSON.parse(JSON.stringify(doc)) as SiteBlueprint,
+      ...(history && history.length ? { history: JSON.parse(JSON.stringify(history)) as Checkpoint[] } : {}),
     });
     return { ok: true };
   } catch (err) {

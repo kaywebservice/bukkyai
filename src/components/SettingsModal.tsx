@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { LLMSettings } from "../lib/types";
 import { defaultModel } from "../lib/llm";
 
-type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; customFonts?: string };
+type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; customFonts?: string; emailServiceProvider?: string; emailServiceEndpoint?: string; emailServiceApiKey?: string; emailServiceListId?: string; coupons?: string; orderNotify?: string };
 type Props = {
   settings: LLMSettings & { githubToken?: string };
   siteMeta?: SiteMeta;
@@ -40,6 +40,12 @@ export default function SettingsModal(p: Props) {
     popupCtaUrl: p.siteMeta?.popupCtaUrl ?? "",
     popupDelaySec: p.siteMeta?.popupDelaySec ?? 6,
     customFonts: p.siteMeta?.customFonts ?? "",
+    emailServiceProvider: p.siteMeta?.emailServiceProvider ?? "",
+    emailServiceEndpoint: p.siteMeta?.emailServiceEndpoint ?? "",
+    emailServiceApiKey: p.siteMeta?.emailServiceApiKey ?? "",
+    emailServiceListId: p.siteMeta?.emailServiceListId ?? "",
+    coupons: p.siteMeta?.coupons ?? "",
+    orderNotify: p.siteMeta?.orderNotify ?? "",
   });
 
   const provider = s.provider;
@@ -305,6 +311,62 @@ export default function SettingsModal(p: Props) {
             One per line: <code>Name url [weight]</code>. After saving, use the font name in any heading/body field.
           </div>
         </div>
+
+        <div className="panel-label">Commerce</div>
+        <div className="settings-row">
+          <label>Coupon codes (code %)</label>
+          <textarea
+            rows={3}
+            value={meta.coupons}
+            placeholder={"SAVE10 10\nLAUNCH 20"}
+            onChange={(e) => setMeta({ ...meta, coupons: e.target.value })}
+          />
+          <div className="settings-note">One per line: <code>code percent</code>. Visitors enter them in the cart.</div>
+        </div>
+        <div className="settings-row">
+          <label>Order notification URL (optional)</label>
+          <input
+            value={meta.orderNotify}
+            placeholder="https://formspree.io/f/xxx"
+            onChange={(e) => setMeta({ ...meta, orderNotify: e.target.value })}
+          />
+          <div className="settings-note">
+            When a visitor hits Checkout, the cart contents are POSTed here so you get notified of new orders.
+          </div>
+        </div>
+        <div className="settings-row">
+          <label>Email list provider</label>
+          <select value={meta.emailServiceProvider} onChange={(e) => setMeta({ ...meta, emailServiceProvider: e.target.value })}>
+            <option value="">Off (use form endpoint)</option>
+            <option value="mailchimp">Mailchimp</option>
+            <option value="klaviyo">Klaviyo</option>
+            <option value="custom">Custom endpoint</option>
+          </select>
+        </div>
+        {meta.emailServiceProvider && (
+          <>
+            <div className="settings-row">
+              <label>Subscribe endpoint</label>
+              <input
+                value={meta.emailServiceEndpoint}
+                placeholder="https://…/subscribe"
+                onChange={(e) => setMeta({ ...meta, emailServiceEndpoint: e.target.value })}
+              />
+            </div>
+            <div className="settings-row">
+              <label>API key (optional)</label>
+              <input
+                type="password"
+                value={meta.emailServiceApiKey}
+                onChange={(e) => setMeta({ ...meta, emailServiceApiKey: e.target.value })}
+              />
+            </div>
+            <div className="settings-row">
+              <label>List / audience ID (optional)</label>
+              <input value={meta.emailServiceListId} onChange={(e) => setMeta({ ...meta, emailServiceListId: e.target.value })} />
+            </div>
+          </>
+        )}
 
         <div className="panel-label">Privacy & redirects</div>
         <div className="settings-row">

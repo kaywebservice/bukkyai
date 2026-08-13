@@ -189,6 +189,25 @@ document.querySelectorAll(".bk-newsletter form").forEach(function(f){
     e.preventDefault();
     var s = f.querySelector(".bk-form-success");
     if (!s) return;
+    var svc = cfg.emailService;
+    if (svc && svc.endpoint) {
+      var emailEl = f.querySelector('input[type="email"], input[name="email"]');
+      var email = emailEl ? emailEl.value : "";
+      s.textContent = "Signing you up\u2026";
+      var headers = { "Content-Type": "application/json" };
+      if (svc.apiKey) headers["Authorization"] = "Bearer " + svc.apiKey;
+      fetch(svc.endpoint, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({ email: email, listId: svc.listId || "" })
+      }).then(function (r) {
+        if (r.ok) { s.textContent = "You're on the list — check your inbox."; f.reset(); }
+        else throw new Error("status " + r.status);
+      }).catch(function () {
+        s.textContent = "Sorry, signup failed. Please try again.";
+      });
+      return;
+    }
     var ep = cfg.formEndpoint;
     if (!ep) {
       s.textContent = "You're on the list — check your inbox. (Demo mode — no form service connected yet.)";
@@ -397,7 +416,7 @@ ${doc.announcement?.text ? `<div class="bk-announcement" role="banner">${doc.ann
     <ul id="bk-search-results" class="bk-search-results"></ul>
   </div>
 </div>
-${hasProducts ? `<div id="bk-cart-drawer" class="bk-cart-drawer"><div class="bk-cart-drawer-inner"><div class="bk-cart-drawer-head"><b>Your cart</b><button id="bk-cart-close" aria-label="Close">x</button></div><div id="bk-cart-items" class="bk-cart-items"></div></div></div>` : ""}`;
+${hasProducts ? `<div id="bk-cart-drawer" class="bk-cart-drawer"><div class="bk-cart-drawer-inner"><div class="bk-cart-drawer-head"><b>Your cart</b><button id="bk-cart-close" aria-label="Close">x</button></div><div id="bk-cart-items" class="bk-cart-items"></div><div class="bk-cart-coupon"><input id="bk-coupon-input" placeholder="Promo code" aria-label="Promo code"/><button id="bk-coupon-apply" class="bk-btn">Apply</button></div></div></div>` : ""}`;
 }
 
 function artBlock(url: string | undefined, alt: string, path = ""): string {
@@ -898,7 +917,7 @@ function renderSection(
     case "products": {
       const h = c as typeof c & {
         heading?: string; subheading?: string; currency?: string;
-        items?: { id: string; name: string; price: number; description: string; features?: string[]; image?: string; badge?: string; sku?: string }[];
+        items?: { id: string; name: string; price: number; description: string; features?: string[]; image?: string; badge?: string; sku?: string; stock?: number }[];
       };
       const cards = (h.items ?? []).map(
         (p, idx) => `
@@ -911,7 +930,8 @@ function renderSection(
       ${p.features && p.features.length ? `<ul class="bk-price-feat">${p.features.map((f) => `<li>${svgIcon("check", 16)}<span>${te(`${r}.items[${idx}].features[]`, f ?? "", "span")}</span></li>`).join("")}</ul>` : ""}
       <div class="bk-product-footer">
         <span class="bk-product-price">${esc(h.currency ?? "$")}${te(`${r}.items[${idx}].price`, String(p.price ?? 0), "span")}</span>
-        <button class="bk-btn bk-btn-primary bk-add-to-cart" data-product-id="${esc(p.id)}" data-product-name="${esc(p.name)}" data-product-price="${p.price ?? 0}">Add to cart</button>
+        ${typeof p.stock === "number" ? `<span class="bk-stock${p.stock <= 0 ? " bk-stock-out" : ""}">${p.stock > 0 ? (p.stock <= 5 ? `Only ${p.stock} left` : "In stock") : "Sold out"}</span>` : ""}
+        <button class="bk-btn bk-btn-primary bk-add-to-cart" data-product-id="${esc(p.id)}" data-product-name="${esc(p.name)}" data-product-price="${p.price ?? 0}"${typeof p.stock === "number" ? ` data-stock="${p.stock}"` : ""}${typeof p.stock === "number" && p.stock <= 0 ? " disabled" : ""}>${typeof p.stock === "number" && p.stock <= 0 ? "Sold out" : "Add to cart"}</button>
       </div>
     </div>
   </div>`
@@ -982,9 +1002,13 @@ function renderSection(
         .filter((p) => !h.category || p.category === h.category)
         .slice(0, h.postsPerPage || 6);
       const layout = h.layout === "list" ? "bk-posts-list" : "bk-posts-grid";
+      const allCategories = Array.from(new Set((doc.posts ?? []).map((p) => p.category).filter((c): c is string => Boolean(c))));
+      const chips = allCategories.length > 1
+        ? `<div class="bk-post-chips"><button class="bk-chip bk-chip-active" data-cat="">All</button>${allCategories.map((c) => `<button class="bk-chip" data-cat="${esc(c)}">${esc(c)}</button>`).join("")}</div>`
+        : "";
       const cards = posts.map(
         (p) => `
-  <article class="bk-post-card"${d} data-post-slug="${esc(p.slug)}">
+  <article class="bk-post-card"${d} data-post-slug="${esc(p.slug)}" data-cat="${esc(p.category ?? "")}">
     ${p.cover ? `<div class="bk-post-cover"><img src="${attrSafe(p.cover)}" alt="${esc(p.title)}" loading="lazy" data-bkimg="${r}.post-cover"/></div>` : `<div class="bk-post-cover-placeholder"></div>`}
     <div class="bk-post-content">
       ${p.category ? `<span class="bk-post-category">${esc(p.category)}</span>` : ""}
@@ -1001,7 +1025,8 @@ function renderSection(
     <h2 class="bk-h2">${te(`${r}.heading`, h.heading ?? "Blog", "span")}</h2>
     ${h.subheading ? te(`${r}.subheading`, h.subheading, "p", "bk-lede") : ""}
   </div>
-  <div class="bk-posts ${layout}">${cards}
+  ${chips}
+  <div class="bk-posts ${layout}"${d} data-field-root>${cards}
   </div>
   <div id="bk-post-modal" class="bk-post-modal" style="display:none"></div>
 </div>`,
@@ -1183,8 +1208,36 @@ const SITE_FEATURES_SCRIPT = `(function () {
           (post.author ? ' · ' + post.author : '') +
         '</div>' +
         '<div class="bk-post-body">' + post.content + '</div>' +
+        '<div class="bk-comments"><h4>Leave a comment</h4>' +
+          '<form class="bk-comment-form"><input type="text" name="name" placeholder="Your name" required/><textarea name="message" placeholder="Your comment" rows="3" required></textarea>' +
+          '<button type="submit" class="bk-btn bk-btn-primary">Post comment</button><span class="bk-comment-status"></span></form></div>' +
         '</div></div>';
       modal.style.display = "flex";
+      var cf = modal.querySelector(".bk-comment-form");
+      if (cf) {
+        cf.addEventListener("submit", function (ev) {
+          ev.preventDefault();
+          var st = cf.querySelector(".bk-comment-status");
+          var ep = cfg.formEndpoint;
+          if (!ep) {
+            st.textContent = "Comments not enabled on this site yet.";
+            return;
+          }
+          var payload = new URLSearchParams(new FormData(cf));
+          payload.set("_subject", "Comment on \u201C" + post.title + "\u201D");
+          st.textContent = "Posting\u2026";
+          fetch(ep, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+            body: payload.toString()
+          }).then(function (r) {
+            if (r.ok) { st.textContent = "Thanks! Your comment is on its way."; cf.reset(); }
+            else throw new Error("status " + r.status);
+          }).catch(function () {
+            st.textContent = "Sorry, posting failed. Try again.";
+          });
+        });
+      }
       return;
     }
     if (e.target.closest && e.target.closest(".bk-post-modal-close")) {
@@ -1193,13 +1246,35 @@ const SITE_FEATURES_SCRIPT = `(function () {
     if (e.target.closest && e.target.closest(".bk-modal-overlay") && e.target.className === "bk-modal-overlay") {
       modal.style.display = "none";
     }
+    var chip = e.target.closest ? e.target.closest(".bk-chip") : null;
+    if (chip) {
+      var cat = chip.getAttribute("data-cat");
+      document.querySelectorAll(".bk-chip").forEach(function (c) { c.classList.remove("bk-chip-active"); });
+      chip.classList.add("bk-chip-active");
+      var root = chip.closest("[data-field-root]") || chip.parentNode;
+      var grid = root.querySelector(".bk-posts");
+      if (!grid) return;
+      var allCards = Array.prototype.slice.call(grid.querySelectorAll(".bk-post-card"));
+      allCards.forEach(function (card) {
+        var cardCat = card.getAttribute("data-cat") || "";
+        card.style.display = !cat || cardCat === cat ? "" : "none";
+      });
+    }
   });
   // Cart
   var cartKey = "bk-cart";
+  var discountKey = "bk-discount";
   function loadCart() { try { return JSON.parse(localStorage.getItem(cartKey) || "[]"); } catch { return []; } }
   function saveCart(cart) { try { localStorage.setItem(cartKey, JSON.stringify(cart)); } catch {} }
   function cartCount(cart) { return cart.reduce(function (s, i) { return s + i.qty; }, 0); }
   function fmtMoney(n) { return (Number(n) || 0).toFixed(2); }
+  function loadDiscount() { try { return JSON.parse(localStorage.getItem(discountKey) || "null"); } catch { return null; } }
+  function saveDiscount(d) { try { if (d) localStorage.setItem(discountKey, JSON.stringify(d)); else localStorage.removeItem(discountKey); } catch {} }
+  function stockFor(id) {
+    var el = document.querySelector('.bk-product[data-product-id="' + id + '"]');
+    var raw = el && el.getAttribute("data-stock");
+    return raw === null ? null : Number(raw);
+  }
   function renderCartBadge() {
     var badge = document.getElementById("bk-cart-count");
     if (badge) badge.textContent = cartCount(loadCart());
@@ -1218,20 +1293,43 @@ const SITE_FEATURES_SCRIPT = `(function () {
         '<div class="bk-cart-item-sub">' + (cfg.currency || "$") + fmtMoney(i.price) + " × " + i.qty + "</div></div>" +
         '<button class="bk-cart-remove" data-remove="' + i.id + '" aria-label="Remove">✕</button></div>';
     }).join("");
-    var total = cart.reduce(function (s, i) { return s + (Number(i.price) || 0) * i.qty; }, 0);
+    var subtotal = cart.reduce(function (s, i) { return s + (Number(i.price) || 0) * i.qty; }, 0);
+    var disc = loadDiscount();
+    var discountAmt = disc && disc.percent ? subtotal * disc.percent / 100 : 0;
+    var total = subtotal - discountAmt;
     box.innerHTML = rows +
+      (disc ? '<div class="bk-cart-discount">' + disc.code + " (−" + (cfg.currency || "$") + fmtMoney(discountAmt) + ')</div>' : "") +
       '<div class="bk-cart-total"><span>Total</span><span>' + (cfg.currency || "$") + fmtMoney(total) + "</span></div>" +
       '<button id="bk-cart-checkout" class="bk-btn bk-btn-primary">Checkout</button>' +
       (cfg.stripeLink ? "" : '<p class="bk-cart-note">Checkout not configured by the site owner yet.</p>');
+  }
+  function applyCoupon() {
+    var input = document.getElementById("bk-coupon-input");
+    if (!input) return;
+    var code = input.value.trim().toLowerCase();
+    var coupons = cfg.coupons || [];
+    var match = coupons.find(function (c) { return c.code.toLowerCase() === code; });
+    if (!match) {
+      input.setAttribute("data-status", "invalid");
+      return;
+    }
+    saveDiscount({ code: match.code, percent: Number(match.percentOff) || 0 });
+    renderCartDrawer();
+    input.value = "";
+    input.removeAttribute("data-status");
   }
   document.addEventListener("click", function (e) {
     var btn = e.target.closest ? e.target.closest(".bk-add-to-cart") : null;
     if (btn) {
       e.preventDefault();
+      if (btn.disabled) return;
       var cart = loadCart();
       var id = btn.getAttribute("data-product-id");
+      var stock = stockFor(id);
       var found = cart.find(function (i) { return i.id === id; });
-      if (found) found.qty += 1;
+      var nextQty = (found ? found.qty : 0) + 1;
+      if (stock !== null && nextQty > stock) return;
+      if (found) found.qty = nextQty;
       else cart.push({ id: id, name: btn.getAttribute("data-product-name"), price: Number(btn.getAttribute("data-product-price")) || 0, qty: 1 });
       saveCart(cart);
       renderCartBadge();
@@ -1252,9 +1350,23 @@ const SITE_FEATURES_SCRIPT = `(function () {
     var checkout = e.target.closest ? e.target.closest("#bk-cart-checkout") : null;
     if (checkout) {
       if (!cfg.stripeLink) return;
+      if (cfg.orderNotify) {
+        var items = loadCart();
+        try {
+          fetch(cfg.orderNotify, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ subject: "New order — " + document.title, items: items, total: items.reduce(function (s, i) { return s + (Number(i.price) || 0) * i.qty; }, 0) })
+          });
+        } catch (err) {}
+      }
       window.location.href = cfg.stripeLink;
       return;
     }
+    var applyBtn = e.target.closest ? e.target.closest("#bk-coupon-apply") : null;
+    if (applyBtn) { applyCoupon(); return; }
+    var couponInput = e.target.closest ? e.target.closest("#bk-coupon-input") : null;
+    if (couponInput && e.key && e.key === "Enter") { applyCoupon(); return; }
     var toggle = e.target.closest ? e.target.closest("#bk-cart-toggle") : null;
     if (toggle) {
       e.preventDefault();

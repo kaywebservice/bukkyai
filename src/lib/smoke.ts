@@ -46,6 +46,25 @@ export function runSmoke(): SmokeResult {
   });
   const embedHtml = renderPage(embedDoc, embedDoc.pages[0], false);
 
+  const shopDoc2 = JSON.parse(JSON.stringify(doc)) as typeof doc;
+  shopDoc2.pages[0].sections.push({
+    id: "pg_shop2",
+    type: "products",
+    content: { heading: "Shop", currency: "€", items: [{ id: "a", name: "Coffee", price: 9, description: "", stock: 3 }, { id: "b", name: "Tea", price: 5, description: "", stock: 0 }] },
+  });
+  shopDoc2.coupons = [{ code: "SAVE10", percentOff: 10 }];
+  shopDoc2.orderNotify = "https://formspree.io/f/order";
+  shopDoc2.forms = { endpoint: "https://formspree.io/f/abcd1234", emailService: { provider: "mailchimp", endpoint: "https://x/list", apiKey: "k", listId: "L" } };
+  const shop2Html = renderPage(shopDoc2, shopDoc2.pages[0], false);
+
+  const blogDoc = JSON.parse(JSON.stringify(doc)) as typeof doc;
+  blogDoc.posts = [
+    { id: "p1", slug: "one", title: "One", excerpt: "", content: "", date: "2026-01-01", category: "News" },
+    { id: "p2", slug: "two", title: "Two", excerpt: "", content: "", date: "2026-01-02", category: "Guides" },
+  ];
+  blogDoc.pages[0].sections.push({ id: "pg_blog", type: "posts", content: { heading: "Blog" } });
+  const blogHtml = renderPage(blogDoc, blogDoc.pages[0], false);
+
   const results: [string, boolean][] = [
     ["HTML starts with doctype", html.trimStart().startsWith("<!doctype html>")],
     ["Page title present", html.includes("<title>")],
@@ -83,6 +102,12 @@ export function runSmoke(): SmokeResult {
     ["Announcement bar rendered", seoHtml.includes("Summer sale!")],
     ["Popup markup rendered", seoHtml.includes('id="bk-popup"')],
     ["Custom font-face emitted", seoCss.includes("@font-face") && seoCss.includes("MyFont")],
+    ["Coupon codes render in cart", shop2Html.includes('id="bk-coupon-input"')],
+    ["Order notify flows into config", shop2Html.includes('"orderNotify":"https://formspree.io/f/order"')],
+    ["Stock badge renders", shop2Html.includes("Only 3 left") && shop2Html.includes("Sold out")],
+    ["Disabled add-to-cart for out-of-stock", shop2Html.includes("data-stock=\"0\" disabled")],
+    ["Blog category chips render", blogHtml.includes("bk-chip") && blogHtml.includes("Guides")],
+    ["Comment form in post modal", blogHtml.includes("bk-comment-form")],
     ["Contrast math sane", contrastRatio("#241a12", "#f7f2ea") > 7],
   ];
 

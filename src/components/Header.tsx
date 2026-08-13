@@ -10,6 +10,7 @@ type Props = {
   onSelectProject: (id: string) => void;
   onDeleteProject: () => void;
   onRenameProject: () => void;
+  onDuplicateProject: () => void;
   onNewProject: () => void;
   onDemo: () => void;
   onImport: (file: File) => void;
@@ -76,6 +77,14 @@ export default function Header(p: Props) {
           disabled={!p.activeId}
         >
           ✎
+        </button>
+        <button
+          className="btn btn-sm btn-ghost"
+          onClick={p.onDuplicateProject}
+          title="Duplicate the active project"
+          disabled={!p.activeId}
+        >
+          ⧉
         </button>
         <button
           className="btn btn-sm btn-ghost"

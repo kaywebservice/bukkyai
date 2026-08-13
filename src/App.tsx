@@ -46,6 +46,7 @@ import {
   deleteProject,
   demoProject,
   importProjectFromJson,
+  saveProjectAs,
   listProjects,
   loadAssets,
   loadChat,
@@ -88,12 +89,13 @@ import PostsView from "./components/PostsView";
 import LanguagesView from "./components/LanguagesView";
 import PagesManager from "./components/PagesManager";
 import SeoPanel from "./components/SeoPanel";
+import AnalyticsView from "./components/AnalyticsView";
 import AuthModal from "./components/AuthModal";
 import StarterGallery from "./components/StarterGallery";
 import PricingModal from "./components/PricingModal";
 import { starterById } from "./lib/starterSites";
 
-type Tab = "chat" | "design" | "media" | "code" | "inspect" | "plan" | "history" | "posts" | "langs" | "pages" | "seo";
+type Tab = "chat" | "design" | "media" | "code" | "inspect" | "plan" | "history" | "posts" | "langs" | "pages" | "seo" | "analytics";
 
 export default function App() {
   const [projects, setProjects] = useState<ProjectMeta[]>([]);
@@ -174,10 +176,10 @@ export default function App() {
     if (!authUid || !cloudOn || !doc || !projectId) return;
     const name = projects.find((p) => p.id === projectId)?.name ?? "Project";
     const t = window.setTimeout(() => {
-      void saveProjectToCloud(authUid, projectId, name, doc).catch(() => {});
+      void saveProjectToCloud(authUid, projectId, name, doc, history).catch(() => {});
     }, 1500);
     return () => window.clearTimeout(t);
-  }, [doc, projectId, authUid, cloudOn, projects]);
+  }, [doc, projectId, authUid, cloudOn, projects, history]);
 
   // Realtime collaboration: apply remote changes pushed from other devices/tabs.
   const lastRemoteAt = useRef(0);
@@ -361,6 +363,16 @@ export default function App() {
     renameProject(projectId, name);
     setProjects(listProjects());
     showToast("Project renamed");
+  };
+
+  const duplicateActiveProject = () => {
+    if (!doc) return;
+    const name = projects.find((p) => p.id === projectId)?.name ?? "Project";
+    const copy = { ...doc, meta: { ...doc.meta, title: `${doc.meta.title} (copy)` } };
+    const id = saveProjectAs(copy, `${name} (copy)`);
+    setProjects(listProjects());
+    openProject(id);
+    showToast("Project duplicated");
   };
 
   const deleteActiveProject = () => {
@@ -952,11 +964,41 @@ export default function App() {
     pushMsg({ role: "system", text: `AI provider set to ${s.provider}. Everything still runs locally — no credits, no limits.` });
   };
 
-  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; customFonts?: string }) => {
+  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; customFonts?: string; emailServiceProvider?: string; emailServiceEndpoint?: string; emailServiceApiKey?: string; emailServiceListId?: string; coupons?: string; orderNotify?: string }) => {
     if (!doc) return;
     const next = { ...doc };
     if (m.password !== undefined) next.password = m.password;
     if (m.stripePaymentLink !== undefined) next.stripePaymentLink = m.stripePaymentLink;
+    if (m.coupons !== undefined) {
+      next.coupons = (m.coupons ?? "")
+        .split(/\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const parts = line.split(/\s+/);
+          const code = (parts[0] ?? "").toUpperCase();
+          const percentOff = Number(parts[1]);
+          return code && !Number.isNaN(percentOff) ? { code, percentOff } : null;
+        })
+        .filter((c): c is { code: string; percentOff: number } => c !== null);
+      if (!next.coupons.length) next.coupons = undefined;
+    }
+    if (m.orderNotify !== undefined) next.orderNotify = m.orderNotify.trim() || undefined;
+    if (m.emailServiceProvider !== undefined) {
+      if (!m.emailServiceProvider || !m.emailServiceEndpoint?.trim()) {
+        next.forms = { ...(next.forms ?? {}), emailService: undefined };
+      } else {
+        next.forms = {
+          ...(next.forms ?? {}),
+          emailService: {
+            provider: m.emailServiceProvider,
+            endpoint: m.emailServiceEndpoint.trim(),
+            apiKey: m.emailServiceApiKey?.trim() || undefined,
+            listId: m.emailServiceListId?.trim() || undefined,
+          },
+        };
+      }
+    }
     if (m.siteUrl !== undefined) {
       next.meta = { ...next.meta, siteUrl: m.siteUrl.trim() || undefined };
     }
@@ -1149,6 +1191,7 @@ export default function App() {
         onSelectProject={(id) => openProject(id)}
         onDeleteProject={deleteActiveProject}
         onRenameProject={renameActiveProject}
+        onDuplicateProject={duplicateActiveProject}
         onNewProject={newProject}
         onDemo={loadDemo}
         onImport={importFile}
@@ -1337,6 +1380,7 @@ export default function App() {
             </button>
             <button className={`tab${tab === "langs" ? " active" : ""}`} onClick={() => setTab("langs")}>Lang</button>
             <button className={`tab${tab === "seo" ? " active" : ""}`} onClick={() => setTab("seo")}>SEO</button>
+            <button className={`tab${tab === "analytics" ? " active" : ""}`} onClick={() => setTab("analytics")}>Analytics</button>
           </div>
 
           <div className="panel-body">
@@ -1426,6 +1470,9 @@ export default function App() {
                 onGenerateOg={generateOgImage}
               />
             )}
+            {tab === "analytics" && doc && (
+              <AnalyticsView doc={doc} onApplyDoc={(d, label, source) => mutate(d, label, source)} />
+            )}
           </div>
         </div>
       </div>
@@ -1459,6 +1506,12 @@ export default function App() {
             popupCtaUrl: doc?.popup?.ctaUrl,
             popupDelaySec: doc?.popup?.delaySec,
             customFonts: (doc?.customFonts ?? []).map((f) => `${f.name} ${f.url}${f.weight ? ` ${f.weight}` : ""}`).join("\n"),
+            emailServiceProvider: doc?.forms?.emailService?.provider ?? "",
+            emailServiceEndpoint: doc?.forms?.emailService?.endpoint ?? "",
+            emailServiceApiKey: doc?.forms?.emailService?.apiKey ?? "",
+            emailServiceListId: doc?.forms?.emailService?.listId ?? "",
+            coupons: (doc?.coupons ?? []).map((c) => `${c.code} ${c.percentOff}`).join("\n"),
+            orderNotify: doc?.orderNotify ?? "",
           }}
           cloudOn={cloudOn}
           signedIn={Boolean(authUid)}

@@ -151,6 +151,7 @@ export type SectionContent = {
       image?: string;
       badge?: string;
       sku?: string;
+      stock?: number;
     }[];
   };
   booking?: {
