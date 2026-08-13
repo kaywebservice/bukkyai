@@ -2,9 +2,16 @@ type Props = {
   onClose: () => void;
   onBuy: () => void;
   configured?: boolean;
+  pro?: boolean;
+  signedIn?: boolean;
+  email?: string | null;
+  projectCount?: number;
+  publishedCount?: number;
+  onOpenAccount?: () => void;
 };
 
 export default function PricingModal(p: Props) {
+  const plan = p.pro ? "Pro" : "Free";
   return (
     <div className="modal-overlay" onClick={p.onClose}>
       <div className="modal pricing-modal" onClick={(e) => e.stopPropagation()}>
@@ -14,13 +21,39 @@ export default function PricingModal(p: Props) {
             Close
           </button>
         </div>
+
+        {p.signedIn && (
+          <div className="plan-card">
+            <div className="plan-card-row">
+              <span>
+                <b>Current plan</b>
+                <span className={`plan-badge ${p.pro ? "plan-badge-pro" : ""}`}>{plan}</span>
+              </span>
+              <span className="plan-card-email">{p.email}</span>
+            </div>
+            <div className="plan-card-stats">
+              <span>
+                <b>{p.projectCount ?? 0}</b> projects
+              </span>
+              <span>
+                <b>{p.publishedCount ?? 0}</b> published
+              </span>
+            </div>
+            {p.onOpenAccount && (
+              <button className="btn btn-ghost btn-sm" style={{ width: "100%", marginTop: 8 }} onClick={p.onOpenAccount}>
+                Manage account
+              </button>
+            )}
+          </div>
+        )}
+
         <p className="settings-note">
           An AI website builder that's yours forever — unlimited edits, no credits, no cloud lock-in.
           Describe a site, get the whole thing built, then polish it visually.
         </p>
 
         <div className="pricing-tiers">
-          <div className="pricing-tier">
+          <div className={`pricing-tier${!p.pro ? " pricing-tier-active" : ""}`}>
             <b>Free</b>
             <div className="pricing-price">$0</div>
             <ul>
@@ -31,27 +64,33 @@ export default function PricingModal(p: Props) {
               <li>Static HTML / zip export</li>
               <li>Blog, i18n, animations, cart</li>
             </ul>
+            {!p.pro && <div className="plan-badge plan-badge-current">Your plan</div>}
           </div>
-          <div className="pricing-tier pricing-tier-featured">
+          <div className={`pricing-tier pricing-tier-featured${p.pro ? " pricing-tier-active" : ""}`}>
             <b>Pro</b>
             <div className="pricing-price">$19<span>/mo</span></div>
             <ul>
               <li>Everything in Free</li>
               <li>One-click publish & share links</li>
+              <li>Custom domains</li>
               <li>Cloud save across devices</li>
               <li>Firebase auth / member areas</li>
               <li>Checkout with payments</li>
               <li>Priority support</li>
             </ul>
-            <button
-              className="btn btn-primary"
-              style={{ width: "100%", marginTop: 10 }}
-              onClick={p.onBuy}
-              disabled={!p.configured}
-            >
-              {p.configured ? "Get Pro" : "Configure payment link first"}
-            </button>
-            {!p.configured && (
+            {p.pro ? (
+              <div className="plan-badge plan-badge-current plan-badge-pro">Active</div>
+            ) : (
+              <button
+                className="btn btn-primary"
+                style={{ width: "100%", marginTop: 10 }}
+                onClick={p.onBuy}
+                disabled={!p.configured}
+              >
+                {p.configured ? "Get Pro" : "Configure payment link first"}
+              </button>
+            )}
+            {!p.pro && !p.configured && (
               <div className="settings-note" style={{ marginTop: 6 }}>
                 Set a payment link in Settings to enable checkout.
               </div>

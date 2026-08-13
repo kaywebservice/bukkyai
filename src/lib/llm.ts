@@ -136,3 +136,161 @@ export async function callJSON<T>(
   if (!parsed) return { data: null, error: "Model returned invalid JSON. Please try again." };
   return { data: parsed as T };
 }
+
+export async function streamLLM(
+  settings: LLMSettings,
+  system: string,
+  user: string,
+  onToken: (delta: string) => void,
+  maxTokens = 4096
+): Promise<{ text: string; error?: string }> {
+  const key = settings.apiKey.trim();
+  if (!key) return { text: "", error: "No API key configured. Add one in Settings." };
+
+  const parseOpenAI = (chunk: string): string => {
+    const lines = chunk.split("\n").filter((l) => l.startsWith("data: "));
+    let out = "";
+    for (const line of lines) {
+      const payload = line.slice(6).trim();
+      if (payload === "[DONE]") continue;
+      try {
+        const j = JSON.parse(payload);
+        out += j?.choices?.[0]?.delta?.content ?? "";
+      } catch {}
+    }
+    return out;
+  };
+
+  const parseAnthropic = (chunk: string): string => {
+    let out = "";
+    for (const line of chunk.split("\n")) {
+      const m = line.match(/^data: (.*)$/);
+      if (!m) continue;
+      try {
+        const j = JSON.parse(m[1]);
+        if (j.type === "content_block_delta" && j.delta?.type === "text_delta") out += j.delta.text ?? "";
+      } catch {}
+    }
+    return out;
+  };
+
+  try {
+    if (settings.provider === "anthropic") {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": key,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
+        body: JSON.stringify({
+          model: settings.model || defaultModel("anthropic"),
+          max_tokens: maxTokens,
+          stream: true,
+          system,
+          messages: [{ role: "user", content: user }],
+        }),
+      });
+      if (!res.ok || !res.body) {
+        const data = await res.json().catch(() => ({}));
+        return { text: "", error: `Anthropic: ${data?.error?.message ?? res.status}` };
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let full = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const delta = parseAnthropic(decoder.decode(value, { stream: true }));
+        if (delta) {
+          full += delta;
+          onToken(delta);
+        }
+      }
+      return { text: full };
+    }
+
+    if (settings.provider === "gemini") {
+      const model = settings.model || defaultModel("gemini");
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(key)}`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: system }] },
+            contents: [{ role: "user", parts: [{ text: user }] }],
+            generationConfig: { maxOutputTokens: maxTokens, responseMimeType: "application/json" },
+          }),
+        }
+      );
+      if (!res.ok || !res.body) {
+        const data = await res.json().catch(() => ({}));
+        return { text: "", error: `Gemini: ${data?.error?.message ?? res.status}` };
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let full = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        for (const line of chunk.split("\n")) {
+          const m = line.match(/^data: (.*)$/);
+          if (!m) continue;
+          try {
+            const j = JSON.parse(m[1]);
+            const delta = (j?.candidates?.[0]?.content?.parts ?? []).map((p: { text?: string }) => p.text ?? "").join("");
+            if (delta) {
+              full += delta;
+              onToken(delta);
+            }
+          } catch {}
+        }
+      }
+      return { text: full };
+    }
+
+    const base =
+      settings.provider === "custom" && settings.baseUrl
+        ? settings.baseUrl.replace(/\/+$/, "")
+        : "https://api.openai.com/v1";
+    const res = await fetch(`${base}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: settings.model || defaultModel(settings.provider),
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+        temperature: 0.7,
+        max_tokens: maxTokens,
+        stream: true,
+      }),
+    });
+    if (!res.ok || !res.body) {
+      const data = await res.json().catch(() => ({}));
+      return { text: "", error: `${data?.error?.message ?? `HTTP ${res.status}`}` };
+    }
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let full = "";
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const delta = parseOpenAI(decoder.decode(value, { stream: true }));
+      if (delta) {
+        full += delta;
+        onToken(delta);
+      }
+    }
+    return { text: full };
+  } catch (err) {
+    return { text: "", error: `Network error: ${err instanceof Error ? err.message : String(err)}` };
+  }
+}

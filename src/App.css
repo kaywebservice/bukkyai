@@ -536,6 +536,22 @@ input[type="range"] {
   gap: 12px;
   padding: 4px;
 }
+.chat-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 12px;
+}
+.chat-stream-cursor {
+  display: inline-block;
+  animation: chat-blink 1s steps(2) infinite;
+}
+@keyframes chat-blink {
+  50% {
+    opacity: 0;
+  }
+}
 .msg {
   display: flex;
   flex-direction: column;
@@ -1345,4 +1361,88 @@ input[type="range"] {
 }
 .tour-back:hover {
   color: var(--chrome-muted);
+}
+
+/* ── Presence (live collaborators) ──────────────────────────────── */.presence-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--chrome-text);
+  background: var(--chrome-panel2);
+  border: 1px solid var(--chrome-border);
+  border-radius: 999px;
+  padding: 5px 10px;
+}
+.presence-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.2);
+  animation: presence-pulse 2s ease infinite;
+}
+@keyframes presence-pulse {
+  50% {
+    box-shadow: 0 0 0 6px rgba(74, 222, 128, 0);
+  }
+}
+
+/* ── Plan card (pricing modal) ──────────────────────────────────── */
+.plan-card {
+  background: var(--chrome-panel2);
+  border: 1px solid var(--chrome-border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.plan-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.plan-card-row b {
+  font-size: 14px;
+}
+.plan-card-email {
+  font-size: 12px;
+  color: var(--chrome-faint);
+}
+.plan-badge {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 10px;
+  border: 1px solid var(--chrome-border);
+  color: var(--chrome-muted);
+}
+.plan-badge-pro {
+  border-color: var(--chrome-accent);
+  color: var(--chrome-accent);
+}
+.plan-badge-current {
+  background: var(--chrome-accent);
+  color: #fff;
+  border-color: transparent;
+}
+.plan-badge-current.plan-badge-pro {
+  background: var(--chrome-accent);
+}
+.plan-card-stats {
+  display: flex;
+  gap: 18px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--chrome-muted);
+}
+.plan-card-stats b {
+  color: var(--chrome-text);
+  font-size: 15px;
+}
+.pricing-tier-active {
+  outline: 1px solid var(--chrome-accent);
 }

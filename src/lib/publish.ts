@@ -67,7 +67,7 @@ export async function fetchEntitlement(email: string): Promise<boolean> {
   }
 }
 
-export async function publishSite(doc: SiteBlueprint, email: string): Promise<{ url?: string; error?: string }> {
+export async function publishSite(doc: SiteBlueprint, email: string, domain?: string): Promise<{ url?: string; error?: string }> {
   const endpoint = publishEndpoint();
   if (!endpoint) return { error: "Publish endpoint not configured. Add VITE_PUBLISH_ENDPOINT to .env (see server/README.md)." };
   try {
@@ -75,7 +75,13 @@ export async function publishSite(doc: SiteBlueprint, email: string): Promise<{ 
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ files, email, license: proLicense() }),
+      body: JSON.stringify({
+        files,
+        email,
+        license: proLicense(),
+        domain: domain?.trim() || undefined,
+        siteId: doc.meta.title ? slugifyForRepo(doc.meta.title) : "site",
+      }),
     });
     const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
     if (!res.ok) return { error: data.error ?? `Publish returned ${res.status}` };
@@ -84,4 +90,8 @@ export async function publishSite(doc: SiteBlueprint, email: string): Promise<{ 
   } catch (err) {
     return { error: err instanceof Error ? err.message : String(err) };
   }
+}
+
+function slugifyForRepo(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "site";
 }

@@ -24,7 +24,6 @@ import { SECTION_TEMPLATES } from "./lib/templates";
 import {
   applyEdit,
   buildFromBrief,
-  discuss,
   fieldRewrite,
   generateDesign,
   generatePlan,
@@ -33,12 +32,14 @@ import {
   translateSite,
 } from "./lib/builder";
 import { DESIGN_PRESETS } from "./lib/presets";
+import { streamLLM } from "./lib/llm";
+import { DISCUSS_SYSTEM, discussUser } from "./lib/prompts";
 import { harmonizeDesign as harmonize } from "./lib/harmony";
 import { generateOgImage as renderOgImage } from "./lib/ogImage";
 import { canGenerateImages, generateSiteImage } from "./lib/images";
 import { authConfigured, onAuthChange } from "./lib/auth";
-import { acceptInvite, deleteCloudProject, listCloudProjects, saveProjectToCloud, shareProject, subscribeCloudProject } from "./lib/cloud";
-import { fetchEntitlement, publishSite, setProUnlocked, startProCheckout } from "./lib/publish";
+import { acceptInvite, clearPresence, deleteCloudProject, listCloudProjects, saveProjectToCloud, shareProject, subscribeCloudProject, subscribePresence, updatePresence, type PresenceInfo } from "./lib/cloud";
+import { fetchEntitlement, proUnlocked, publishSite, setProUnlocked, startProCheckout } from "./lib/publish";
 import {
   addAsset,
   addAssetDataUrl,
@@ -108,6 +109,8 @@ export default function App() {
   const [invites, setInvites] = useState<{ id: string; name: string; role: string }[]>([]);
   const [shareOpen, setShareOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [presence, setPresence] = useState<PresenceInfo[]>([]);
+  const [pro, setPro] = useState(() => proUnlocked());
   const [pageIdx, setPageIdx] = useState(0);
   const [selected, setSelected] = useState<{ p: number; s: number } | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -221,6 +224,22 @@ export default function App() {
     return unsub;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUid, cloudOn, projectId]);
+
+  // Live presence: heartbeat while a project is open, show who else is editing.
+  useEffect(() => {
+    if (!authUid || !cloudOn || !projectId) return;
+    const name = (authEmail ?? "Someone").split("@")[0];
+    const beat = () => void updatePresence(authUid, name, projectId);
+    beat();
+    const iv = window.setInterval(beat, 10000);
+    const unsub = subscribePresence(projectId, authUid, setPresence);
+    return () => {
+      window.clearInterval(iv);
+      unsub();
+      void clearPresence(authUid);
+      setPresence([]);
+    };
+  }, [authUid, cloudOn, projectId, authEmail]);
 
   const acceptInviteHandler = async (id: string) => {
     if (!authUid || !authEmail) return;
@@ -367,7 +386,7 @@ export default function App() {
       return;
     }
     runBusy("Publishing your site…", async () => {
-      const res = await publishSite(doc, authEmail);
+      const res = await publishSite(doc, authEmail, doc.meta.siteUrl);
       if (res.error) {
         pushMsg({ role: "assistant", text: `Publish failed: ${res.error}`, kind: "error" });
         showToast("Publish failed");
@@ -375,6 +394,7 @@ export default function App() {
       } else {
         const ok = await fetchEntitlement(authEmail);
         setProUnlocked(ok);
+        setPro(ok);
         pushMsg({ role: "assistant", text: `Your site is live at ${res.url} — share it anywhere.` });
         showToast("Published!");
       }
@@ -387,6 +407,7 @@ export default function App() {
     if (!authEmail) return;
     void fetchEntitlement(authEmail).then((ok) => {
       setProUnlocked(ok);
+      setPro(ok);
       if (ok && new URLSearchParams(window.location.search).get("creem") === "success") {
         showToast("Pro unlocked — Publish & share is ready");
         try { window.history.replaceState(null, "", window.location.pathname); } catch {}
@@ -561,13 +582,16 @@ export default function App() {
       return;
     }
     pushMsg({ role: "user", text });
+    const msgId = uid("msg");
+    setMessages((prev) => [...prev, { id: msgId, role: "assistant", text: "" }]);
     runBusy("Thinking…", async () => {
-      const res = await discuss(doc, text, settings, { onStatus: (label) => setBusyLabel(label) });
-      if (res.error || !res.answer) {
-        pushMsg({ role: "assistant", text: res.error ?? "No answer.", kind: "error" });
+      const res = await streamLLM(settings, DISCUSS_SYSTEM, discussUser(doc, text), (delta) => {
+        setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, text: m.text + delta } : m)));
+      });
+      if (res.error) {
+        setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, text: res.error ?? "No answer.", kind: "error" } : m)));
         return;
       }
-      pushMsg({ role: "assistant", text: res.answer });
     });
   };
 
@@ -1439,6 +1463,7 @@ export default function App() {
         invites={invites.length}
         onAcceptInvites={invites.length ? async () => { for (const i of invites) await acceptInviteHandler(i.id); } : undefined}
         onHelp={() => setTourOpen(true)}
+        presence={presence.map((p) => ({ name: p.name }))}
       />
       {shareOpen && (
         <ShareModal
@@ -1594,7 +1619,7 @@ export default function App() {
           <div className="panel-body">
             {tab === "chat" && (
               <Chat
-                queue={messages.map((m) => `${m.role}: ${m.text}`)}
+                messages={messages}
                 busy={busy}
                 onDiscuss={discussQuestion}
                 onSendInstruction={chatSend}
@@ -1762,7 +1787,21 @@ export default function App() {
       )}
       {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
       {starterOpen && <StarterGallery onPick={pickStarter} onClose={() => setStarterOpen(false)} />}
-      {pricingOpen && <PricingModal onClose={() => setPricingOpen(false)} onBuy={buyPro} configured={Boolean(paymentLink())} />}
+      {pricingOpen && (
+        <PricingModal
+          onClose={() => setPricingOpen(false)}
+          onBuy={buyPro}
+          configured={Boolean(paymentLink())}
+          pro={pro}
+          signedIn={Boolean(authUid)}
+          email={authEmail}
+          projectCount={projects.length}
+          onOpenAccount={() => {
+            setPricingOpen(false);
+            setAuthOpen(true);
+          }}
+        />
+      )}
       <OnboardingTour
         active={tourOpen}
         steps={tourSteps}

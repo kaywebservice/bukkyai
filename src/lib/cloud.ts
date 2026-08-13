@@ -234,3 +234,59 @@ export function subscribeCloudProject(
     unsub = null;
   };
 }
+
+// ── Presence: "X is editing" live indicators ─────────────────────────
+// Presence is stored in a top-level presence/{uid} doc (heartbeat every ~10s).
+// Presence docs are queryable by projectId and cleaned up on sign-out.
+
+export type PresenceInfo = { uid: string; name: string; projectId: string; at: number };
+
+export async function updatePresence(uid: string, name: string, projectId: string): Promise<void> {
+  try {
+    const db = await getDb();
+    const { doc, setDoc } = await import("firebase/firestore");
+    await setDoc(doc(db, "presence", uid), { uid, name, projectId, at: Date.now() });
+  } catch {
+    // ignore
+  }
+}
+
+export async function clearPresence(uid: string): Promise<void> {
+  try {
+    const db = await getDb();
+    const { doc, deleteDoc } = await import("firebase/firestore");
+    await deleteDoc(doc(db, "presence", uid));
+  } catch {
+    // ignore
+  }
+}
+
+export function subscribePresence(
+  projectId: string,
+  selfUid: string,
+  onPresence: (users: PresenceInfo[]) => void
+): () => void {
+  let unsub: (() => void) | null = null;
+  let cancelled = false;
+  void getDb().then(async (db) => {
+    if (cancelled) return;
+    const { collection, query, where, onSnapshot } = await import("firebase/firestore");
+    const ref = query(collection(db, "presence"), where("projectId", "==", projectId));
+    unsub = onSnapshot(ref, (snap) => {
+      const users: PresenceInfo[] = [];
+      const now = Date.now();
+      for (const s of snap.docs) {
+        const d = s.data() as PresenceInfo;
+        if (d.uid === selfUid) continue;
+        if (now - (d.at ?? 0) > 30000) continue; // stale heartbeats
+        users.push(d);
+      }
+      onPresence(users);
+    });
+  });
+  return () => {
+    cancelled = true;
+    unsub?.();
+    unsub = null;
+  };
+}

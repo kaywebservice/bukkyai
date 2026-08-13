@@ -158,21 +158,26 @@ export default {
       if (!files.length) return json({ error: "No files to publish." }, 400, cors());
 
       const owner = env.GITHUB_USER;
-      const repo = env.GITHUB_REPO || "bukkyai-sites";
+      const domain = String(body.domain || "").trim().toLowerCase();
+      const siteId = String(body.siteId || "site").toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "") || "site";
+      const repo = domain
+        ? `bukkyai-${siteId}`  // dedicated repo per custom-domain site (CNAME can't be shared)
+        : env.GITHUB_REPO || "bukkyai-sites";
       try {
         // 1. ensure repo exists
         const existing = await gh(`/repos/${owner}/${repo}`, {}, env);
         if (!existing.ok) {
           const created = await gh(`/user/repos`, {
             method: "POST",
-            body: JSON.stringify({ name: repo, private: false, auto_init: true, description: "bukkyai published sites" }),
+            body: JSON.stringify({ name: repo, private: false, auto_init: true, description: domain ? `bukkyai site — ${domain}` : "bukkyai published sites" }),
           }, env);
           if (!created.ok) return json({ error: `Repo create: ${created.data.message || created.status}` }, 502, cors());
         }
 
-        // 2. blobs
+        // 2. blobs (+ CNAME for custom domain)
         const blobs = [];
-        for (const f of files) {
+        const allFiles = domain ? [...files, { path: "CNAME", content: `${domain}\n` }] : files;
+        for (const f of allFiles) {
           const b = await gh(`/repos/${owner}/${repo}/git/blobs`, {
             method: "POST",
             body: JSON.stringify({ content: btoa(unescape(encodeURIComponent(String(f.content)))), encoding: "base64" }),
@@ -216,7 +221,7 @@ export default {
           body: JSON.stringify({ source: { branch: "main", path: "/" } }),
         }, env);
 
-        return json({ url: `https://${owner}.github.io/${repo}/` }, 200, cors());
+        return json({ url: domain ? `https://${domain}/` : `https://${owner}.github.io/${repo}/` }, 200, cors());
       } catch (err) {
         return json({ error: err.message || String(err) }, 500, cors());
       }

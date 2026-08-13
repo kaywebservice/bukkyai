@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ChatMessage } from "../lib/types";
 
 type Props = {
-  queue: string[];
+  messages: ChatMessage[];
   busy: boolean;
   onDiscuss: (msg: string) => void;
   onSendInstruction: (instruction: string) => void;
@@ -11,6 +12,12 @@ type Props = {
 export default function Chat(p: Props) {
   const [input, setInput] = useState("");
   const [showDiscussion, setShowDiscussion] = useState(false);
+  const transcriptRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = transcriptRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [p.messages]);
 
   const send = () => {
     const text = input.trim();
@@ -20,7 +27,26 @@ export default function Chat(p: Props) {
   };
 
   return (
-    <div className="chat-container">
+    <div className="chat-wrap">
+      <div className="chat-msgs" ref={transcriptRef}>
+        {p.messages.length === 0 ? (
+          <div className="settings-note">Ask me to edit anything in this site — or pick a tab on the left to start building.</div>
+        ) : (
+          p.messages.map((m) => (
+            <div key={m.id} className={`msg msg-${m.role}${m.kind ? ` msg-${m.kind}` : ""}`}>
+              <div className="msg-bubble">{m.text || (m.role === "assistant" ? "…" : "")}</div>
+            </div>
+          ))
+        )}
+        {p.busy && (
+          <div className="msg msg-assistant">
+            <div className="msg-bubble">
+              <span className="chat-stream-cursor">▊</span>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="chat-input-wrapper">
         <input
           className="chat-input"
@@ -47,7 +73,7 @@ export default function Chat(p: Props) {
       {showDiscussion && (
         <div className="discussion-panel">
           <div className="panel-label">Discussion</div>
-          {p.queue.length === 0 ? (
+          {p.messages.filter((m) => m.role === "user").length === 0 ? (
             <div className="settings-note">No history yet. Every instruction you send is saved here so you can branch from an earlier point.</div>
           ) : (
             <form
@@ -62,9 +88,11 @@ export default function Chat(p: Props) {
               style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1, overflow: "hidden" }}
             >
               <ul className="discussion-list" style={{ flex: 1, overflowY: "auto", margin: 0, paddingLeft: 0 }}>
-                {p.queue.map((q, i) => (
-                  <li key={i}>{q.slice(0, 140)}{q.length > 140 ? "…" : ""}</li>
-                ))}
+                {p.messages
+                  .filter((m) => m.role === "user")
+                  .map((m) => (
+                    <li key={m.id}>{m.text.slice(0, 140)}{m.text.length > 140 ? "…" : ""}</li>
+                  ))}
               </ul>
               <div style={{ display: "flex", gap: 6 }}>
                 <input name="q" className="chat-input" placeholder="Ask a question about the site…" />

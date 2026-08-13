@@ -32,6 +32,7 @@ type Props = {
   invites?: number;
   onAcceptInvites?: () => void;
   onHelp?: () => void;
+  presence?: { name: string }[];
 };
 
 export default function Header(p: Props) {
@@ -179,6 +180,12 @@ export default function Header(p: Props) {
         <button className="btn btn-ghost" onClick={p.onHelp} title="Guided tour">
           Help
         </button>
+      )}
+      {p.presence && p.presence.length > 0 && (
+        <span className="presence-chip" title={`Editing now: ${p.presence.map((u) => u.name).join(", ")}`}>
+          <span className="presence-dot" />
+          {p.presence.map((u) => u.name.slice(0, 1).toUpperCase()).join("")}
+        </span>
       )}
       {p.onShare && (
         <button className="btn btn-ghost" onClick={p.onShare} title="Share the active project">
