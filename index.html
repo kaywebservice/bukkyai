@@ -1,27 +1,173 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>bukkyai — AI website builder</title>
-    <meta name="description" content="Describe your business. Get a complete, beautiful website in minutes — edit visually, export anytime, publish with one click. Designed by Kaywebservice Enterprise Solutions." />
-    <meta name="theme-color" content="#f7f3ea" />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="icon" href="/icon-192.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function () {
-          navigator.serviceWorker.register("/sw.js").catch(function () {});
-        });
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>bukkyai — Describe your site, it builds it</title>
+<meta name="description" content="bukkyai turns a plain-English brief into a complete, live website: design system, every page written for you, then publish to your own URL. Designed by Kaywebservice Enterprise Solutions." />
+<meta property="og:title" content="bukkyai — AI website builder" />
+<meta property="og:description" content="Describe your site. bukkyai builds it — design, copy, pages, then live on the web. Designed by Kaywebservice Enterprise Solutions." />
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="icon" href="/icon-192.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta name="theme-color" content="#f7f3ea" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/marketing.css" />
+<style>
+  .bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .bento .card.big { grid-column: span 2; }
+  @media (max-width: 760px) { .bento { grid-template-columns: 1fr; } .bento .card.big { grid-column: span 1; } }
+</style>
+</head>
+<body>
+
+<!-- Nav injected by marketing.js -->
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">✦ Free to build · No credit card · You own everything</span>
+    <h1>Describe your site.<br /><span class="grad">bukkyai builds it.</span></h1>
+    <p class="lede">Type a plain-English brief. bukkyai plans your site, designs a bespoke design system, and writes every page — then edit visually and publish to your own URL.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/app">Start building — it's free</a>
+      <a class="btn btn-ghost" href="#how">See how it works</a>
+    </div>
+    <p class="proof">Describe it · See the plan · Approve · It builds itself</p>
+
+    <div class="mock">
+      <div class="mock-bar"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-url">austinbakery.bukkyai.com</span></div>
+      <div class="mock-body">
+        <div class="mock-copy">
+          <h3>June &amp; Oak — warm wood-fired sourdough from East Austin.</h3>
+          <p>From a one-line brief: bakery, warm &amp; artisanal, menu, story, ordering. Real pages, real SEO, real words — not lorem ipsum.</p>
+          <span class="mock-pill">Book a table</span>
+        </div>
+        <div class="mock-side"><div class="mock-art"></div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="how">
+  <div class="wrap center">
+    <div class="section-label">How it works</div>
+    <h2>From idea to live site in minutes.</h2>
+    <p class="lede">No templates, no blank canvas. bukkyai plans first, then builds the whole thing — then hands you the keys.</p>
+    <div class="steps">
+      <div class="step"><span class="num">1</span><h3>Describe it</h3><p>One or two sentences. "A bakery in Austin…" is enough to start.</p></div>
+      <div class="step"><span class="num">2</span><h3>Approve the plan</h3><p>See the sitemap, sections and tone before anything is built.</p></div>
+      <div class="step"><span class="num">3</span><h3>Refine &amp; publish</h3><p>Edit any word in the live preview, then export or publish it.</p></div>
+    </div>
+  </div>
+</section>
+
+<section style="background: var(--panel)">
+  <div class="wrap center">
+    <div class="section-label">What you get</div>
+    <h2>Everything a real website needs, generated for you.</h2>
+    <p class="lede">A bespoke build every time — then a live editor to make it yours.</p>
+    <div class="bento">
+      <div class="card big"><div class="icon">✏️</div><h3>AI copy &amp; design</h3><p>From brief to full site: plan, design system, and every section written in your brand's voice.</p></div>
+      <div class="card"><div class="icon">🖱️</div><h3>Edit in place</h3><p>Click any word on the live preview to change it — instant, no code.</p></div>
+      <div class="card"><div class="icon">🗂️</div><h3>Multi-page &amp; blog</h3><p>Real pages with SEO, JSON-LD, sitemap, and a built-in blog.</p></div>
+      <div class="card"><div class="icon">🛒</div><h3>Show &amp; sell</h3><p>Products with a cart and checkout, plus payment links on any site.</p></div>
+      <div class="card"><div class="icon">📬</div><h3>Working forms</h3><p>Contact &amp; newsletter forms that actually deliver.</p></div>
+      <div class="card"><div class="icon">🌐</div><h3>Publish &amp; share</h3><p>One-click live link, custom domain, ZIP, React or CMS export.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap center">
+    <div class="section-label">Templates</div>
+    <h2>Start from a finished site.</h2>
+    <p class="lede">Six ready-made multi-page templates — bakery, SaaS, studio, wellness, hotel, restaurant — fully written and designed, ready to edit.</p>
+    <div class="tpl-grid">
+      <a class="tpl-card" href="/app"><div class="tpl-thumb" style="background:linear-gradient(135deg,#d9b98c,#b3541e)">June &amp; Oak</div><div class="tpl-body"><b>Bakery &amp; café</b><span>Menu · story · ordering · journal</span></div></a>
+      <a class="tpl-card" href="/app"><div class="tpl-thumb" style="background:linear-gradient(135deg,#8aa29e,#3d5a52)">Northwind</div><div class="tpl-body"><b>SaaS product</b><span>Features · pricing · customers · blog</span></div></a>
+      <a class="tpl-card" href="/app"><div class="tpl-thumb" style="background:linear-gradient(135deg,#c9bda3,#6b6355)">Atelier</div><div class="tpl-body"><b>Design studio</b><span>Portfolio · process · journal</span></div></a>
+      <a class="tpl-card" href="/app"><div class="tpl-thumb" style="background:linear-gradient(135deg,#a8c3a0,#4d6b45)">Verdant</div><div class="tpl-body"><b>Wellness brand</b><span>Shop · farm story · rituals</span></div></a>
+      <a class="tpl-card" href="/app"><div class="tpl-thumb" style="background:linear-gradient(135deg,#7f92a8,#24374a)">Harbor House</div><div class="tpl-body"><b>Boutique hotel</b><span>Rooms · stay · dining · booking</span></div></a>
+      <a class="tpl-card" href="/app"><div class="tpl-thumb" style="background:linear-gradient(135deg,#c98f6e,#7a3c1e)">Metro</div><div class="tpl-body"><b>Restaurant &amp; bar</b><span>Menu · hours · events · reserve</span></div></a>
+    </div>
+  </div>
+</section>
+
+<section style="background: var(--panel)">
+  <div class="wrap center">
+    <div class="section-label">Own it forever</div>
+    <h2>No lock-in, no credits, no limits.</h2>
+    <p class="lede">Your site is a plain JSON document you can export and own. Edit locally, save to the cloud, or ship the code.</p>
+    <div class="grid">
+      <div class="card"><div class="icon">🔓</div><h3>Single-file HTML</h3><p>One self-contained page, all CSS inline. Host it anywhere.</p></div>
+      <div class="card"><div class="icon">📦</div><h3>ZIP, React, CMS</h3><p>Export a static site, a Vite + React project, or Markdown for a CMS.</p></div>
+      <div class="card"><div class="icon">☁️</div><h3>Cloud save &amp; sync</h3><p>Sign in to sync across devices and invite collaborators.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap center">
+    <div class="section-label">Loved by builders</div>
+    <h2>Word on the street.</h2>
+    <div class="quotes">
+      <div class="quote"><p>"It planned the site first, then wrote everything. I only edited three words before publishing."</p><b>Maya Chen</b><span>Founder, Northbeam</span></div>
+      <div class="quote"><p>"The export is a clean static site — no platform to leave, no hostage data."</p><b>Tom Becker</b><span>CEO, Lumen</span></div>
+      <div class="quote"><p>"I described my bakery and an hour later I had a menu, a story page and online ordering."</p><b>June Miller</b><span>Owner, June &amp; Oak</span></div>
+    </div>
+  </div>
+</section>
+
+<section style="background: var(--panel)">
+  <div class="wrap">
+    <div class="section-label">Trust &amp; foundations</div>
+    <div class="grid">
+      <div class="card"><div class="icon">⚡</div><h3>Fast by design</h3><p>Server-rendered HTML, optimized images, no bloat.</p></div>
+      <div class="card"><div class="icon">🔒</div><h3>Your data, yours</h3><p>Your API keys stay local. Your site exports open.</p></div>
+      <div class="card"><div class="icon">📈</div><h3>SEO built in</h3><p>WCAG contrast, sitemap, RSS, JSON-LD and OG images.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-label">FAQ</div>
+    <h2>Common questions.</h2>
+    <div class="faq-wrap">
+      <div class="faq-item"><button class="faq-q">Is it really free?<span class="chev">▾</span></button><div class="faq-a"><p>Yes — building, editing and exporting are free, forever. Pro adds one-click publishing and custom domains.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Do I need to know how to code?<span class="chev">▾</span></button><div class="faq-a"><p>No. Describe your site, approve the plan, then edit words and images visually.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Do I own my site?<span class="chev">▾</span></button><div class="faq-a"><p>Completely. Export single-file HTML, a ZIP, a React project, or the JSON blueprint — open forever.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Can I connect my own domain?<span class="chev">▾</span></button><div class="faq-a"><p>Yes, on Pro. Publish to your own domain with a dedicated repo and CNAME.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2>This is what ready feels like.</h2>
+    <p class="lede" style="margin:0 auto 28px;text-align:center">Describe your site. Get the whole thing — plan, design, copy, pages — in minutes.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/app">Get started — it's free</a>
+      <a class="btn btn-ghost" href="/pricing">See pricing</a>
+    </div>
+  </div>
+</section>
+
+<script src="/marketing.js"></script>
+<script>
+  document.querySelectorAll(".faq-q").forEach(function (q) {
+    q.addEventListener("click", function () {
+      var item = q.closest(".faq-item");
+      var open = item.classList.contains("open");
+      document.querySelectorAll(".faq-item.open").forEach(function (el) { el.classList.remove("open"); el.querySelector(".faq-a").style.maxHeight = null; });
+      if (!open) {
+        item.classList.add("open");
+        item.querySelector(".faq-a").style.maxHeight = item.querySelector(".faq-a").scrollHeight + "px";
       }
-    </script>
-  </body>
+    });
+  });
+</script>
+</body>
 </html>

@@ -1,12 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/", "destination": "/landing.html" },
     { "source": "/features", "destination": "/features.html" },
     { "source": "/templates", "destination": "/templates.html" },
     { "source": "/pricing", "destination": "/pricing.html" },
     { "source": "/faq", "destination": "/faq.html" },
     { "source": "/contact", "destination": "/contact.html" },
-    { "source": "/app", "destination": "/index.html" }
+    { "source": "/app", "destination": "/app.html" }
   ]
 }

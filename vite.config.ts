@@ -6,7 +6,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: "index.html",
+        app: "app.html",
+        index: "index.html",
         landing: "landing.html",
         pricing: "pricing.html",
         features: "features.html",
