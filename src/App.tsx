@@ -952,11 +952,47 @@ export default function App() {
     pushMsg({ role: "system", text: `AI provider set to ${s.provider}. Everything still runs locally — no credits, no limits.` });
   };
 
-  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark" }) => {
+  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; customFonts?: string }) => {
     if (!doc) return;
     const next = { ...doc };
     if (m.password !== undefined) next.password = m.password;
     if (m.stripePaymentLink !== undefined) next.stripePaymentLink = m.stripePaymentLink;
+    if (m.siteUrl !== undefined) {
+      next.meta = { ...next.meta, siteUrl: m.siteUrl.trim() || undefined };
+    }
+    if (m.stickyNav !== undefined) {
+      next.nav = { ...next.nav, sticky: m.stickyNav };
+    }
+    if (m.announcementText !== undefined) {
+      const text = m.announcementText.trim();
+      next.announcement = text ? { text, href: m.announcementHref?.trim() || undefined } : undefined;
+    }
+    if (m.popupEnabled !== undefined) {
+      next.popup = m.popupEnabled
+        ? {
+            enabled: true,
+            title: m.popupTitle?.trim() || undefined,
+            text: m.popupText?.trim() || undefined,
+            buttonLabel: m.popupButtonLabel?.trim() || undefined,
+            ctaUrl: m.popupCtaUrl?.trim() || undefined,
+            delaySec: m.popupDelaySec ?? 6,
+          }
+        : undefined;
+    }
+    if (m.customFonts !== undefined) {
+      const parsed: { name: string; url: string; weight?: string }[] = (m.customFonts ?? "")
+        .split(/\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const parts = line.split(/\s+/);
+          const name = parts[0] ?? "";
+          const url = parts[1] ?? "";
+          return name && url ? { name, url, weight: parts[2] } : null;
+        })
+        .filter((f): f is { name: string; url: string; weight: string } => f !== null);
+      next.customFonts = parsed.length ? parsed : undefined;
+    }
     if (m.formEndpoint !== undefined) {
       const ep = (m.formEndpoint ?? "").trim();
       next.forms = { ...(next.forms ?? {}), endpoint: ep || undefined };
@@ -1412,6 +1448,17 @@ export default function App() {
             redirects: (doc?.redirects ?? []).map((r) => `${r.from} → ${r.to}`).join("\n"),
             themeToggle: doc?.theme?.toggle,
             themeDefaultMode: doc?.theme?.defaultMode ?? "auto",
+            siteUrl: doc?.meta.siteUrl,
+            stickyNav: doc?.nav?.sticky,
+            announcementText: doc?.announcement?.text,
+            announcementHref: doc?.announcement?.href,
+            popupEnabled: doc?.popup?.enabled,
+            popupTitle: doc?.popup?.title,
+            popupText: doc?.popup?.text,
+            popupButtonLabel: doc?.popup?.buttonLabel,
+            popupCtaUrl: doc?.popup?.ctaUrl,
+            popupDelaySec: doc?.popup?.delaySec,
+            customFonts: (doc?.customFonts ?? []).map((f) => `${f.name} ${f.url}${f.weight ? ` ${f.weight}` : ""}`).join("\n"),
           }}
           cloudOn={cloudOn}
           signedIn={Boolean(authUid)}

@@ -60,6 +60,7 @@ export type SectionContent = {
     secondaryCta: { label: string; href: string };
     image?: { url: string; alt: string };
     trust: string;
+    bgVideo?: string;
   };
   logos?: { heading: string; items: string[] };
   features?: {
@@ -172,7 +173,7 @@ export type SectionContent = {
 
 export type SectionType = keyof SectionContent;
 
-export type SectionMotion = "fade" | "slide-up" | "slide-left" | "slide-right" | "zoom" | "marquee" | "none";
+export type SectionMotion = "fade" | "slide-up" | "slide-left" | "slide-right" | "zoom" | "marquee" | "parallax" | "none";
 
 export const MOTION_OPTIONS: { value: SectionMotion; label: string }[] = [
   { value: "none", label: "None" },
@@ -182,6 +183,7 @@ export const MOTION_OPTIONS: { value: SectionMotion; label: string }[] = [
   { value: "slide-right", label: "Slide right" },
   { value: "zoom", label: "Zoom in" },
   { value: "marquee", label: "Marquee" },
+  { value: "parallax", label: "Parallax" },
 ];
 
 export type Post = {
@@ -237,13 +239,13 @@ export type SiteTheme = {
 
 export type SiteBlueprint = {
   version: number;
-  meta: { title: string; description: string; lang: string; ogImage?: string };
-  nav: { links: NavLink[]; cta: NavLink | null };
+  meta: { title: string; description: string; lang: string; ogImage?: string; siteUrl?: string };
+  nav: { links: NavLink[]; cta: NavLink | null; sticky?: boolean };
   design: DesignSystem;
   pages: Page[];
   embeds?: { head: string[]; body: string[] };
   analytics?: { plausible?: string; goatcounter?: string };
-  forms?: { endpoint?: string };
+  forms?: { endpoint?: string; emailService?: { provider: string; apiKey?: string; listId?: string; endpoint?: string } };
   voice?: string;
   posts?: Post[];
   languages?: { default: string; supported: string[]; translations?: Record<string, Record<string, string>> };
@@ -252,6 +254,11 @@ export type SiteBlueprint = {
   redirects?: RedirectRule[];
   cookieConsent?: CookieConsent;
   theme?: SiteTheme;
+  announcement?: { text: string; href?: string };
+  popup?: { enabled: boolean; title?: string; text?: string; buttonLabel?: string; ctaUrl?: string; delaySec?: number };
+  customFonts?: { name: string; url: string; weight?: string; style?: string }[];
+  coupons?: { code: string; percentOff: number }[];
+  orderNotify?: string;
 };
 
 export type CheckpointSource = "init" | "plan" | "design" | "content" | "edit" | "manual";

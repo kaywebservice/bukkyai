@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { LLMSettings } from "../lib/types";
 import { defaultModel } from "../lib/llm";
 
-type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark" };
+type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; customFonts?: string };
 type Props = {
   settings: LLMSettings & { githubToken?: string };
   siteMeta?: SiteMeta;
@@ -29,6 +29,17 @@ export default function SettingsModal(p: Props) {
     redirects: p.siteMeta?.redirects ?? "",
     themeToggle: p.siteMeta?.themeToggle ?? false,
     themeDefaultMode: p.siteMeta?.themeDefaultMode ?? "auto",
+    siteUrl: p.siteMeta?.siteUrl ?? "",
+    stickyNav: p.siteMeta?.stickyNav ?? false,
+    announcementText: p.siteMeta?.announcementText ?? "",
+    announcementHref: p.siteMeta?.announcementHref ?? "",
+    popupEnabled: p.siteMeta?.popupEnabled ?? false,
+    popupTitle: p.siteMeta?.popupTitle ?? "",
+    popupText: p.siteMeta?.popupText ?? "",
+    popupButtonLabel: p.siteMeta?.popupButtonLabel ?? "",
+    popupCtaUrl: p.siteMeta?.popupCtaUrl ?? "",
+    popupDelaySec: p.siteMeta?.popupDelaySec ?? 6,
+    customFonts: p.siteMeta?.customFonts ?? "",
   });
 
   const provider = s.provider;
@@ -220,6 +231,80 @@ export default function SettingsModal(p: Props) {
             </select>
           </div>
         )}
+
+        <div className="panel-label">Site & branding</div>
+        <div className="settings-row">
+          <label>Site URL</label>
+          <input
+            value={meta.siteUrl}
+            placeholder="https://yoursite.com"
+            onChange={(e) => setMeta({ ...meta, siteUrl: e.target.value })}
+          />
+          <div className="settings-note">
+            Used in sitemap.xml, RSS feed and canonical tags. Set this to your real domain before publishing.
+          </div>
+        </div>
+        <div className="settings-row">
+          <label>
+            <input
+              type="checkbox"
+              checked={Boolean(meta.stickyNav)}
+              onChange={(e) => setMeta({ ...meta, stickyNav: e.target.checked })}
+              style={{ width: "auto" }}
+            />
+            Sticky navigation bar
+          </label>
+        </div>
+        <div className="settings-row">
+          <label>Announcement bar</label>
+          <input
+            value={meta.announcementText}
+            placeholder="Free shipping on orders over $50"
+            onChange={(e) => setMeta({ ...meta, announcementText: e.target.value })}
+          />
+        </div>
+        {meta.announcementText && (
+          <div className="settings-row">
+            <label>Announcement link (optional)</label>
+            <input value={meta.announcementHref} placeholder="https://…" onChange={(e) => setMeta({ ...meta, announcementHref: e.target.value })} />
+          </div>
+        )}
+
+        <div className="panel-label">Lead capture popup</div>
+        <div className="settings-row">
+          <label>
+            <input
+              type="checkbox"
+              checked={Boolean(meta.popupEnabled)}
+              onChange={(e) => setMeta({ ...meta, popupEnabled: e.target.checked })}
+              style={{ width: "auto" }}
+            />
+            Show popup (once per visit)
+          </label>
+        </div>
+        {meta.popupEnabled && (
+          <>
+            <div className="settings-row"><label>Title</label><input value={meta.popupTitle} onChange={(e) => setMeta({ ...meta, popupTitle: e.target.value })} placeholder="Get 10% off your first order" /></div>
+            <div className="settings-row"><label>Text</label><textarea rows={2} value={meta.popupText} onChange={(e) => setMeta({ ...meta, popupText: e.target.value })} placeholder="Join our newsletter…" /></div>
+            <div className="settings-row"><label>Button label</label><input value={meta.popupButtonLabel} onChange={(e) => setMeta({ ...meta, popupButtonLabel: e.target.value })} placeholder="Subscribe" /></div>
+            <div className="settings-row"><label>Button link (optional)</label><input value={meta.popupCtaUrl} onChange={(e) => setMeta({ ...meta, popupCtaUrl: e.target.value })} placeholder="https://…" /></div>
+            <div className="settings-row"><label>Delay (seconds)</label><input type="number" value={meta.popupDelaySec} onChange={(e) => setMeta({ ...meta, popupDelaySec: Number(e.target.value) || 0 })} /></div>
+          </>
+        )}
+
+        <div className="panel-label">Custom fonts</div>
+        <div className="settings-row">
+          <label>Fonts (name + woff2 URL per line)</label>
+          <textarea
+            rows={3}
+            value={meta.customFonts}
+            placeholder={"MyFont https://…/font.woff2 600\nTitleFont https://…/title.woff2 800"}
+            onChange={(e) => setMeta({ ...meta, customFonts: e.target.value })}
+          />
+          <div className="settings-note">
+            One per line: <code>Name url [weight]</code>. After saving, use the font name in any heading/body field.
+          </div>
+        </div>
 
         <div className="panel-label">Privacy & redirects</div>
         <div className="settings-row">

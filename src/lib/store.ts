@@ -1,5 +1,6 @@
 import type { Checkpoint, ChatMessage, LLMSettings, SiteBlueprint, SitePlan } from "./types";
 import { emptyBlueprint, sampleProject, uid } from "./blueprint";
+import { compressDataUrl } from "./compressImage";
 
 export type ProjectMeta = { id: string; name: string; at: number };
 
@@ -124,23 +125,27 @@ export function loadAssets(projectId: string): MediaAsset[] {
 }
 
 export function addAsset(projectId: string, file: File): Promise<MediaAsset | null> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const asset: MediaAsset = {
-        id: uid("ast"),
-        name: file.name,
-        dataUrl: String(reader.result ?? ""),
-        at: Date.now(),
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        void compressDataUrl(String(reader.result ?? ""))
+          .catch(() => String(reader.result ?? ""))
+          .then((dataUrl) => {
+            const asset: MediaAsset = {
+              id: uid("ast"),
+              name: file.name,
+              dataUrl,
+              at: Date.now(),
+            };
+            const assets = loadAssets(projectId);
+            assets.unshift(asset);
+            write(`bukkyai.assets.${projectId}`, assets);
+            resolve(asset);
+          });
       };
-      const assets = loadAssets(projectId);
-      assets.unshift(asset);
-      write(`bukkyai.assets.${projectId}`, assets);
-      resolve(asset);
-    };
-    reader.onerror = () => resolve(null);
-    reader.readAsDataURL(file);
-  });
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    });
 }
 
 export function addAssetDataUrl(projectId: string, name: string, dataUrl: string): MediaAsset {

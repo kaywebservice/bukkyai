@@ -26,8 +26,22 @@ type Props = {
 };
 
 type FieldCtx = { sectionType: string; voice: string };
-
 type Obj = Record<string, unknown>;
+
+const ALT_BY_SECTION: Record<string, string> = {
+  hero: "Hero image for the site",
+  gallery: "Gallery image",
+  team: "Team member photo",
+  testimonials: "Customer photo",
+  products: "Product photo",
+  features: "Feature illustration",
+  blog: "Blog post cover",
+  posts: "Blog post cover",
+};
+
+function suggestAlt(sectionType: string): string {
+  return ALT_BY_SECTION[sectionType] ?? `${sectionType.replace(/-/g, " ")} image`;
+}
 
 function isPlainObject(v: unknown): v is Obj {
   return typeof v === "object" && v !== null && !Array.isArray(v);
@@ -206,6 +220,16 @@ function FieldEditor(p: FEProps) {
             title="Rewrite with AI"
           >
             {p.busy ? "…" : "✨"}
+          </button>
+        )}
+        {key === "alt" && !str && (
+          <button
+            className="btn btn-sm btn-ghost"
+            style={{ padding: "4px 8px", fontSize: 11 }}
+            onClick={() => p.onValue(suggestAlt(p.ctx.sectionType))}
+            title="Suggest alt text"
+          >
+            Alt+
           </button>
         )}
       </div>

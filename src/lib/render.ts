@@ -78,6 +78,12 @@ function buildJsonLd(doc: SiteBlueprint, page: Page): unknown {
   return base;
 }
 
+export function siteBase(doc: SiteBlueprint): string {
+  const raw = doc.meta.siteUrl?.trim() || "";
+  if (!raw) return "https://example.com";
+  return raw.replace(/\/+$/, "");
+}
+
 export function renderPage(
   doc: SiteBlueprint,
   page: Page,
@@ -96,6 +102,7 @@ export function renderPage(
     ? (doc.languages?.supported ?? []).map((c) => `<link rel="alternate" hreflang="${esc(c)}" href="?lang=${esc(c)}"/>`).join("\n") +
       `\n<link rel="alternate" hreflang="x-default" href="${esc(page.slug ? `/${page.slug}.html` : "/")}"/>`
     : "";
+  const canonical = `<link rel="canonical" href="${siteBase(doc)}${esc(page.slug ? `/${page.slug}.html` : "/")}"/>`;
   const jsonLd = buildJsonLd(doc, page);
   let html = `
 <!doctype html>
@@ -111,6 +118,7 @@ export function renderPage(
 <link rel="icon" href="${faviconDataUrl(doc)}"/>
 ${ogImage}
 ${hreflang}
+${canonical}
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="${googleFontsLink(doc.design.tokens.fonts.heading, doc.design.tokens.fonts.body)}" rel="stylesheet"/>
@@ -139,6 +147,10 @@ window.__BKKY__ = ${JSON.stringify({
     defaultLang: doc.languages?.default ?? doc.meta.lang,
     cookie: doc.cookieConsent ? { enabled: !!doc.cookieConsent.enabled, text: doc.cookieConsent.text || "", policyUrl: doc.cookieConsent.policyUrl || "" } : null,
     theme: doc.theme ? { toggle: !!doc.theme.toggle, defaultMode: doc.theme.defaultMode || "auto" } : null,
+    popup: doc.popup ? { enabled: !!doc.popup.enabled, delaySec: doc.popup.delaySec || 6 } : null,
+    coupons: doc.coupons ?? [],
+    orderNotify: doc.orderNotify || "",
+    emailService: doc.forms?.emailService || null,
   })};
 </script>
 <script>
@@ -209,6 +221,15 @@ ${doc.cookieConsent?.enabled ? `<div id="bk-cookie" class="bk-cookie" role="dial
   <div class="bk-cookie-text">${esc(doc.cookieConsent.text || "We use cookies to improve your experience. By continuing you agree to our use of cookies.")}${doc.cookieConsent.policyUrl ? ` <a href="${attrSafe(doc.cookieConsent.policyUrl)}" target="_blank" rel="noopener">Learn more</a>` : ""}</div>
   <div class="bk-cookie-actions"><button id="bk-cookie-accept" class="bk-btn bk-btn-primary">Accept</button><button id="bk-cookie-decline" class="bk-btn">Decline</button></div>
 </div>` : ""}
+${doc.popup?.enabled ? `<div id="bk-popup" class="bk-popup" role="dialog" aria-label="Popup">
+  <div class="bk-popup-card">
+    <button id="bk-popup-close" class="bk-popup-close" aria-label="Close">x</button>
+    ${doc.popup.title ? `<h3>${esc(doc.popup.title)}</h3>` : ""}
+    ${doc.popup.text ? `<p>${esc(doc.popup.text)}</p>` : ""}
+    ${doc.popup.ctaUrl ? `<a class="bk-btn bk-btn-primary" href="${attrSafe(doc.popup.ctaUrl)}">${esc(doc.popup.buttonLabel || "Learn more")}</a>` : `<button id="bk-popup-done" class="bk-btn bk-btn-primary">${esc(doc.popup.buttonLabel || "Got it")}</button>`}
+  </div>
+</div>` : ""}
+<button id="bk-to-top" class="bk-to-top" aria-label="Back to top">↑</button>
 </body>
 </html>`;
 
@@ -232,8 +253,8 @@ export function renderStaticSite(doc: SiteBlueprint): { files: { path: string; c
     path: "sitemap.xml",
     content: `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${pages.map((p) => `  <url><loc>https://example.com${p.slug ? `/${p.slug}.html` : "/"}</loc><priority>${p.slug ? "0.8" : "1.0"}</priority></url>`).join("\n")}
-${(doc.posts ?? []).map((post) => `  <url><loc>https://example.com/post/${esc(post.slug)}.html</loc><lastmod>${esc((post.date || "").slice(0, 10))}</lastmod><priority>0.7</priority></url>`).join("\n")}
+${pages.map((p) => `  <url><loc>${siteBase(doc)}${p.slug ? `/${p.slug}.html` : "/"}</loc><priority>${p.slug ? "0.8" : "1.0"}</priority></url>`).join("\n")}
+${(doc.posts ?? []).map((post) => `  <url><loc>${siteBase(doc)}/post/${esc(post.slug)}.html</loc><lastmod>${esc((post.date || "").slice(0, 10))}</lastmod><priority>0.7</priority></url>`).join("\n")}
 </urlset>`,
   });
   files.push({
@@ -258,7 +279,7 @@ ${(doc.posts ?? []).map((post) => `  <url><loc>https://example.com/post/${esc(po
 
 export function rssFeed(doc: SiteBlueprint): string {
   const posts = doc.posts ?? [];
-  const base = "https://example.com";
+  const base = siteBase(doc);
   const items = posts.map((post) => {
     const link = `${base}/post/${esc(post.slug)}.html`;
     const desc = esc(post.excerpt || (post.content || "").replace(/<[^>]*>/g, "").slice(0, 300));
@@ -362,13 +383,14 @@ function renderNav(doc: SiteBlueprint, previewSlugs?: string[]): string {
     ? `<button id="bk-theme-toggle" class="bk-theme-toggle" aria-label="Toggle dark mode">${svgIcon("moon", 18)}</button>`
     : "";
   return `
-<header class="bk-nav">
+<header class="bk-nav${doc.nav?.sticky ? " bk-nav-sticky" : ""}">
   <div class="bk-nav-inner">
     <a class="bk-nav-brand" href="${brandHref}">${brand}</a>
     ${links || cta ? `<nav class="bk-nav-links" aria-label="Primary">${links}${cta}</nav>` : ""}
     <div class="bk-nav-extra">${themeToggle}<button id="bk-search-toggle" class="bk-search-toggle" aria-label="Search">${svgIcon("search", 18)}</button>${langSwitch}${cartBtn}</div>
   </div>
 </header>
+${doc.announcement?.text ? `<div class="bk-announcement" role="banner">${doc.announcement.href ? `<a href="${attrSafe(doc.announcement.href)}">${esc(doc.announcement.text)}</a>` : esc(doc.announcement.text)}</div>` : ""}
 <div id="bk-search-overlay" class="bk-search-overlay" aria-hidden="true">
   <div class="bk-search-box">
     <input id="bk-search-input" type="search" placeholder="Search this site…" aria-label="Search" autocomplete="off"/>
@@ -406,9 +428,12 @@ function renderSection(
       const h = c as typeof c & {
         layout?: string; eyebrow?: string; title?: string; subtitle?: string;
         primaryCta?: { label: string; href: string }; secondaryCta?: { label: string; href: string };
-        image?: { url: string; alt: string }; trust?: string;
+        image?: { url: string; alt: string }; trust?: string; bgVideo?: string;
       };
       const split = h.layout === "split";
+      const bgVideo = h.bgVideo
+        ? `<video class="bk-hero-bg" autoplay muted loop playsinline src="${attrSafe(h.bgVideo)}"></video><div class="bk-hero-bg-scrim"></div>`
+        : "";
       const ctas = `
 <div class="bk-btn-row"${d}>
   ${h.primaryCta?.label ? `<a class="bk-btn bk-btn-primary" href="${attrSafe(h.primaryCta.href)}">${te(`${r}.primaryCta.label`, h.primaryCta.label, "span")}</a>` : ""}
@@ -417,6 +442,7 @@ function renderSection(
       return wrap(
         `<div class="bk-hero ${split ? "bk-hero-split" : "bk-hero-centered"}" ${d}>
   <div class="bk-hero-glow"></div>
+  ${bgVideo}
   <div class="bk-container bk-hero-inner">
     <div class="bk-hero-copy">
       ${h.eyebrow ? te(`${r}.eyebrow`, h.eyebrow, "span", "bk-eyebrow") : ""}
@@ -1046,6 +1072,43 @@ const SITE_FEATURES_SCRIPT = `(function () {
       try { localStorage.setItem(themeKey, dark ? "dark" : "light"); } catch {}
     });
   }
+  // Sticky nav scroll shadow
+  var nav = document.querySelector(".bk-nav");
+  if (nav) {
+    window.addEventListener("scroll", function () {
+      nav.classList.toggle("bk-nav-scrolled", window.scrollY > 8);
+    }, { passive: true });
+  }
+  // Back to top
+  var toTop = document.getElementById("bk-to-top");
+  if (toTop) {
+    window.addEventListener("scroll", function () {
+      toTop.classList.toggle("bk-to-top-show", window.scrollY > 600);
+    }, { passive: true });
+    toTop.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
+  }
+  // Lead-capture popup (once per session)
+  var popup = document.getElementById("bk-popup");
+  if (popup && cfg.popup && cfg.popup.enabled) {
+    var popupKey = "bk-popup-seen";
+    var popupSeen = false;
+    try { popupSeen = sessionStorage.getItem(popupKey) === "1"; } catch {}
+    if (!popupSeen) {
+      var delay = (Number(cfg.popup.delaySec) || 6) * 1000;
+      setTimeout(function () {
+        popup.style.display = "flex";
+      }, delay);
+      var closePopup = function () {
+        popup.style.display = "none";
+        try { sessionStorage.setItem(popupKey, "1"); } catch {}
+      };
+      var pc = document.getElementById("bk-popup-close");
+      var pd = document.getElementById("bk-popup-done");
+      if (pc) pc.addEventListener("click", closePopup);
+      if (pd) pd.addEventListener("click", closePopup);
+      popup.addEventListener("click", function (e) { if (e.target === popup) closePopup(); });
+    }
+  }
   // Site search
   var searchToggle = document.getElementById("bk-search-toggle");
   var searchOverlay = document.getElementById("bk-search-overlay");
@@ -1220,5 +1283,24 @@ const SITE_FEATURES_SCRIPT = `(function () {
     document.querySelectorAll(".bk-motion-fade,.bk-motion-slide-up,.bk-motion-slide-left,.bk-motion-slide-right,.bk-motion-zoom,.bk-motion-marquee").forEach(function (el) { io.observe(el); });
   } else {
     document.querySelectorAll(".bk-motion-fade,.bk-motion-slide-up,.bk-motion-slide-left,.bk-motion-slide-right,.bk-motion-zoom,.bk-motion-marquee").forEach(function (el) { el.classList.add("bk-in-view"); });
+  }
+  // Parallax (scroll-driven translate)
+  var parallaxEls = document.querySelectorAll(".bk-motion-parallax");
+  if (parallaxEls.length) {
+    var ticking = false;
+    var parallaxUpdate = function () {
+      ticking = false;
+      parallaxEls.forEach(function (el) {
+        var r = el.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > window.innerHeight) return;
+        var offset = (r.top + r.height / 2 - window.innerHeight / 2) * -0.12;
+        el.style.transform = "translateY(" + offset.toFixed(1) + "px)";
+      });
+    };
+    window.addEventListener("scroll", function () {
+      if (!ticking) { ticking = true; window.requestAnimationFrame(parallaxUpdate); }
+    }, { passive: true });
+    window.addEventListener("resize", parallaxUpdate);
+    parallaxUpdate();
   }
 })();`;

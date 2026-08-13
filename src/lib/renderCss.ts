@@ -11,8 +11,12 @@ export function renderCss(doc: SiteBlueprint): string {
   const sh = t.shadows;
   const dur = t.motion.durationMs;
 
+  const customFonts = (doc.customFonts ?? [])
+    .map((f) => `@font-face{font-family:"${f.name.replace(/[^a-zA-Z0-9\s-]/g, "").trim()}";src:url("${f.url}") format("woff2");font-weight:${f.weight || "400"};font-style:${f.style || "normal"}}`)
+    .join("\n");
+
   return `
-:root{
+${customFonts ? `${customFonts}\n` : ""}:root{
   --bg:${c.background}; --surface:${c.surface}; --text:${c.text}; --muted:${c.muted};
   --primary:${c.primary}; --primary-c:${c.primaryContrast}; --accent:${c.accent}; --accent-c:${c.accentContrast};
   --border:${c.border};
@@ -89,6 +93,9 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.12;letter-spacing:-.01em;
     radial-gradient(42% 38% at 12% 8%, color-mix(in srgb,var(--accent) 14%,transparent), transparent 70%),
     radial-gradient(38% 34% at 88% 20%, color-mix(in srgb,var(--primary) 12%,transparent), transparent 70%),
     radial-gradient(50% 44% at 50% 110%, color-mix(in srgb,var(--accent) 9%,transparent), transparent 70%)}
+.bk-hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.bk-hero-bg-scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.55))}
+.bk-hero-centered .bk-hero-bg-scrim,.bk-hero-split .bk-hero-bg-scrim{z-index:-1}
 .bk-art{position:relative;border-radius:var(--rd-lg);overflow:hidden;aspect-ratio:4/3;background:var(--surface);border:1px solid var(--border);
   background-image:
     linear-gradient(150deg, color-mix(in srgb,var(--primary) 7%,transparent), transparent 45%),
@@ -300,6 +307,10 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.12;letter-spacing:-.01em;
 .bk-post-body{line-height:1.7;margin-top:14px}
 
 /* nav extras */
+.bk-announcement{background:var(--accent);color:var(--accent-c);text-align:center;font-size:var(--fs-small);padding:8px 16px;font-weight:600}
+.bk-announcement a{color:inherit;text-decoration:underline}
+.bk-nav-sticky{position:sticky;top:0;z-index:1000;background:var(--bg);transition:box-shadow .2s,background .2s}
+.bk-nav-sticky.bk-nav-scrolled{box-shadow:var(--sh-md)}
 .bk-nav-extra{display:flex;align-items:center;gap:10px}
 .bk-lang-switch{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--rd-md);padding:6px 10px;font-size:var(--fs-small);cursor:pointer}
 .bk-search-toggle{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:var(--rd-md);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
@@ -350,5 +361,15 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.12;letter-spacing:-.01em;
 @keyframes bk-left{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
 @keyframes bk-right{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
 @keyframes bk-zoom{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.bk-motion-parallax{will-change:transform}
+.bk-to-top{position:fixed;right:20px;bottom:20px;z-index:9000;width:44px;height:44px;border-radius:var(--rd-pill);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:18px;cursor:pointer;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .25s,transform .25s}
+.bk-to-top.bk-to-top-show{opacity:1;pointer-events:auto;transform:none}
+.bk-popup{position:fixed;inset:0;z-index:9996;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:20px}
+.bk-popup-card{position:relative;width:min(440px,100%);background:var(--bg);border:1px solid var(--border);border-radius:var(--rd-lg);box-shadow:var(--sh-lg);padding:30px;text-align:center}
+.bk-popup-card h3{margin:0 0 8px}
+.bk-popup-card p{color:var(--muted);margin:0 0 18px;font-size:15px}
+.bk-popup-close{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
+.bk-popup-close:hover{color:var(--text)}
 `;
+
 }

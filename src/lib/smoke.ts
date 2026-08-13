@@ -29,8 +29,14 @@ export function runSmoke(): SmokeResult {
   seoDoc.cookieConsent = { enabled: true, text: "We use cookies.", policyUrl: "/privacy" };
   seoDoc.redirects = [{ from: "/old", to: "/new" }];
   seoDoc.theme = { toggle: true, defaultMode: "auto" };
+  seoDoc.meta.siteUrl = "https://mysite.example";
+  seoDoc.nav = { ...seoDoc.nav, sticky: true };
+  seoDoc.announcement = { text: "Summer sale!", href: "/shop" };
+  seoDoc.popup = { enabled: true, title: "Join us", text: "Newsletter", buttonLabel: "Go", delaySec: 5 };
+  seoDoc.customFonts = [{ name: "MyFont", url: "https://x/f.woff2", weight: "600" }];
   const seoHtml = renderPage(seoDoc, seoDoc.pages[0], false);
   const seoFiles = renderStaticSite(seoDoc).files;
+  const seoCss = renderCss(seoDoc);
 
   const embedDoc = JSON.parse(JSON.stringify(doc)) as typeof doc;
   embedDoc.pages[0].sections.push({
@@ -70,6 +76,13 @@ export function runSmoke(): SmokeResult {
     ["Theme toggle rendered", seoHtml.includes('id="bk-theme-toggle"')],
     ["Dark-mode CSS emitted", renderCss(seoDoc).includes('html[data-theme="dark"]')],
     ["Embed section renders YouTube iframe", embedHtml.includes('youtube.com/embed/dQw4w9WgXcQ')],
+    ["Canonical uses site URL", seoHtml.includes('rel="canonical" href="https://mysite.example/')],
+    ["Sitemap uses site URL", seoFiles.find((f) => f.path === "sitemap.xml")?.content.includes("https://mysite.example") ?? false],
+    ["RSS uses site URL", seoFiles.find((f) => f.path === "feed.xml")?.content.includes("https://mysite.example") ?? false],
+    ["Sticky nav rendered", seoHtml.includes("bk-nav-sticky")],
+    ["Announcement bar rendered", seoHtml.includes("Summer sale!")],
+    ["Popup markup rendered", seoHtml.includes('id="bk-popup"')],
+    ["Custom font-face emitted", seoCss.includes("@font-face") && seoCss.includes("MyFont")],
     ["Contrast math sane", contrastRatio("#241a12", "#f7f2ea") > 7],
   ];
 
