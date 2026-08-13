@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FAQ — bukkyai</title>
+<meta name="description" content="Answers to common questions about bukkyai — how it works, pricing, ownership, publishing and more." />
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="icon" href="/icon-192.png" />
+<meta name="theme-color" content="#f7f3ea" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/marketing.css" />
+<style>
+  .faq-wrap { max-width: 720px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Help center</span>
+    <h1>Questions, answered.</h1>
+    <p>Everything you need to know about building with bukkyai.</p>
+  </div>
+</header>
+
+<section style="padding-top: 20px">
+  <div class="wrap">
+    <div class="faq-wrap">
+      <div class="faq-item"><button class="faq-q">What is bukkyai?<span class="chev">▾</span></button><div class="faq-a"><p>bukkyai is an AI website builder. You describe your business in a sentence; it plans your site, designs a design system, and writes every page — then you edit visually and publish.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Do I need to know how to code?<span class="chev">▾</span></button><div class="faq-a"><p>No. Describe your site, approve the plan, then edit words and images by clicking them. Code is available if you want it, never required.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Is it really free?<span class="chev">▾</span></button><div class="faq-a"><p>Yes — building, editing and exporting are free with no credits and no time limits. Pro adds one-click publishing, custom domains, cloud sync and team collaboration.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Do I own my site?<span class="chev">▾</span></button><div class="faq-a"><p>Completely. Export single-file HTML, a static-site ZIP, a React project, or the JSON blueprint. Your data is yours, always.</p></div></div>
+      <div class="faq-item"><button class="faq-q">How does publishing work?<span class="chev">▾</span></button><div class="faq-a"><p>On Pro, one click gives you a live shareable link via a secure publish worker. You can also connect a custom domain or deploy to GitHub Pages.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Can I connect my own domain?<span class="chev">▾</span></button><div class="faq-a"><p>Yes, on Pro. Set your site URL in Settings and bukkyai publishes to your own domain with a dedicated repo and CNAME.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Where is my data stored?<span class="chev">▾</span></button><div class="faq-a"><p>Projects live in your browser by default. Sign in to sync them to your own cloud account. Your AI API key is never sent anywhere but the provider you chose.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Can I sell products or take bookings?<span class="chev">▾</span></button><div class="faq-a"><p>Yes — product sections with a working cart and branded checkout, coupons and stock, plus booking sections and payment links.</p></div></div>
+      <div class="faq-item"><button class="faq-q">What about SEO?<span class="chev">▾</span></button><div class="faq-a"><p>Built in: meta tags, JSON-LD, sitemap.xml, RSS, OG images, WCAG contrast checks and a live SEO audit with AI auto-fix.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Can I invite collaborators?<span class="chev">▾</span></button><div class="faq-a"><p>On Pro, yes. Invite editors or viewers by email — they see the project live and edits sync across devices.</p></div></div>
+      <div class="faq-item"><button class="faq-q">How do I cancel Pro?<span class="chev">▾</span></button><div class="faq-a"><p>It's month to month. Cancel in the app — and you keep all your projects and exports regardless.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2>Still have a question?</h2>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/contact">Contact us</a>
+    </div>
+  </div>
+</section>
+
+<script src="/marketing.js"></script>
+<script>
+  document.querySelectorAll(".faq-q").forEach(function (q) {
+    q.addEventListener("click", function () {
+      var item = q.closest(".faq-item");
+      var open = item.classList.contains("open");
+      document.querySelectorAll(".faq-item.open").forEach(function (el) { el.classList.remove("open"); el.querySelector(".faq-a").style.maxHeight = null; });
+      if (!open) {
+        item.classList.add("open");
+        item.querySelector(".faq-a").style.maxHeight = item.querySelector(".faq-a").scrollHeight + "px";
+      }
+    });
+  });
+</script>
+</body>
+</html>

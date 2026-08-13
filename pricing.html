@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pricing — bukkyai</title>
+<meta name="description" content="bukkyai pricing: Free to build, Pro to publish. One-click publishing, custom domains, cloud save and checkout with payments." />
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="icon" href="/icon-192.png" />
+<meta name="theme-color" content="#f7f3ea" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/marketing.css" />
+</head>
+<body>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Simple, honest pricing</span>
+    <h1>Free to build. Pro to publish.</h1>
+    <p>Everything is free while you create. Upgrade to Pro inside the app when you're ready to publish and share.</p>
+  </div>
+</header>
+
+<section style="padding-top: 20px">
+  <div class="wrap">
+    <div class="pricing-tiers">
+      <div class="pricing-tier">
+        <b>Free</b>
+        <div class="pricing-price">$0<span>/forever</span></div>
+        <p class="pricing-desc">For building and experimenting — no time limit, no credits.</p>
+        <ul>
+          <li>Unlimited local projects</li>
+          <li>AI plan → build (multi-page)</li>
+          <li>Visual canvas editor</li>
+          <li>AI image generation</li>
+          <li>Static HTML / ZIP export</li>
+          <li>Blog, i18n, animations, cart</li>
+        </ul>
+        <a class="btn" href="/app">Start free</a>
+      </div>
+      <div class="pricing-tier featured">
+        <b>Pro</b>
+        <div class="pricing-price">$19<span>/month</span></div>
+        <p class="pricing-desc">For publishing, sharing and growing your site.</p>
+        <ul>
+          <li>Everything in Free</li>
+          <li>One-click publish &amp; share links</li>
+          <li>Custom domains</li>
+          <li>Cloud save across devices</li>
+          <li>Firebase auth / member areas</li>
+          <li>Checkout with payments</li>
+          <li>Priority support</li>
+        </ul>
+        <a class="btn btn-primary" href="/app">Get Pro</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top: 40px">
+  <div class="wrap">
+    <div class="section-label">What's included</div>
+    <h2>Both plans, compared.</h2>
+    <div class="table-wrap" style="margin-top: 24px">
+      <table>
+        <thead><tr><th>Feature</th><th>Free</th><th>Pro</th></tr></thead>
+        <tbody>
+          <tr><td>AI website generation (multi-page)</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>Visual editor &amp; inline editing</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>Static HTML / ZIP / React / CMS export</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>Blog, SEO, i18n, animations, cart</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>One-click publish &amp; share links</td><td class="no">—</td><td class="yes">✓</td></tr>
+          <tr><td>Custom domains</td><td class="no">—</td><td class="yes">✓</td></tr>
+          <tr><td>Cloud save &amp; cross-device sync</td><td class="no">—</td><td class="yes">✓</td></tr>
+          <tr><td>Team collaboration &amp; invites</td><td class="no">—</td><td class="yes">✓</td></tr>
+          <tr><td>Priority support</td><td class="no">—</td><td class="yes">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-label">FAQ</div>
+    <h2>Pricing questions.</h2>
+    <div class="faq-wrap">
+      <div class="faq-item"><button class="faq-q">Is the Free plan really free forever?<span class="chev">▾</span></button><div class="faq-a"><p>Yes. Building, editing and exporting never expire and never run out of credits.</p></div></div>
+      <div class="faq-item"><button class="faq-q">What does Pro actually unlock?<span class="chev">▾</span></button><div class="faq-a"><p>One-click publishing to a live link, custom domains, cloud save across devices, team collaboration and priority support.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Can I cancel anytime?<span class="chev">▾</span></button><div class="faq-a"><p>Yes — it's month to month. Cancel in the app, no guilt trip.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Do I keep my work if I downgrade?<span class="chev">▾</span></button><div class="faq-a"><p>Always. Your projects and exports stay yours whether you're on Free or Pro.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2>Ready when you are.</h2>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/app">Get started — it's free</a>
+    </div>
+  </div>
+</section>
+
+<script src="/marketing.js"></script>
+<script>
+  document.querySelectorAll(".faq-q").forEach(function (q) {
+    q.addEventListener("click", function () {
+      var item = q.closest(".faq-item");
+      var open = item.classList.contains("open");
+      document.querySelectorAll(".faq-item.open").forEach(function (el) { el.classList.remove("open"); el.querySelector(".faq-a").style.maxHeight = null; });
+      if (!open) {
+        item.classList.add("open");
+        item.querySelector(".faq-a").style.maxHeight = item.querySelector(".faq-a").scrollHeight + "px";
+      }
+    });
+  });
+</script>
+</body>
+</html>

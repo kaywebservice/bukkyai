@@ -8,6 +8,11 @@ export default defineConfig({
       input: {
         main: "index.html",
         landing: "landing.html",
+        pricing: "pricing.html",
+        features: "features.html",
+        templates: "templates.html",
+        faq: "faq.html",
+        contact: "contact.html",
       },
     },
   },

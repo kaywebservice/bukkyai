@@ -1,0 +1,83 @@
+// Shared Wix-style nav + footer for all marketing pages.
+(function () {
+  var page = (location.pathname.split("/").pop() || "landing.html").replace(".html", "");
+  if (page === "") page = "landing";
+
+  var isActive = function (p) { return page === p ? " active" : ""; };
+
+  var mega = '' +
+    '<div class="mega">' +
+      '<div class="mega-group"><h4>Build</h4>' +
+        '<a href="/features">Website builder<small>Describe it, get a full site</small></a>' +
+        '<a href="/templates">Templates<small>6 ready-made multi-page sites</small></a>' +
+        '<a href="/features#blog">Blog & SEO<small>Posts, sitemap, RSS, JSON-LD</small></a>' +
+      '</div>' +
+      '<div class="mega-group"><h4>Business</h4>' +
+        '<a href="/pricing">Pricing<small>Free to build, Pro to publish</small></a>' +
+        '<a href="/features#shop">Shop & payments<small>Cart, checkout, coupons</small></a>' +
+        '<a href="/features#forms">Forms & analytics<small>Captures, stats, dashboards</small></a>' +
+      '</div>' +
+      '<div class="mega-group"><h4>Resources</h4>' +
+        '<a href="/faq">FAQ<small>Questions, answered</small></a>' +
+        '<a href="/contact">Contact<small>Talk to a human</small></a>' +
+        '<a href="/app">The editor<small>Open bukkyai and build</small></a>' +
+      '</div>' +
+    '</div>';
+
+  var navHtml = '' +
+    '<div class="nav-inner">' +
+      '<a class="brand" href="/"><span class="brand-mark">b</span>bukkyai</a>' +
+      '<div class="nav-links">' +
+        '<div class="mega-trigger"><button class="nav-link">Product <span class="mega-caret">▼</span></button>' + mega + '</div>' +
+        '<a class="nav-link' + isActive("features") + '" href="/features">Features</a>' +
+        '<a class="nav-link' + isActive("templates") + '" href="/templates">Templates</a>' +
+        '<a class="nav-link' + isActive("pricing") + '" href="/pricing">Pricing</a>' +
+        '<a class="nav-link' + isActive("faq") + '" href="/faq">FAQ</a>' +
+      '</div>' +
+      '<div class="nav-cta">' +
+        '<a class="btn btn-ghost" href="/app">Log in</a>' +
+        '<a class="btn btn-primary" href="/app">Get started</a>' +
+      '</div>' +
+      '<button class="nav-burger" aria-label="Menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>' +
+    '</div>' +
+    '<div class="mobile-menu">' +
+      '<span class="m-group-title">Product</span>' +
+      '<a href="/features">Website builder</a>' +
+      '<a href="/templates">Templates</a>' +
+      '<a href="/pricing">Pricing</a>' +
+      '<span class="m-group-title">Resources</span>' +
+      '<a href="/faq">FAQ</a>' +
+      '<a href="/contact">Contact</a>' +
+      '<a class="btn btn-primary" href="/app">Get started</a>' +
+      '<a class="btn btn-ghost" href="/app">Log in</a>' +
+    '</div>';
+
+  var footHtml = '' +
+    '<div class="wrap">' +
+      '<div class="foot">' +
+        '<div class="brand-col">' +
+          '<a class="brand" href="/"><span class="brand-mark">b</span>bukkyai</a>' +
+          '<p class="brand-desc">Describe your business. bukkyai plans, designs and writes your entire website — then you own it forever.</p>' +
+        '</div>' +
+        '<div><h4>Product</h4><a href="/features">Features</a><a href="/templates">Templates</a><a href="/pricing">Pricing</a><a href="/app">Open editor</a></div>' +
+        '<div><h4>Resources</h4><a href="/faq">FAQ</a><a href="/contact">Contact</a></div>' +
+        '<div><h4>Company</h4><span style="font-size:13px;color:var(--faint)">Designed by Kaywebservice Enterprise Solutions</span></div>' +
+      '</div>' +
+      '<div class="foot-bottom">' +
+        '<span>© <span id="year"></span> bukkyai</span>' +
+        '<span>Designed by Kaywebservice Enterprise Solutions</span>' +
+      '</div>' +
+    '</div>';
+
+  document.write('<nav class="nav" id="bk-nav">' + navHtml + '</nav>');
+  document.write('<footer>' + footHtml + '</footer>');
+
+  var burger = document.querySelector(".nav-burger");
+  var mobileMenu = document.querySelector(".mobile-menu");
+  if (burger && mobileMenu) {
+    burger.addEventListener("click", function () {
+      mobileMenu.classList.toggle("open");
+    });
+  }
+  document.getElementById("year").textContent = new Date().getFullYear();
+})();

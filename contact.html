@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Contact — bukkyai</title>
+<meta name="description" content="Contact bukkyai — support, questions, partnerships and feedback. We reply within a day." />
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="icon" href="/icon-192.png" />
+<meta name="theme-color" content="#f7f3ea" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/marketing.css" />
+</head>
+<body>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Contact</span>
+    <h1>Talk to a human.</h1>
+    <p>Questions, feedback, partnerships or just to say hi — we answer within a day.</p>
+  </div>
+</header>
+
+<section style="padding-top: 20px">
+  <div class="wrap">
+    <div class="contact-info">
+      <div class="card"><div class="icon">📧</div><b>Email</b><span>support@bukkyai.com</span></div>
+      <div class="card"><div class="icon">🐦</div><b>Community</b><span>Discord + X</span></div>
+      <div class="card"><div class="icon">🏢</div><b>Company</b><span>Kaywebservice Enterprise Solutions</span></div>
+    </div>
+
+    <form class="contact-form" action="https://formspree.io/f/yourformid" method="POST">
+      <label for="name">Your name</label>
+      <input id="name" name="name" type="text" required placeholder="Jane Doe" />
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required placeholder="you@email.com" />
+      <label for="topic">Topic</label>
+      <input id="topic" name="topic" type="text" placeholder="Support, partnership, feedback…" />
+      <label for="message">Message</label>
+      <textarea id="message" name="message" required placeholder="Tell us what you need…"></textarea>
+      <button class="btn btn-primary" type="submit">Send message</button>
+      <p style="font-size:12px;color:var(--faint);text-align:center">Tip: open the editor for instant help — the AI assistant knows your site.</p>
+    </form>
+  </div>
+</section>
+
+<script src="/marketing.js"></script>
+</body>
+</html>
