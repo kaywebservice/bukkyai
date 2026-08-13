@@ -1261,3 +1261,79 @@ input[type="range"] {
   border-radius: 50%;
   background: var(--chrome-accent);
 }
+
+/* ── Onboarding tour ───────────────────────────────────────────── */
+.tour-root {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+}
+.tour-shade {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 8, 14, 0.6);
+}
+.tour-highlight {
+  position: absolute;
+  border: 2px solid var(--chrome-accent);
+  border-radius: 10px;
+  box-shadow: 0 0 0 9999px rgba(8, 8, 14, 0.6), 0 8px 30px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
+}
+.tour-tip {
+  position: absolute;
+  width: 300px;
+  max-width: calc(100vw - 40px);
+  background: var(--chrome-panel);
+  border: 1px solid var(--chrome-border);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: var(--chrome-shadow);
+  color: var(--chrome-text);
+  z-index: 5001;
+}
+.tour-step-dots {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+.tour-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--chrome-border);
+}
+.tour-dot.active {
+  background: var(--chrome-accent);
+}
+.tour-title {
+  font-weight: 800;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.tour-body {
+  font-size: 13px;
+  color: var(--chrome-muted);
+  line-height: 1.55;
+}
+.tour-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+.tour-back {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  background: none;
+  border: none;
+  color: var(--chrome-faint);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+.tour-back:hover {
+  color: var(--chrome-muted);
+}

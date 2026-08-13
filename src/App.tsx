@@ -93,6 +93,7 @@ import AnalyticsView from "./components/AnalyticsView";
 import AuthModal from "./components/AuthModal";
 import StarterGallery from "./components/StarterGallery";
 import ShareModal from "./components/ShareModal";
+import OnboardingTour, { tourCompleted, markTourDone, type TourStep } from "./components/OnboardingTour";
 import PricingModal from "./components/PricingModal";
 import { starterById } from "./lib/starterSites";
 
@@ -106,6 +107,7 @@ export default function App() {
   const [cursor, setCursor] = useState(-1);
   const [invites, setInvites] = useState<{ id: string; name: string; role: string }[]>([]);
   const [shareOpen, setShareOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const [pageIdx, setPageIdx] = useState(0);
   const [selected, setSelected] = useState<{ p: number; s: number } | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -148,6 +150,11 @@ export default function App() {
       setAuthUid(u?.uid ?? null);
       setAuthEmail(u?.email ?? null);
     });
+  }, []);
+
+  // First-run onboarding tour — auto-shows once, re-openable via Help.
+  useEffect(() => {
+    if (!tourCompleted()) setTourOpen(true);
   }, []);
 
   // Pull cloud projects into the local list when signed in + sync on
@@ -1213,6 +1220,50 @@ export default function App() {
   const page = doc?.pages[pageIdx];
   const hasPages = Boolean(doc && doc.pages.length > 0);
 
+  const tourSteps: TourStep[] = [
+    {
+      target: ".welcome",
+      title: "Welcome to bukkyai",
+      body: "Describe your business in a sentence — bukkyai plans your site, designs a design system, and writes every page. This is where it all starts.",
+      action: () => {
+        if (projectId) setTab("chat");
+      },
+    },
+    {
+      target: ".brief-input",
+      title: "Write your brief",
+      body: "Type what your site is about here — e.g. \"a bakery in Austin called June & Oak, warm and artisanal\". Then hit Plan my site.",
+      align: "below",
+    },
+    {
+      target: ".app-main .left-rail",
+      title: "Pages & sections",
+      body: "Your pages and sections live here. Add new sections from templates, reorder them, or delete ones you don't need.",
+      align: "right",
+    },
+    {
+      target: ".preview-area",
+      title: "The live preview",
+      body: "This is your site, rendered live. Flip on Edit mode to click any text and edit it directly, or switch between desktop/tablet/mobile.",
+      align: "above",
+    },
+    {
+      target: ".right-panel .tabs",
+      title: "Design & content tabs",
+      body: "Everything you tweak lives here: Design (colors, fonts), Media, Code, Inspect, Plan, History, Blog posts, SEO, Analytics.",
+      align: "above",
+    },
+    {
+      target: ".header",
+      title: "Export & publish",
+      body: "When you're ready, use Export or Publish & share from the header to get a live link, a zip, or a React project. You're all set — go build something great.",
+      align: "below",
+      action: () => {
+        if (projectId) setTab("chat");
+      },
+    },
+  ];
+
   return (
     <div className="app">
       <Header
@@ -1273,6 +1324,7 @@ export default function App() {
         onShare={authUid && cloudOn ? () => setShareOpen(true) : undefined}
         invites={invites.length}
         onAcceptInvites={invites.length ? async () => { for (const i of invites) await acceptInviteHandler(i.id); } : undefined}
+        onHelp={() => setTourOpen(true)}
       />
       {shareOpen && (
         <ShareModal
@@ -1597,6 +1649,14 @@ export default function App() {
       {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
       {starterOpen && <StarterGallery onPick={pickStarter} onClose={() => setStarterOpen(false)} />}
       {pricingOpen && <PricingModal onClose={() => setPricingOpen(false)} onBuy={buyPro} configured={Boolean(paymentLink())} />}
+      <OnboardingTour
+        active={tourOpen}
+        steps={tourSteps}
+        onClose={() => {
+          setTourOpen(false);
+          markTourDone();
+        }}
+      />
     </div>
   );
 }
