@@ -88,8 +88,8 @@ export default function Header(p: Props) {
   return (
     <div className="header">
       <div className="brand">
-        <span className="brand-mark">b</span>
-        <span>bukkyai</span>
+        <span className="brand-mark">k</span>
+        <span>Kaywebservice</span>
       </div>
 
       <div className="project-picker">

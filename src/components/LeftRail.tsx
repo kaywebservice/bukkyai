@@ -97,7 +97,7 @@ export default function LeftRail(p: Props) {
           {p.pageIdx === pi && <AddSectionSelect doc={p.doc} pageIdx={pi} onAdd={p.onAddSection} onAddTemplate={p.onAddSectionTemplate} />}
         </div>
       ))}
-      <div className="rail-title">Why bukkyai</div>
+      <div className="rail-title">Why Kaywebservice</div>
       <div style={{ fontSize: 11.5, color: "var(--chrome-faint)", lineHeight: 1.55 }}>
         Unlimited edits, no credits. Every AI action is a checkpoint — jump back anytime. Your site is a
         plain JSON document you can export and own forever. Drag sections to reorder or move between pages.

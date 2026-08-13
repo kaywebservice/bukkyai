@@ -1,7 +1,7 @@
 import { sampleProject } from "./blueprint";
 import { renderPage, renderStaticSite, renderMaintenance } from "./render";
 import { renderCss } from "./renderCss";
-import { singleFileHtml } from "./export";
+import { singleFileHtml, multiPageHtml } from "./export";
 import { contrastRatio } from "./color";
 import { FULL_TEMPLATES } from "./templatesFull";
 
@@ -134,6 +134,7 @@ export function runSmoke(): SmokeResult {
     ["Full templates build and render (6, multi-page)", templatesOk],
     ["Maintenance mode renders coming-soon page", maintenanceHtml.includes("Back soon") && maintenanceHtml.includes("x@y.com")],
     ["Maintenance mode publishes single index.html", maintenanceFiles.length === 1 && maintenanceFiles[0].path === "index.html"],
+    ["Multi-page browser preview embeds all pages", multiPageHtml(doc).includes("bk-pages") && multiPageHtml(doc).includes("var pages =")],
     ["Contrast math sane", contrastRatio("#241a12", "#f7f2ea") > 7],
   ];
 

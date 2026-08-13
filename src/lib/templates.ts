@@ -445,7 +445,7 @@ export const SECTION_TEMPLATES: SectionTemplate[] = [
       { icon: "mail", label: "Email", href: "#contact" },
     ],
     copyright: `© ${new Date().getFullYear()} Example Co.`,
-    note: "Built with bukkyai. Own your site, always.",
+    note: "Designed by Kaywebservice Enterprise Solutions. Own your site, always.",
   })),
 ];
 

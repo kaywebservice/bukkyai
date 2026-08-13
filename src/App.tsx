@@ -309,7 +309,7 @@ export default function App() {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
           body: new URLSearchParams({
-            _subject: `You've been invited to collaborate on "${proj?.name ?? "a bukkyai site"}"`,
+            _subject: `You've been invited to collaborate on "${proj?.name ?? "a Kaywebservice site"}"`,
             email,
             message: `You've been invited as a ${role}. Open ${inviteLink}, sign in with this email, and accept the invite to start editing.`,
           }).toString(),
@@ -1266,7 +1266,7 @@ export default function App() {
       return;
     }
     runBusy("Backing up to GitHub…", async () => {
-      const title = doc.meta.title || "bukkyai site";
+      const title = doc.meta.title || "Kaywebservice site";
       const res = await backupToGithub(settings.githubToken!, doc, title);
       if (res.error) pushMsg({ role: "assistant", text: res.error, kind: "error" });
       else {
@@ -1351,8 +1351,8 @@ export default function App() {
   const tourSteps: TourStep[] = [
     {
       target: ".welcome",
-      title: "Welcome to bukkyai",
-      body: "Describe your business in a sentence — bukkyai plans your site, designs a design system, and writes every page. This tour walks you through every feature.",
+      title: "Welcome to Kaywebservice",
+      body: "Describe your business in a sentence — Kaywebservice plans your site, designs a design system, and writes every page. This tour walks you through every feature.",
       prepare: () => { if (!projectId) setTab("chat"); },
     },
     {
@@ -1394,7 +1394,7 @@ export default function App() {
     {
       target: ".right-panel .tabs button:nth-child(1)",
       title: "7. Chat",
-      body: "Ask anything about your site or type an instruction — \"make the hero CTA red\" — and bukkyai edits the blueprint for you.",
+      body: "Ask anything about your site or type an instruction — \"make the hero CTA red\" — and Kaywebservice edits the blueprint for you.",
       align: "below",
       prepare: () => setTab("chat"),
     },
@@ -1429,7 +1429,7 @@ export default function App() {
     {
       target: ".right-panel .tabs button:nth-child(6)",
       title: "12. Plan",
-      body: "See the site structure bukkyai planned — pages and their sections — before or after building.",
+      body: "See the site structure Kaywebservice planned — pages and their sections — before or after building.",
       align: "below",
       prepare: () => setTab("plan"),
     },
@@ -1623,16 +1623,16 @@ export default function App() {
               </button>
             </div>
             <button
-              className="btn btn-sm"
+              className="btn btn-sm btn-primary"
               onClick={() => {
                 if (doc) {
                   void publishPreview(doc);
-                  showToast("Preview opened in a new tab");
+                  showToast("Opened in browser");
                 }
               }}
-              title="Open preview in a new tab"
+              title="Open your design in a real browser tab"
             >
-              ↗
+              ↗ View in browser
             </button>
             <button className="btn btn-sm" onClick={toggleFullscreen} title="Fullscreen preview">
               ⛶
@@ -1684,7 +1684,7 @@ export default function App() {
                 <h1>
                   Describe your site.
                   <br />
-                  <span className="grad">bukkyai builds it.</span>
+                  <span className="grad">Kaywebservice builds it.</span>
                 </h1>
                 <p>A plan first, then a bespoke design system, then every section written for real. Unlimited edits. No credits. You own everything.</p>
                 <textarea

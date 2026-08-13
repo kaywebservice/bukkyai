@@ -131,7 +131,7 @@ const EDITOR_SCRIPT = `(function () {
 
 export default function Preview(p: Props) {
   const page = p.doc.pages[p.pageIdx];
-  const html = page ? renderPage(p.doc, page, p.editMode) : "<!doctype html><title>bukkyai</title>";
+  const html = page ? renderPage(p.doc, page, p.editMode) : "<!doctype html><title>Kaywebservice</title>";
   const editorInj = p.editMode ? `<script>${EDITOR_SCRIPT}</script>` : "";
   const srcDoc = html.replace(/<\/head>/, `<style>${INJECT}</style></head>`).replace(/<\/body>/, `${editorInj}</body>`);
   const wrapWidth = DEVICE[p.device];

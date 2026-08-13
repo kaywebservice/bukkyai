@@ -37,7 +37,7 @@ export default function InstallAppButton() {
         if (choice.outcome === "accepted") setInstalled(true);
         setDeferred(null);
       }}
-      title="Install bukkyai on this device"
+      title="Install Kaywebservice on this device"
     >
       Install app
     </button>
