@@ -73,8 +73,9 @@ export default {
     if (request.method !== "POST") {
       return json({ error: "POST only" }, 405, cors());
     }
+    const raw = await request.text();
     let body;
-    try { body = await request.json(); } catch {
+    try { body = JSON.parse(raw); } catch {
       return json({ error: "Invalid JSON" }, 400, cors());
     }
 
@@ -114,7 +115,6 @@ export default {
       if (!env.CREEM_WEBHOOK_SECRET) {
         return json({ error: "Webhook secret not configured." }, 503, cors());
       }
-      const raw = await request.text();
       const sig = request.headers.get("creem-signature");
       if (!sig) return json({ error: "Missing creem-signature header." }, 401, cors());
       const expected = await sha256Hex(env.CREEM_WEBHOOK_SECRET, raw);
