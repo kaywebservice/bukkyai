@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useFocusTrap } from "../lib/useFocusTrap";
 
 type Props = {
   onClose: () => void;
@@ -15,17 +15,10 @@ const SHORTCUTS: { keys: string; label: string }[] = [
 ];
 
 export default function ShortcutsModal(p: Props) {
-  useEffect(() => {
-    const esc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") p.onClose();
-    };
-    document.addEventListener("keydown", esc);
-    return () => document.removeEventListener("keydown", esc);
-  }, [p.onClose]);
-
+  const modalRef = useFocusTrap(true, p.onClose);
   return (
     <div className="modal-overlay" onClick={p.onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
+      <div className="modal" ref={modalRef} role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
         <div className="inspector-head">
           <h2 style={{ margin: 0, fontSize: 17 }}>Keyboard shortcuts</h2>
           <button className="btn btn-sm btn-ghost" onClick={p.onClose}>Close</button>

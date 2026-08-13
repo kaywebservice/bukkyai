@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Post } from "../lib/types";
 import { uid } from "../lib/blueprint";
 import { parseMarkdown, slugify } from "../lib/markdown";
+import EmptyState from "./EmptyState";
 
 type Props = {
   posts: Post[];
@@ -142,16 +143,9 @@ export default function PostsView(p: Props) {
       {!editing && (
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {p.posts.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">✍️</div>
-              <b>No posts yet</b>
-              <p>Write one yourself, import a Markdown file, or let AI draft three in your site's voice.</p>
-              {p.onGeneratePosts && (
-                <button className="btn btn-primary" onClick={p.onGeneratePosts} disabled={p.busy}>
-                  ✦ Write 3 with AI
-                </button>
-              )}
-            </div>
+            <EmptyState icon="blog" title="No posts yet" action={p.onGeneratePosts ? <button className="btn btn-primary" onClick={p.onGeneratePosts} disabled={p.busy}>✦ Write 3 with AI</button> : undefined}>
+              Write one yourself, import a Markdown file, or let AI draft three in your site's voice.
+            </EmptyState>
           ) : (
             p.posts.map((post) => (
               <div key={post.id} className="inspector-section" style={{ padding: 10, cursor: "pointer" }} onClick={() => setEditingId(post.id)}>

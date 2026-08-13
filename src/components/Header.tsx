@@ -55,6 +55,36 @@ export default function Header(p: Props) {
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
+  // Keyboard nav for the export dropdown: arrow keys + Enter + Escape.
+  useEffect(() => {
+    if (!exportOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      const pop = ref.current?.querySelector(".export-pop");
+      if (!pop) return;
+      const items = Array.from(pop.querySelectorAll("button")) as HTMLButtonElement[];
+      const active = document.activeElement as HTMLButtonElement | null;
+      const idx = items.indexOf(active as HTMLButtonElement);
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        items[(idx + 1) % items.length]?.focus();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        items[(idx - 1 + items.length) % items.length]?.focus();
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        items[0]?.focus();
+      } else if (e.key === "End") {
+        e.preventDefault();
+        items[items.length - 1]?.focus();
+      } else if (e.key === "Escape") {
+        setExportOpen(false);
+        (pop.closest(".export-menu")?.querySelector("button") as HTMLButtonElement)?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [exportOpen]);
+
   return (
     <div className="header">
       <div className="brand">

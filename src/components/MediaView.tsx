@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { MediaAsset } from "../lib/store";
+import EmptyState from "./EmptyState";
 
 type Props = {
   assets: MediaAsset[];
@@ -48,15 +49,9 @@ export default function MediaView(p: Props) {
       )}
 
       {!p.assets.length ? (
-        <div className="empty-state">
-          <div className="empty-icon">🖼️</div>
-          <b>No images yet</b>
-          <p>Upload a photo or generate one with AI — it'll be optimized and hosted automatically.</p>
-          <label className="btn btn-primary" style={{ cursor: "pointer" }}>
-            ↑ Upload image
-            <input type="file" accept="image/*" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) p.onUpload(f); }} />
-          </label>
-        </div>
+        <EmptyState icon="image" title="No images yet" action={<label className="btn btn-primary" style={{ cursor: "pointer" }}>↑ Upload image<input type="file" accept="image/*" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) p.onUpload(f); }} /></label>}>
+          Upload a photo or generate one with AI — it'll be optimized and hosted automatically.
+        </EmptyState>
       ) : visible.length === 0 ? (
         <div className="settings-note" style={{ marginTop: 8 }}>No images match “{q}”.</div>
       ) : (

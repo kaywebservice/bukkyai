@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useFocusTrap } from "../lib/useFocusTrap";
 
 type Props = {
   projectName: string;
@@ -10,6 +11,7 @@ export default function ShareModal(p: Props) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"editor" | "viewer">("editor");
   const [status, setStatus] = useState("");
+  const modalRef = useFocusTrap(true, p.onClose);
 
   const submit = async () => {
     const res = await p.onShare(email, role);
@@ -23,7 +25,7 @@ export default function ShareModal(p: Props) {
 
   return (
     <div className="modal-overlay" onClick={p.onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
+      <div className="modal" ref={modalRef} role="dialog" aria-modal="true" aria-label="Share project" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
         <h2>Share project</h2>
         <div className="settings-note" style={{ marginBottom: 12 }}>
           Invite a collaborator to “{p.projectName}”. They'll see it in their project list when they sign in

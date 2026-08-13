@@ -1,3 +1,5 @@
+import { useFocusTrap } from "../lib/useFocusTrap";
+
 type Props = {
   onClose: () => void;
   onBuy: () => void;
@@ -11,10 +13,11 @@ type Props = {
 };
 
 export default function PricingModal(p: Props) {
+  const modalRef = useFocusTrap(true, p.onClose);
   const plan = p.pro ? "Pro" : "Free";
   return (
     <div className="modal-overlay" onClick={p.onClose}>
-      <div className="modal pricing-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal pricing-modal" ref={modalRef} role="dialog" aria-modal="true" aria-label="Pricing" onClick={(e) => e.stopPropagation()}>
         <div className="inspector-head">
           <h2 style={{ margin: 0, fontSize: 18 }}>bukkyai</h2>
           <button className="btn btn-sm btn-ghost" onClick={p.onClose}>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { LLMSettings } from "../lib/types";
 import { defaultModel } from "../lib/llm";
 import FieldHint from "./FieldHint";
+import { useFocusTrap } from "../lib/useFocusTrap";
 
 type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; popupTrigger?: "time" | "exit" | "scroll"; popupScrollPct?: number; customFonts?: string; emailServiceProvider?: string; emailServiceEndpoint?: string; emailServiceApiKey?: string; emailServiceListId?: string; coupons?: string; orderNotify?: string; maintenanceEnabled?: boolean; maintenanceTitle?: string; maintenanceText?: string; maintenanceEmail?: string };
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
 
 export default function SettingsModal(p: Props) {
   const [s, setS] = useState(p.settings);
+  const modalRef = useFocusTrap(true, p.onClose);
   const [meta, setMeta] = useState({
     password: p.siteMeta?.password ?? "",
     stripePaymentLink: p.siteMeta?.stripePaymentLink ?? "",
@@ -60,7 +62,7 @@ export default function SettingsModal(p: Props) {
 
   return (
     <div className="modal-overlay" onClick={p.onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal" ref={modalRef} role="dialog" aria-modal="true" aria-label="Settings" onClick={(e) => e.stopPropagation()}>
         <h2>Settings</h2>
 
         <div className="panel-label">AI provider (your key stays local)</div>

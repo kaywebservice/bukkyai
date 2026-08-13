@@ -3,6 +3,7 @@ import type { Section, SectionContent, SectionMotion, SectionType, SiteBlueprint
 import { MOTION_OPTIONS } from "../lib/types";
 import { SECTION_LABEL } from "../lib/blueprint";
 import type { MediaAsset } from "../lib/store";
+import EmptyState from "./EmptyState";
 
 type Props = {
   doc: SiteBlueprint;
@@ -256,11 +257,9 @@ export default function Inspector(p: Props) {
   const [genBusy, setGenBusy] = useState<string | null>(null);
   if (!page || !section) {
     return (
-      <div className="empty-state">
-        <div className="empty-icon">🎯</div>
-        <b>Nothing selected</b>
-        <p>Turn on Edit mode and click a section in the preview — or pick one in the left rail — to inspect and edit every field here.</p>
-      </div>
+      <EmptyState icon="target" title="Nothing selected">
+        Turn on Edit mode and click a section in the preview — or pick one in the left rail — to inspect and edit every field here.
+      </EmptyState>
     );
   }
 

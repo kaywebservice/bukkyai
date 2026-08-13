@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { STARTER_SITES } from "../lib/starterSites";
 import { FULL_TEMPLATES } from "../lib/templatesFull";
+import { useFocusTrap } from "../lib/useFocusTrap";
 
 type Props = {
   onPick: (starterId: string | null, name: string) => void;
@@ -13,10 +14,11 @@ export default function StarterGallery(p: Props) {
   const [name, setName] = useState("My new site");
   const [category, setCategory] = useState("All");
   const [showFull, setShowFull] = useState(false);
+  const modalRef = useFocusTrap(true, p.onClose);
   const visible = category === "All" ? FULL_TEMPLATES : FULL_TEMPLATES.filter((t) => t.category === category);
   return (
     <div className="modal-overlay" onClick={p.onClose}>
-      <div className="modal starter-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal starter-modal" ref={modalRef} role="dialog" aria-modal="true" aria-label="New site" onClick={(e) => e.stopPropagation()}>
         <div className="inspector-head">
           <h2 style={{ margin: 0, fontSize: 17 }}>New site</h2>
           <button className="btn btn-sm btn-ghost" onClick={p.onClose}>

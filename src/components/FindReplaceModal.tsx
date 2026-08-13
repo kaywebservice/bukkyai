@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { SiteBlueprint } from "../lib/types";
+import { useFocusTrap } from "../lib/useFocusTrap";
 
 type Props = {
   doc: SiteBlueprint;
@@ -25,6 +26,7 @@ function replaceInValue(value: unknown, find: string, replace: string): unknown 
 export default function FindReplaceModal(p: Props) {
   const [find, setFind] = useState("");
   const [replace, setReplace] = useState("");
+  const modalRef = useFocusTrap(true, p.onClose);
 
   const preview = (): number => {
     if (!find) return 0;
@@ -43,7 +45,7 @@ export default function FindReplaceModal(p: Props) {
 
   return (
     <div className="modal-overlay" onClick={p.onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
+      <div className="modal" ref={modalRef} role="dialog" aria-modal="true" aria-label="Find and replace" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
         <div className="inspector-head">
           <h2 style={{ margin: 0, fontSize: 17 }}>Find & replace</h2>
           <button className="btn btn-sm btn-ghost" onClick={p.onClose}>Close</button>

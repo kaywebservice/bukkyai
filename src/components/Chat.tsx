@@ -40,8 +40,10 @@ export default function Chat(p: Props) {
         )}
         {p.busy && (
           <div className="msg msg-assistant">
-            <div className="msg-bubble">
-              <span className="chat-stream-cursor">▊</span>
+            <div className="skeleton-chat" style={{ padding: "10px 13px", background: "var(--chrome-panel2)", border: "1px solid var(--chrome-border)", borderRadius: 12 }}>
+              <div className="skeleton skeleton-line" style={{ width: "88%" }} />
+              <div className="skeleton skeleton-line" style={{ width: "70%" }} />
+              <div className="skeleton skeleton-line short" />
             </div>
           </div>
         )}
