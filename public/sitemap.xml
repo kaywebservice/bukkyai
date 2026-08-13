@@ -5,12 +5,23 @@
   <url><loc>https://bukkyai.duckdns.org/templates</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://bukkyai.duckdns.org/tools</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://bukkyai.duckdns.org/made-with</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/playground</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://bukkyai.duckdns.org/pricing</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://bukkyai.duckdns.org/faq</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://bukkyai.duckdns.org/contact</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/badge</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/blog/how-to-write-a-website-brief</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/blog/why-good-design-system-beats-template</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/blog/writing-homepage-that-sells</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/compare</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/compare/carrd</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/compare/elementor</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/compare/framer</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/compare/godaddy</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/compare/lovable</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/compare/squarespace</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://bukkyai.duckdns.org/compare/webflow</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/compare/wix</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/compare/wordpress</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://bukkyai.duckdns.org/how-to/make-a-portfolio</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>

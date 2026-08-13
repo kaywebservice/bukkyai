@@ -127,6 +127,11 @@ export default {
         || (tier === "plus" ? env.CREEM_PLUS_PRODUCT_ID : "")
         || env.CREEM_PRODUCT_ID
         || "prod_48AX6fRL1MUIcYUivSHtKa";
+      const ref = (body.ref || "").trim();
+      if (ref && env.ENTITLEMENTS) {
+        const rec = JSON.parse((await env.ENTITLEMENTS.get(`ref:code:${ref}`)) || "null");
+        if (rec) await env.ENTITLEMENTS.put(`ref:user:${email}`, ref);
+      }
       const api = env.CREEM_TEST_MODE === "1" ? "https://test-api.creem.io" : "https://api.creem.io";
       const res = await fetch(`${api}/v1/checkouts`, {
         method: "POST",
@@ -174,6 +179,17 @@ export default {
       if (email) {
         if (["checkout.completed", "subscription.active", "subscription.paid"].includes(type)) {
           await setEntitlement(env, email, true, tier);
+          // Referral: if the buyer arrived via a referral code, credit the referrer.
+          if (env.ENTITLEMENTS) {
+            const refCode = await env.ENTITLEMENTS.get(`ref:user:${email}`);
+            if (refCode) {
+              const rec = JSON.parse((await env.ENTITLEMENTS.get(`ref:code:${refCode}`)) || "null");
+              if (rec) {
+                await env.ENTITLEMENTS.put(`ref:code:${refCode}`, JSON.stringify({ ...rec, conversions: (rec.conversions || 0) + 1 }));
+                await env.ENTITLEMENTS.put(`ref:conv:${email}`, refCode);
+              }
+            }
+          }
         } else if (["subscription.canceled", "subscription.past_due", "subscription.expired", "refund.created", "dispute.created"].includes(type)) {
           await setEntitlement(env, email, false);
         }
@@ -186,6 +202,46 @@ export default {
       const email = (body.email || "").trim();
       if (!email) return json({ active: false }, 200, cors());
       return json(await getEntitlement(env, email), 200, cors());
+    }
+
+    // ── Referral program ──────────────────────────────────────────────────────
+    // Create/fetch a referral code for an account.
+    if (path === "/api/referral" && request.method === "POST") {
+      const email = (body.email || "").trim().toLowerCase();
+      if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+        return json({ error: "Valid email required." }, 400, cors());
+      }
+      if (!env.ENTITLEMENTS) return json({ error: "Referrals not configured." }, 503, cors());
+      let code = await env.ENTITLEMENTS.get(`ref:owner:${email}`);
+      if (!code) {
+        code = "bk" + Math.random().toString(36).slice(2, 8);
+        await env.ENTITLEMENTS.put(`ref:owner:${email}`, code);
+        const owner = await getEntitlement(env, email);
+        await env.ENTITLEMENTS.put(`ref:code:${code}`, JSON.stringify({ owner: email, count: 0, since: Date.now(), tier: owner.tier || "free" }));
+      }
+      const rec = JSON.parse((await env.ENTITLEMENTS.get(`ref:code:${code}`)) || "{}");
+      return json({ code, count: rec.count || 0, since: rec.since || null }, 200, cors());
+    }
+
+    // Record a visit from a referral link.
+    if (path === "/api/referral/visit" && request.method === "POST") {
+      const code = (body.code || "").trim();
+      if (!code || !env.ENTITLEMENTS) return json({ error: "Invalid referral." }, 400, cors());
+      const rec = JSON.parse((await env.ENTITLEMENTS.get(`ref:code:${code}`)) || "null");
+      if (!rec) return json({ error: "Unknown referral code." }, 404, cors());
+      const count = (rec.count || 0) + 1;
+      await env.ENTITLEMENTS.put(`ref:code:${code}`, JSON.stringify({ ...rec, count, lastVisit: Date.now() }));
+      return json({ code, count, owner: (rec.owner || "").replace(/(.).+@/, "$1***@") }, 200, cors());
+    }
+
+    // Referrer stats for an account (code + click count + referrals).
+    if (path === "/api/referral/stats" && request.method === "POST") {
+      const email = (body.email || "").trim().toLowerCase();
+      if (!email || !env.ENTITLEMENTS) return json({ stats: null }, 200, cors());
+      const code = await env.ENTITLEMENTS.get(`ref:owner:${email}`);
+      if (!code) return json({ stats: null }, 200, cors());
+      const rec = JSON.parse((await env.ENTITLEMENTS.get(`ref:code:${code}`)) || "{}");
+      return json({ stats: { code, count: rec.count || 0, conversions: rec.conversions || 0, since: rec.since || null } }, 200, cors());
     }
 
     // ── Publish (legacy path stays; license check only when Creem is unset) ──

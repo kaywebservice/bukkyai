@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blog — bukkyai</title>
+<meta name="description" content="Practical guides on building a website for your business: writing a great brief, planning pages, choosing a builder, and more — from the bukkyai team." />
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="icon" href="/icon-192.png" />
+<meta name="theme-color" content="#f7f3ea" />
+<meta name="google-site-verification" content="vzREjfhomsn9KoFEywBS7ebsa7Wo-ttVmnc8jPh7l70" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/marketing.css" />
+<style>
+  .blog-hero { padding: 84px 0 36px; text-align: center; }
+  .blog-hero h1 { font-family: var(--font-display); font-size: clamp(34px, 5vw, 52px); letter-spacing: -.02em; margin-bottom: 14px; }
+  .blog-hero p { color: var(--muted); font-size: 17px; max-width: 620px; margin: 0 auto; }
+  .blog-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+  .blog-card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 26px; display: flex; flex-direction: column; transition: transform .15s, box-shadow .15s; }
+  .blog-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  .blog-card .meta { font-size: 12px; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+  .blog-card h2 { font-family: var(--font-display); font-size: 22px; margin: 10px 0 8px; line-height: 1.25; }
+  .blog-card h2 a { color: var(--text); text-decoration: none; }
+  .blog-card h2 a:hover { color: var(--accent); }
+  .blog-card p { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 0 0 16px; }
+  .blog-card .read { font-size: 13px; font-weight: 700; color: var(--accent); margin-top: auto; }
+  @media (max-width: 760px) { .blog-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="blog-hero">
+  <div class="wrap">
+    <span class="eyebrow">The bukkyai blog</span>
+    <h1>Build a website you're proud of.</h1>
+    <p>Practical, honest guides on planning, writing and designing a business website — the same ideas bukkyai uses to build your site in minutes.</p>
+  </div>
+</header>
+
+<section style="padding-top: 10px; padding-bottom: 30px">
+  <div class="wrap" style="max-width: 900px">
+
+    <div class="blog-grid">
+
+      <article class="blog-card">
+        <div class="meta">Planning</div>
+        <h2><a href="/blog/how-to-write-a-website-brief">How to write a website brief that gets you the right site</a></h2>
+        <p>The single most important paragraph when you build a website is the first one. Here's how to describe your business so the site that comes back actually sounds like you.</p>
+        <span class="read">Read the guide →</span>
+      </article>
+
+      <article class="blog-card">
+        <div class="meta">Design</div>
+        <h2><a href="/blog/why-good-design-system-beats-template">Why a real design system beats choosing a template</a></h2>
+        <p>Colors, fonts and spacing done consistently make a site look like a business, not a template. Here's what a design system is — and why yours should be yours.</p>
+        <span class="read">Read the guide →</span>
+      </article>
+
+      <article class="blog-card">
+        <div class="meta">Copy</div>
+        <h2><a href="/blog/writing-homepage-that-sells">Writing a homepage that sells without sounding salesy</a></h2>
+        <p>Headlines, subheads and one clear call to action. The small changes that turn a homepage from "about us" into a page that quietly does its job.</p>
+        <span class="read">Read the guide →</span>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2>Ready to stop reading and start building?</h2>
+    <p>Describe your business in a sentence — bukkyai plans the pages, writes the copy and designs the site.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/app">Build yours free</a>
+    </div>
+  </div>
+</section>
+
+<script src="/marketing.js"></script>
+</body>
+</html>

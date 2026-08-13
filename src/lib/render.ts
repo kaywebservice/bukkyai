@@ -141,7 +141,7 @@ ${page.password && !editingMode ? `<div class="bk-page-gate" data-page-password=
 window.__BKKY__ = ${JSON.stringify({
     posts: doc.posts ?? [],
     password: doc.password || "",
-    stripeLink: doc.stripePaymentLink || (import.meta.env.VITE_DEFAULT_PAYMENT_LINK as string | undefined) || "",
+    stripeLink: doc.stripePaymentLink || (import.meta.env?.VITE_DEFAULT_PAYMENT_LINK as string | undefined) || "",
     formEndpoint: doc.forms?.endpoint || "",
     currency: (doc.pages.flatMap((p) => p.sections).find((s) => s.type === "products")?.content as { currency?: string } | undefined)?.currency || "$",
     translations: doc.languages?.translations || {},
@@ -154,8 +154,8 @@ window.__BKKY__ = ${JSON.stringify({
     orderNotify: doc.orderNotify || "",
     emailService: doc.forms?.emailService || null,
     checkoutPage: doc.stripePaymentLink
-      ? (import.meta.env.VITE_CHECKOUT_PAGE as string | undefined) ||
-        ((import.meta.env.VITE_PUBLISH_ENDPOINT as string | undefined) || "").replace(/\/publish$/, "").replace(/\/+$/, "") + "/checkout"
+      ? (import.meta.env?.VITE_CHECKOUT_PAGE as string | undefined) ||
+        ((import.meta.env?.VITE_PUBLISH_ENDPOINT as string | undefined) || "").replace(/\/publish$/, "").replace(/\/+$/, "") + "/checkout"
       : "",
   })};
 </script>

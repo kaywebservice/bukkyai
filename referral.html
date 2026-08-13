@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>You've been referred to bukkyai — build your website free</title>
+<meta name="description" content="You've been referred to bukkyai, the AI website builder. Describe your business in a sentence — bukkyai plans, designs and writes your whole site. Build free." />
+<meta name="robots" content="noindex" />
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="icon" href="/icon-192.png" />
+<meta name="theme-color" content="#f7f3ea" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/marketing.css" />
+<style>
+  .ref-wrap { max-width: 620px; margin: 0 auto; padding: 90px 0 60px; text-align: center; }
+  .ref-badge { display: inline-block; background: #f3ead9; color: var(--accent); border: 1px solid #e4d3b5; padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 700; margin-bottom: 22px; }
+  .ref-wrap h1 { font-family: var(--font-display); font-size: clamp(32px, 5vw, 48px); letter-spacing: -.02em; line-height: 1.12; margin: 0 0 16px; }
+  .ref-wrap p { color: var(--muted); font-size: 17px; max-width: 500px; margin: 0 auto 28px; }
+  .ref-wrap .btn { padding: 15px 30px; font-size: 16px; }
+  .ref-perks { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 34px; }
+  .ref-perk { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; font-size: 13px; color: var(--muted); max-width: 200px; }
+  .ref-perk b { display: block; color: var(--text); font-size: 14px; margin-bottom: 4px; }
+  #ref-status { margin-top: 18px; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="ref-wrap">
+  <span class="ref-badge">You've been referred to bukkyai</span>
+  <h1>Describe your business. Get the whole website.</h1>
+  <p>bukkyai plans the sitemap, designs your colors and fonts, writes every page of copy — and hands you files you own. Free to build.</p>
+  <a class="btn btn-primary" href="/app?ref=">Build your website free</a>
+  <div id="ref-status"></div>
+  <div class="ref-perks">
+    <div class="ref-perk"><b>One sentence in</b>Type what you do, approve the plan, done.</div>
+    <div class="ref-perk"><b>Written &amp; designed</b>Real copy, real colors, every page covered.</div>
+    <div class="ref-perk"><b>You own it</b>Export open HTML or publish to your domain.</div>
+  </div>
+</div>
+
+<script src="/marketing.js"></script>
+<script>
+  (function () {
+    var ref = new URLSearchParams(location.search).get("ref") || "";
+    if (ref) {
+      var cta = document.querySelector('.ref-wrap .btn');
+      cta.href = "/app?ref=" + encodeURIComponent(ref);
+      var status = document.getElementById("ref-status");
+      status.textContent = "Referral code: " + ref;
+      // Record the visit server-side (best-effort, silent).
+      try {
+        fetch("/api/referral/visit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: ref }),
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          if (d && d.count) status.textContent = "You're the " + (d.count === 1 ? "first" : d.count + "th") + " person here via this link. Welcome!";
+        }).catch(function () {});
+      } catch (e) {}
+    }
+  })();
+</script>
+</body>
+</html>

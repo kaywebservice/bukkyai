@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { readdirSync } from "fs";
 import { join } from "path";
+import { previewsPlugin } from "./scripts/previews-plugin";
 
 const progDir = join(process.cwd(), "programmatic");
 let progInputs = {};
@@ -14,7 +15,7 @@ try {
 }
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), previewsPlugin()],
   build: {
     rollupOptions: {
       input: {
@@ -28,6 +29,13 @@ export default defineConfig({
         contact: "contact.html",
         tools: "tools.html",
         madeWith: "made-with.html",
+        playground: "playground.html",
+        blog: "blog.html",
+        blogBrief: "blog/how-to-write-a-website-brief.html",
+        blogDesign: "blog/why-good-design-system-beats-template.html",
+        blogHomepage: "blog/writing-homepage-that-sells.html",
+        referral: "referral.html",
+        badge: "badge.html",
         ...progInputs,
       },
     },

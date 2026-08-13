@@ -30,6 +30,7 @@ type Props = {
   onAuth: () => void;
   onPricing: () => void;
   onShare?: () => void;
+  onReferral?: () => void;
   invites?: number;
   onAcceptInvites?: () => void;
   onHelp?: () => void;
@@ -216,6 +217,12 @@ export default function Header(p: Props) {
               <button onClick={() => { p.onHelp?.(); setMoreOpen(false); }}>
                 <span className="pop-title">Guided tour</span>
                 <span className="pop-desc">Walk through every feature</span>
+              </button>
+            )}
+            {p.onReferral && (
+              <button onClick={() => { p.onReferral?.(); setMoreOpen(false); }}>
+                <span className="pop-title">Refer &amp; earn</span>
+                <span className="pop-desc">Share your link, earn free Pro time</span>
               </button>
             )}
             <div className="more-pop-sep" />

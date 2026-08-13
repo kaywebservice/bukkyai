@@ -104,6 +104,7 @@ import ThemeGallery from "./components/ThemeGallery";
 import VariantsModal from "./components/VariantsModal";
 import OnboardingTour, { tourCanShow, tourTurnedOff, markTourShown, turnOffTour, type TourStep } from "./components/OnboardingTour";
 import PricingModal from "./components/PricingModal";
+import ReferralModal from "./components/ReferralModal";
 import { starterById } from "./lib/starterSites";
 import { fullTemplateById } from "./lib/templatesFull";
 import type { GeneratedTheme } from "./lib/themeEngine";
@@ -118,6 +119,7 @@ export default function App() {
   const [cursor, setCursor] = useState(-1);
   const [invites, setInvites] = useState<{ id: string; name: string; role: string }[]>([]);
   const [shareOpen, setShareOpen] = useState(false);
+  const [referralOpen, setReferralOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -184,8 +186,15 @@ export default function App() {
   // Open a specific full template from ?template= (used by /made-with demos).
   const pendingTemplate = useRef<string | null>(null);
   useEffect(() => {
-    const tmpl = new URLSearchParams(window.location.search).get("template");
+    const qs = new URLSearchParams(window.location.search);
+    const tmpl = qs.get("template");
     if (tmpl) pendingTemplate.current = tmpl;
+    const ref = qs.get("ref");
+    if (ref) {
+      try {
+        sessionStorage.setItem("bukkyai.ref", ref.slice(0, 64));
+      } catch {}
+    }
   }, []);
   useEffect(() => {
     if (gateOpen) return;
@@ -1656,6 +1665,7 @@ export default function App() {
         onAuth={() => setAuthOpen(true)}
         onPricing={() => setPricingOpen(true)}
         onShare={authUid && cloudOn ? () => setShareOpen(true) : undefined}
+        onReferral={authUid && authEmail ? () => setReferralOpen(true) : undefined}
         invites={invites.length}
         onAcceptInvites={invites.length ? async () => { for (const i of invites) await acceptInviteHandler(i.id); } : undefined}
         onHelp={() => setTourOpen(true)}
@@ -1667,6 +1677,9 @@ export default function App() {
           onShare={shareCurrentProject}
           onClose={() => setShareOpen(false)}
         />
+      )}
+      {referralOpen && authEmail && (
+        <ReferralModal email={authEmail} onClose={() => setReferralOpen(false)} />
       )}
       {findOpen && doc && (
         <FindReplaceModal

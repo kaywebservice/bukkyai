@@ -10,6 +10,7 @@
       '<div class="mega-group"><h4>Build</h4>' +
         '<a href="/features">Website builder<small>Describe it, get a full site</small></a>' +
         '<a href="/templates">Templates<small>6 ready-made multi-page sites</small></a>' +
+'<a href="/playground">Live demos<small>Preview and remix, no signup</small></a>' +
         '<a href="/features#blog">Blog & SEO<small>Posts, sitemap, RSS, JSON-LD</small></a>' +
       '</div>' +
       '<div class="mega-group"><h4>Business</h4>' +
@@ -18,6 +19,7 @@
         '<a href="/features#forms">Forms & analytics<small>Captures, stats, dashboards</small></a>' +
       '</div>' +
       '<div class="mega-group"><h4>Resources</h4>' +
+        '<a href="/blog">Blog<small>Guides on building your site</small></a>' +
         '<a href="/faq">FAQ<small>Questions, answered</small></a>' +
         '<a href="/contact">Contact<small>Talk to a human</small></a>' +
         '<a href="/app">The editor<small>Open bukkyai and build</small></a>' +
@@ -33,7 +35,9 @@
         '<a class="nav-link' + isActive("tools") + '" href="/tools">Tools</a>' +
         '<a class="nav-link' + isActive("templates") + '" href="/templates">Templates</a>' +
         '<a class="nav-link' + isActive("made-with") + '" href="/made-with">Made with</a>' +
+        '<a class="nav-link' + isActive("playground") + '" href="/playground">Try it</a>' +
         '<a class="nav-link' + isActive("pricing") + '" href="/pricing">Pricing</a>' +
+        '<a class="nav-link' + isActive("blog") + '" href="/blog">Blog</a>' +
         '<a class="nav-link' + isActive("faq") + '" href="/faq">FAQ</a>' +
       '</div>' +
       '<div class="nav-cta">' +
@@ -47,9 +51,11 @@
       '<a href="/tools">Free tools</a>' +
       '<a href="/templates">Templates</a>' +
       '<a href="/made-with">Made with bukkyai</a>' +
+      '<a href="/playground">Live demos</a>' +
       '<a href="/pricing">Pricing</a>' +
       '<span class="m-group-title">Resources</span>' +
       '<a href="/faq">FAQ</a>' +
+      '<a href="/blog">Blog</a>' +
       '<a href="/contact">Contact</a>' +
       '<a class="btn btn-primary" href="/app">Get started</a>' +
     '</div>';
@@ -62,7 +68,7 @@
           '<p class="brand-desc">Describe your business. bukkyai plans, designs and writes your entire website — then you own it forever.</p>' +
         '</div>' +
         '<div><h4>Product</h4><a href="/features">Features</a><a href="/templates">Templates</a><a href="/pricing">Pricing</a><a href="/app">Open editor</a></div>' +
-        '<div><h4>Resources</h4><a href="/faq">FAQ</a><a href="/contact">Contact</a></div>' +
+        '<div><h4>Resources</h4><a href="/faq">FAQ</a><a href="/blog">Blog</a><a href="/contact">Contact</a><a href="/badge">Made-with badge</a></div>' +
         '<div><h4>Company</h4><span style="font-size:13px;color:var(--faint)">Designed by Kaywebservice Enterprise Solutions</span></div>' +
       '</div>' +
       '<div class="foot-bottom">' +
@@ -119,6 +125,38 @@
     return { "@type": "Question", name: q ? q.textContent.replace("▾", "").trim() : "", acceptedAnswer: { "@type": "Answer", text: a ? a.textContent.trim() : "" } };
   }).filter(function (x) { return x.name; });
   if (faqItems.length) schema["@graph"].push({ "@type": "FAQPage", mainEntity: faqItems });
+
+  // BreadcrumbList for every page with a path (e.g. /blog/how-to-write-a-website-brief)
+  var crumbs = [];
+  var segs = location.pathname.split("/").filter(Boolean);
+  var acc = "";
+  if (segs.length) {
+    crumbs.push({ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://bukkyai.duckdns.org/" });
+    segs.forEach(function (seg, i) {
+      acc += "/" + seg;
+      var label = seg.replace(/[-_]/g, " ").replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+      var isLast = i === segs.length - 1;
+      var item = isLast ? undefined : { "@id": "https://bukkyai.duckdns.org" + acc };
+      crumbs.push({ "@type": "ListItem", "position": i + 2, "name": label, ...(item || {}) });
+    });
+    schema["@graph"].push({ "@type": "BreadcrumbList", "itemListElement": crumbs });
+  }
+
+  // Article schema on blog posts.
+  var artH1 = document.querySelector(".art h1");
+  if (artH1) {
+    var artMeta = document.querySelector(".art .meta");
+    schema["@graph"].push({
+      "@type": "Article",
+      "headline": artH1.textContent.trim(),
+      "url": "https://bukkyai.duckdns.org" + location.pathname,
+      "description": (document.querySelector('meta[name="description"]') || {}).content || "",
+      "author": { "@type": "Organization", "name": "bukkyai", "@id": "https://bukkyai.duckdns.org/#org" },
+      "publisher": { "@id": "https://bukkyai.duckdns.org/#org" },
+      "mainEntityOfPage": "https://bukkyai.duckdns.org" + location.pathname,
+      "category": artMeta ? artMeta.textContent.trim() : "Blog"
+    });
+  }
   var ld = document.createElement("script");
   ld.type = "application/ld+json";
   ld.textContent = JSON.stringify(schema);

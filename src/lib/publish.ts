@@ -52,11 +52,15 @@ export function setProUnlocked(v: boolean): void {
 export async function startProCheckout(email: string, tier: "pro" | "plus" = "pro"): Promise<{ url?: string; error?: string }> {
   const base = apiBase();
   if (!base) return { error: "Checkout not configured — VITE_PUBLISH_ENDPOINT is empty. Add it to .env (see server/README.md)." };
+  let ref = "";
+  try {
+    ref = sessionStorage.getItem("bukkyai.ref") ?? "";
+  } catch {}
   try {
     const res = await fetch(`${base}/api/checkout`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email, tier }),
+      body: JSON.stringify({ email, tier, ...(ref ? { ref } : {}) }),
     });
     const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
     if (!res.ok) return { error: data.error ?? `Checkout returned ${res.status}` };
@@ -130,4 +134,50 @@ export async function publishSite(doc: SiteBlueprint, email: string, domain?: st
 
 function slugifyForRepo(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "site";
+}
+
+export interface ReferralStats {
+  code: string;
+  count: number;
+  conversions: number;
+  since: number | null;
+}
+
+// Get (or create) this account's referral code.
+export async function fetchReferral(email: string): Promise<{ code?: string; stats?: ReferralStats; error?: string }> {
+  const base = apiBase();
+  if (!base) return { error: "Referral endpoint not configured." };
+  try {
+    const res = await fetch(`${base}/api/referral`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = (await res.json().catch(() => ({}))) as { code?: string; stats?: ReferralStats; error?: string };
+    if (!res.ok) return { error: data.error ?? `Referral returned ${res.status}` };
+    return data;
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+export async function referralStats(email: string): Promise<ReferralStats | null> {
+  const base = apiBase();
+  if (!base) return null;
+  try {
+    const res = await fetch(`${base}/api/referral/stats`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { stats?: ReferralStats };
+    return data.stats ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function referralLink(code: string): string {
+  return `https://bukkyai.duckdns.org/ref?ref=${encodeURIComponent(code)}`;
 }

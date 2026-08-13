@@ -14,9 +14,15 @@ const staticPages = [
   ["/templates", 0.9, "weekly"],
   ["/tools", 0.8, "weekly"],
   ["/made-with", 0.8, "weekly"],
+  ["/playground", 0.8, "weekly"],
   ["/pricing", 0.9, "weekly"],
   ["/faq", 0.6, "monthly"],
   ["/contact", 0.5, "monthly"],
+  ["/blog", 0.7, "weekly"],
+  ["/badge", 0.5, "monthly"],
+  ["/blog/how-to-write-a-website-brief", 0.6, "monthly"],
+  ["/blog/why-good-design-system-beats-template", 0.6, "monthly"],
+  ["/blog/writing-homepage-that-sells", 0.6, "monthly"],
 ];
 
 // Programmatic pages live in programmatic/*.html — collect them.
@@ -34,7 +40,7 @@ try {
       const route = cat === "templates" ? `/templates/${rest}`
         : cat === "industries" ? `/industries/${rest}`
         : cat === "use" ? `/use-cases/${base.slice("use-cases-".length)}`
-        : cat === "compare" ? `/compare/${rest}`
+        : cat === "compare" ? (rest ? `/compare/${rest}` : "/compare")
         : cat === "how" ? `/how-to/${base.slice("how-to-".length)}`
         : cat === "local" ? `/local/${rest.replace(/-/, "/")}`   // rest = {city}-{industry}
         : `/${base}`;

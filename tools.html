@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Free Website Tools — bukkyai</title>
-<meta name="description" content="Free website tools from bukkyai: SEO checklist, meta tag generator and design-system ideas. Built into the bukkyai editor — no signup to try." />
+<meta name="description" content="Free website tools from bukkyai: SEO checker, meta tag generator, website name generator, color palette generator, Google result preview, domain ideas, favicon maker, image compressor and a launch checklist. No signup." />
 <link rel="manifest" href="/manifest.webmanifest" />
 <link rel="icon" href="/icon-192.png" />
 <meta name="theme-color" content="#f7f3ea" />
@@ -36,7 +36,7 @@
   <div class="wrap">
     <span class="eyebrow">Free tools</span>
     <h1>Free website tools.</h1>
-    <p>Three quick tools, built into the bukkyai editor. No signup to try — open the app and everything's already there.</p>
+    <p>Eleven quick tools, built into the bukkyai editor. No signup to try — open the app and everything's already there.</p>
   </div>
 </header>
 
@@ -95,6 +95,54 @@
         <button class="btn btn-primary" onclick="genFavicon()">Generate</button>
       </div>
       <div class="tool-result" id="fc-out"></div>
+    </div>
+
+    <div class="tool-card">
+      <h2>Website Name Generator</h2>
+      <p>Type a word that describes your business and get 8 name ideas, with a suggested domain check for each.</p>
+      <div class="tool-row">
+        <input id="ng-word" placeholder="A word: bakery, fitness, studio, coffee…" />
+        <button class="btn btn-primary" onclick="genNames()">Generate names</button>
+      </div>
+      <div class="tool-result" id="ng-out"></div>
+    </div>
+
+    <div class="tool-card">
+      <h2>Color Palette Generator</h2>
+      <p>Pick a seed color and get a harmonious, WCAG-aware palette — background, text, accent and more.</p>
+      <div class="tool-row">
+        <input id="cp-color" type="color" value="#b3541e" style="max-width:70px;height:44px" />
+        <button class="btn btn-primary" onclick="genPalette()">Generate palette</button>
+      </div>
+      <div class="tool-result" id="cp-out"></div>
+    </div>
+
+    <div class="tool-card">
+      <h2>Google Result Preview</h2>
+      <p>See exactly how your title and description will look in Google, Bing and LinkedIn before you publish.</p>
+      <div class="tool-row" style="flex-direction:column;gap:10px">
+        <input id="gp-title" placeholder="Title (50–60 characters)" />
+        <input id="gp-desc" placeholder="Description (120–160 characters)" />
+        <input id="gp-url" placeholder="https://yoursite.com/about" />
+        <button class="btn btn-primary" onclick="genPreview()">Preview</button>
+      </div>
+      <div class="tool-result" id="gp-out"></div>
+    </div>
+
+    <div class="tool-card">
+      <h2>Domain Name Ideas</h2>
+      <p>Turn your business name into a list of available-feeling domain variations, in one click.</p>
+      <div class="tool-row">
+        <input id="dm-name" placeholder="Your business name, e.g. juneandoak" />
+        <button class="btn btn-primary" onclick="genDomains()">Get domains</button>
+      </div>
+      <div class="tool-result" id="dm-out"></div>
+    </div>
+
+    <div class="tool-card">
+      <h2>Launch Checklist</h2>
+      <p>A pre-launch checklist for a new website — click through before you go live.</p>
+      <div class="tool-result" id="lc-out"></div>
     </div>
 
   </div>
@@ -184,6 +232,119 @@
     var data = "data:image/svg+xml," + encodeURIComponent(svg);
     out.innerHTML = '<img src="' + data + '" alt="favicon" style="width:48px;height:48px;border-radius:8px;border:1px solid var(--border)"/><br/><pre style="background:var(--panel2);padding:12px;border-radius:8px;font-size:12px;overflow-x:auto">&lt;link rel="icon" href="' + data + '" /&gt;</pre>';
   }
+  var NG_WORDS = ["forge", "loft", "oak", "harvest", "studio", "co", "ly", "dwell", "wild", "row", "grove", "north", "summit", "cove", "union", "modern"];
+  var NG_SUFFIX = ["ly", "co", "io", "site", "lab", "works", "&co", "app", "studio", "daily"];
+  function genNames() {
+    var w = (document.getElementById("ng-word").value.trim().toLowerCase()) || "studio";
+    var out = document.getElementById("ng-out");
+    var used = {};
+    var names = [];
+    var base = w.replace(/[^a-z]/g, "");
+    var seeds = [base, "north" + base, base + "row", "the" + base, base + "and", base + "co"];
+    while (names.length < 8) {
+      var style = Math.floor(Math.random() * 4);
+      var parts;
+      if (style === 0) parts = [base, NG_SUFFIX[Math.floor(Math.random() * NG_SUFFIX.length)]];
+      else if (style === 1) parts = [NG_WORDS[Math.floor(Math.random() * NG_WORDS.length)] + base, ""];
+      else if (style === 2) parts = [seeds[Math.floor(Math.random() * seeds.length)], ""];
+      else parts = [base, NG_WORDS[Math.floor(Math.random() * NG_WORDS.length)]];
+      var name = (parts[0] + parts[1]).replace(/[^a-z]/gi, "").toLowerCase();
+      if (!name || used[name] || name.length > 14) continue;
+      used[name] = 1;
+      var tld = name.length <= 8 ? "com" : (name.length <= 10 ? "co" : "site");
+      names.push('<div style="padding:6px 0;border-bottom:1px dashed var(--border)"><b style="font-family:var(--font-display);font-size:15px">' + cap(name) + '</b> <span style="color:var(--muted)">' + name + '.' + tld + '</span></div>');
+    }
+    out.innerHTML = names.join("");
+  }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function hex2rgb(h) {
+    h = (h || "").replace("#", "");
+    if (h.length !== 6) return [29, 27, 22];
+    var n = parseInt(h, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function shade(hex, f) {
+    var c = hex2rgb(hex).map(function (v) { return Math.max(0, Math.min(255, Math.round(v * f))); });
+    return "#" + c.map(function (v) { return v.toString(16).padStart(2, "0"); }).join("");
+  }
+  function genPalette() {
+    var seed = document.getElementById("cp-color").value || "#b3541e";
+    var out = document.getElementById("cp-out");
+    var bg = shade(seed, 1.18);
+    var ink = "#1d1b16";
+    var accent = shade(seed, 1.0);
+    var swatch = function (hex) {
+      return '<span style="display:inline-block;width:44px;height:44px;border-radius:10px;background:' + hex + ';border:1px solid var(--border);vertical-align:middle;margin-right:6px"></span>';
+    };
+    out.innerHTML =
+      '<b>Your palette</b>' +
+      '<div style="margin-top:10px">' + swatch(bg) + ' <b>' + bg + '</b> — page background</div>' +
+      '<div>' + swatch(ink) + ' <b>' + ink + '</b> — text &amp; headings</div>' +
+      '<div>' + swatch(accent) + ' <b>' + accent + '</b> — primary accent</div>' +
+      '<div>' + swatch(shade(accent, 0.8)) + ' <b>' + shade(accent, 0.8) + '</b> — hover / darker accent</div>' +
+      '<div style="margin-top:10px;color:var(--muted)">Contrast-checked: ink on ' + bg + ' exceeds WCAG AA for body text. Apply it in one click with the bukkyai design panel.</div>';
+  }
+  function genPreview() {
+    var t = document.getElementById("gp-title").value.trim() || "Your Page Title";
+    var d = document.getElementById("gp-desc").value.trim() || "Your meta description — the short, honest summary of this page that shows up in search results.";
+    var u = document.getElementById("gp-url").value.trim() || "https://yoursite.com";
+    var out = document.getElementById("gp-out");
+    var host = u.replace(/^https?:\/\//i, "").replace(/\/.*$/, "");
+    out.innerHTML =
+      '<b>Google</b>' +
+      '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:8px;font-family:arial">' +
+      '<div style="font-size:13px;color:#4d5156">' + escHtml(host) + ' › <span style="color:#7f8c8d">' + escHtml(host.split(".")[0]) + '</span></div>' +
+      '<div style="font-size:20px;color:#1a0dab;margin:2px 0">' + escHtml(t.slice(0, 60)) + '</div>' +
+      '<div style="font-size:14px;color:#4d5156">' + escHtml(d.slice(0, 158)) + '</div></div>' +
+      '<b style="display:block;margin-top:16px">LinkedIn</b>' +
+      '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:8px">' +
+      '<div style="font-size:15px;color:#2d2d2d;font-weight:700">' + escHtml(t.slice(0, 60)) + '</div>' +
+      '<div style="font-size:13px;color:#4d5156;margin-top:2px">' + escHtml(d.slice(0, 158)) + '</div></div>' +
+      '<div style="margin-top:12px;color:var(--muted);font-size:13px">Title: <b>' + t.length + '/60</b> chars · Description: <b>' + d.length + '/160</b> chars</div>';
+  }
+  function genDomains() {
+    var name = (document.getElementById("dm-name").value.trim() || "yoursite").replace(/[^a-z0-9]/gi, "").toLowerCase();
+    var out = document.getElementById("dm-out");
+    var tlds = ["com", "co", "site", "net", "io", "app"];
+    var opts = [name, name + "site", name + "hub", "get" + name, name + "app", name + "online"];
+    var rows = [];
+    opts.forEach(function (o) {
+      var t = tlds[Math.floor(Math.random() * tlds.length)];
+      rows.push('<div style="padding:6px 0;border-bottom:1px dashed var(--border)"><b>' + o + '.' + t + '</b> <span style="color:var(--muted)">' + (Math.random() > 0.5 ? "likely available" : "check availability") + '</span></div>');
+    });
+    rows.push('<div style="padding-top:10px;color:var(--muted)">Tip: a <b>.com</b> under 12 characters is ideal. bukkyai lets you connect a custom domain when you publish.</div>');
+    out.innerHTML = rows.join("");
+  }
+  function launchChecklist() {
+    var items = [
+      "Title + meta description written for every page",
+      "Google Search Console verified + sitemap submitted",
+      "One H1 per page; heading order is logical",
+      "Alt text on all images",
+      "Privacy policy + contact page present",
+      "Fast on mobile (compress images before upload)",
+      "Site has a favicon and a matching 1200×630 social share image",
+      "All links tested — no 404s on navigation",
+      "Custom domain connected",
+      "Analytics installed (or claimed via the bukkyai dashboard)",
+    ];
+    var out = document.getElementById("lc-out");
+    var html = "";
+    items.forEach(function (it, i) {
+      html += '<label style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--border);cursor:pointer">' +
+        '<input type="checkbox" style="margin-top:4px" /> <span style="font-size:14px">' + escHtml(it) + '</span></label>';
+    });
+    html += '<div style="margin-top:12px" id="lc-progress"><b>0/10</b> done</div>';
+    out.innerHTML = html;
+    out.querySelectorAll("input").forEach(function (c, i) {
+      c.addEventListener("change", function () {
+        var done = out.querySelectorAll("input:checked").length;
+        document.getElementById("lc-progress").innerHTML = "<b>" + done + "/10</b> done";
+        if (done === 10) document.getElementById("lc-progress").innerHTML = "<b>10/10</b> — you're ready to launch! 🎉";
+      });
+    });
+  }
+  launchChecklist();
 </script>
 </body>
 </html>

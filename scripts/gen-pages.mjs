@@ -11,7 +11,7 @@ mkdirSync(outDir, { recursive: true });
 
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function pageShell({ title, meta, h1, blurb, accent, grad, body, slug, cat, related }) {
+function pageShell({ title, meta, h1, blurb, accent, grad, body, slug, cat, related, howto }) {
   const links = [
     '<a href="/features">Website builder</a>',
     '<a href="/tools">Free tools</a>',
@@ -20,6 +20,16 @@ function pageShell({ title, meta, h1, blurb, accent, grad, body, slug, cat, rela
     '<a href="/app">Open editor</a>',
     ...(related || []),
   ].join(" · ");
+  const howtoLd = howto ? `
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": ${JSON.stringify(title)},
+  "description": ${JSON.stringify(meta)},
+  "step": ${JSON.stringify(howto.map(([t, d], i) => ({ "@type": "HowToStep", "position": i + 1, "name": t, "text": d })))}
+}
+</script>` : "";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -36,7 +46,7 @@ function pageShell({ title, meta, h1, blurb, accent, grad, body, slug, cat, rela
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/marketing.css" />
+<link rel="stylesheet" href="/marketing.css" />${howtoLd}
 <style>
   .prog-hero { padding: 76px 0 44px; text-align: center; }
   .prog-hero h1 { font-family: var(--font-display); font-size: clamp(34px, 5vw, 52px); letter-spacing: -.02em; margin-bottom: 14px; }
@@ -155,9 +165,29 @@ for (const c of COMPARISONS) {
       </table>
     </div>
     <p style="color:var(--muted)">The simplest test is to try it: describe your site, approve the plan and see how fast a finished website appears.</p>`;
-  writeFileSync(join(outDir, `compare-${c.slug}.html`), pageShell({ title: c.title, meta: c.meta, h1: c.h1, blurb: `An honest ${c.name} comparison.`, accent: "#6d5ae8", grad: "#a89bff,#6d5ae8", body, slug: c.slug, cat: "Comparison" }));
+  writeFileSync(join(outDir, `compare-${c.slug}.html`), pageShell({ title: c.title, meta: c.meta, h1: c.h1, blurb: `An honest ${c.name} comparison.`, accent: "#6d5ae8", grad: "#a89bff,#6d5ae8", body, slug: c.slug, cat: "Comparison", related: ['<a href="/compare">All comparisons</a>', '<a href="/templates">Templates</a>'] }));
   count++;
 }
+
+// Comparison index page → /compare
+const compareRows = COMPARISONS.map((c) =>
+  `<a href="/compare/${c.slug}" class="compare-link">bukkyai vs ${c.name}</a>`
+).join("");
+const compareIndexBody = `
+  <div class="section-label" style="color:var(--accent)">Comparison</div>
+  <h2>bukkyai vs the other website builders.</h2>
+  <p style="color:var(--muted);margin-bottom:26px">Honest, side-by-side comparisons — what each tool is best at, and where bukkyai fits. The simplest test is to try it.</p>
+  <style>
+    .compare-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; }
+    .compare-link { display:block; background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px 20px; font-weight:700; color:var(--text); text-decoration:none; font-size:15px; transition:all .15s; }
+    .compare-link:hover { border-color:var(--accent); color:var(--accent); transform:translateY(-2px); }
+  </style>
+  <div class="compare-grid">${compareRows}</div>
+  <div style="margin-top:26px">
+    <p style="color:var(--muted)">Don't compare — try it. Describe your business in bukkyai and watch the site build itself.</p>
+  </div>`;
+writeFileSync(join(outDir, "compare.html"), pageShell({ title: "bukkyai vs other website builders", meta: "Honest comparisons: bukkyai vs Wix, Squarespace, WordPress, Webflow, Framer, GoDaddy, Carrd, Lovable and more — what each is best at.", h1: "bukkyai vs other website builders", blurb: "Honest, side-by-side comparisons. Try the simplest test: describe your site and watch it build.", accent: "#6d5ae8", grad: "#a89bff,#6d5ae8", body: compareIndexBody, slug: "compare", cat: "Comparison", related: ['<a href="/templates">Templates</a>', '<a href="/industries">Industry websites</a>'] }));
+count++;
 
 // How-tos → /how-to/{slug}
 for (const h of HOW_TOS) {
@@ -170,7 +200,7 @@ for (const h of HOW_TOS) {
     <div style="margin-top:26px">
       <p style="color:var(--muted)">With bukkyai, most of these steps are handled for you: describe, approve, edit, publish. Start free, no credit card.</p>
     </div>`;
-  writeFileSync(join(outDir, `how-to-${h.slug}.html`), pageShell({ title: h.title, meta: h.meta, h1: h.h1, blurb: `Follow along — ${h.name.toLowerCase()}, in minutes.`, accent: "#2f6f63", grad: "#8aa29e,#3d5a52", body, slug: h.slug, cat: "Guide" }));
+  writeFileSync(join(outDir, `how-to-${h.slug}.html`), pageShell({ title: h.title, meta: h.meta, h1: h.h1, blurb: `Follow along — ${h.name.toLowerCase()}, in minutes.`, accent: "#2f6f63", grad: "#8aa29e,#3d5a52", body, slug: h.slug, cat: "Guide", howto: h.steps }));
   count++;
 }
 

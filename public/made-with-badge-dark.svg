@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="40" viewBox="0 0 220 40" role="img" aria-label="Designed with bukkyai">
+  <rect width="220" height="40" rx="20" fill="#1d1b16"/>
+  <rect width="220" height="40" rx="20" fill="none" stroke="#f7f3ea" stroke-opacity="0.25"/>
+  <circle cx="21" cy="20" r="13" fill="#f7f3ea"/>
+  <text x="21" y="25" text-anchor="middle" font-family="Georgia, serif" font-size="18" font-weight="700" fill="#1d1b16">b</text>
+  <text x="41" y="20" font-family="Georgia, serif" font-size="13" font-weight="700" fill="#f7f3ea" dominant-baseline="middle">bukkyai</text>
+  <text x="97" y="20" font-family="Arial, sans-serif" font-size="10" font-weight="600" fill="#e89462" dominant-baseline="middle">· made with</text>
+</svg>

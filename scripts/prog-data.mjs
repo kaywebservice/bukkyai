@@ -519,6 +519,60 @@ export const COMPARISONS = [
       ["Output", "Static HTML", "WordPress pages"],
     ],
   },
+  {
+    slug: "webflow",
+    name: "Webflow",
+    title: "bukkyai vs Webflow",
+    meta: "bukkyai vs Webflow: bukkyai writes and designs your site in minutes and exports open HTML — Webflow is a powerful visual CMS with a learning curve.",
+    h1: "bukkyai vs Webflow",
+    points: [
+      ["Time to a full site", "Minutes — AI plans, writes & designs", "Hours to days — learn the canvas"],
+      ["Copywriting", "Included, in your voice", "You write it"],
+      ["Learning curve", "Describe → approve → edit", "Steep for beginners"],
+      ["Export", "Open HTML/React you own", "Export or platform hosting"],
+      ["Best for", "Business owners who want it done", "Designers who want control"],
+    ],
+  },
+  {
+    slug: "framer",
+    name: "Framer",
+    title: "bukkyai vs Framer",
+    meta: "bukkyai vs Framer: get a written, designed site in minutes — Framer is a modern visual editor aimed at designers.",
+    h1: "bukkyai vs Framer",
+    points: [
+      ["Getting started", "One sentence in → full site", "Start from a blank canvas or template"],
+      ["Content", "AI-written copy & structure", "You craft it"],
+      ["Effort", "Minutes", "Hours, plus design skill"],
+      ["Best for", "Businesses, creators, shops", "Designers & agencies"],
+    ],
+  },
+  {
+    slug: "godaddy",
+    name: "GoDaddy",
+    title: "bukkyai vs GoDaddy Website Builder",
+    meta: "bukkyai vs GoDaddy: bukkyai writes your copy and designs your site from a sentence — GoDaddy is a basic template builder bundled with domains.",
+    h1: "bukkyai vs GoDaddy",
+    points: [
+      ["AI site generation", "Yes — full plan, copy & design", "Basic AI sections"],
+      ["Pages & structure", "Multi-page, planned for you", "Limited structure"],
+      ["Design quality", "Bespoke design system", "Pre-set templates"],
+      ["Pricing", "Free to build", "Paid from day one"],
+      ["Best for", "Anyone who wants a real site", "Quick placeholder pages"],
+    ],
+  },
+  {
+    slug: "carrd",
+    name: "Carrd",
+    title: "bukkyai vs Carrd",
+    meta: "bukkyai vs Carrd: bukkyai builds full multi-page sites with AI-written copy — Carrd is a lightweight one-page builder.",
+    h1: "bukkyai vs Carrd",
+    points: [
+      ["Scope", "Full multi-page websites", "Simple one-pagers"],
+      ["Copywriting", "AI writes it", "You write it"],
+      ["Blog & shop", "Built in", "Separate services"],
+      ["Best for", "Businesses & creators", "Links, cards & landing pages"],
+    ],
+  },
 ];
 
 export const HOW_TOS = [
