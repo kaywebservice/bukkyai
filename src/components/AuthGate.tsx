@@ -147,7 +147,7 @@ export default function AuthGate(p: Props) {
 
       <p className="auth-gate-foot">
         {p.onClose ? (
-          <button className="btn btn-ghost" onClick={p.onClose}>Back</button>
+          <button className="btn btn-ghost" onClick={() => { window.location.href = "/"; }}>← Back to home</button>
         ) : (
           <span>Designed by Kaywebservice Enterprise Solutions</span>
         )}
