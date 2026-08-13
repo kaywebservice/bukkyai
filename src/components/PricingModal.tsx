@@ -97,7 +97,7 @@ export default function PricingModal(p: Props) {
           </div>
           <div className={`pricing-tier${p.tier === "plus" ? " pricing-tier-active" : ""}`}>
             <b>Plus</b>
-            <div className="pricing-price">$49.99<span>/mo</span></div>
+            <div className="pricing-price">$35<span>/mo</span></div>
             <ul>
               <li>Everything in Pro</li>
               <li>5 published sites</li>

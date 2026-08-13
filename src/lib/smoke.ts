@@ -1,5 +1,5 @@
 import { sampleProject } from "./blueprint";
-import { renderPage, renderStaticSite, renderMaintenance, renderProductPage, renderPostPage } from "./render";
+import { renderPage, renderStaticSite, renderMaintenance } from "./render";
 import { renderCss } from "./renderCss";
 import { singleFileHtml, multiPageHtml } from "./export";
 import { contrastRatio } from "./color";
@@ -165,6 +165,11 @@ export function runSmoke(): SmokeResult {
     ["Theme generator has multiple categories", (() => {
       const cats = new Set(GENERATED_THEMES.map((t) => t.category));
       return cats.size >= 5;
+    })()],
+    ["A/B variants are distinct designs", (() => {
+      const a = GENERATED_THEMES[3].system;
+      const b = GENERATED_THEMES[40].system;
+      return a.tokens.colors.accent !== b.tokens.colors.accent || a.tokens.fonts.heading !== b.tokens.fonts.heading;
     })()],
     ["Themes are valid design systems", GENERATED_THEMES.every((t) => t.system.tokens.colors.background && t.system.tokens.fonts.heading && t.system.tokens.radius.md > 0)],
     ["Hero slider renders slides + controls", renderPage(sliderDoc, sliderDoc.pages[0], false).includes("bk-slider-viewport") && renderPage(sliderDoc, sliderDoc.pages[0], false).includes("bk-slide-dot")],

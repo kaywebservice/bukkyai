@@ -101,6 +101,7 @@ import ShareModal from "./components/ShareModal";
 import FindReplaceModal from "./components/FindReplaceModal";
 import ShortcutsModal from "./components/ShortcutsModal";
 import ThemeGallery from "./components/ThemeGallery";
+import VariantsModal from "./components/VariantsModal";
 import OnboardingTour, { tourCanShow, tourTurnedOff, markTourShown, turnOffTour, type TourStep } from "./components/OnboardingTour";
 import PricingModal from "./components/PricingModal";
 import { starterById } from "./lib/starterSites";
@@ -121,6 +122,7 @@ export default function App() {
   const [findOpen, setFindOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [themesOpen, setThemesOpen] = useState(false);
+  const [variantsOpen, setVariantsOpen] = useState(false);
   const [cloudHistory, setCloudHistory] = useState<Checkpoint[]>([]);
   const [presence, setPresence] = useState<PresenceInfo[]>([]);
   const [pro, setPro] = useState(() => proUnlocked());
@@ -902,6 +904,12 @@ export default function App() {
     changeDesign(JSON.parse(JSON.stringify(theme.system)) as DesignSystem);
     setThemesOpen(false);
     showToast(`Applied theme: ${theme.name}`);
+  };
+
+  const applyVariantDesign = (design: DesignSystem) => {
+    changeDesign(JSON.parse(JSON.stringify(design)) as DesignSystem);
+    setVariantsOpen(false);
+    showToast("Applied design variant");
   };
 
   const regenerateDesign = () => {
@@ -1833,6 +1841,7 @@ export default function App() {
                 onSetTone={setTone}
                 onHarmonize={harmonizeDesign}
                 onOpenThemes={() => setThemesOpen(true)}
+                onOpenVariants={() => setVariantsOpen(true)}
               />
             )}
             {tab === "media" && (
@@ -2033,6 +2042,18 @@ export default function App() {
             setPricingOpen(true);
           }}
           onClose={() => setThemesOpen(false)}
+        />
+      )}
+      {variantsOpen && doc && (
+        <VariantsModal
+          current={doc.design}
+          tier={proTier}
+          onApply={applyVariantDesign}
+          onUpgrade={() => {
+            setVariantsOpen(false);
+            setPricingOpen(true);
+          }}
+          onClose={() => setVariantsOpen(false)}
         />
       )}
       <OnboardingTour

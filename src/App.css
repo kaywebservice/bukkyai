@@ -1848,6 +1848,56 @@ input[type="range"] {
   opacity: .8;
 }
 
+/* ── A/B testing variants ───────────────────────────────────────── */
+.variant-modal {
+  width: 720px;
+  max-width: 94vw;
+}
+.variant-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.variant-card {
+  background: var(--chrome-panel2);
+  border: 1px solid var(--chrome-border);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.variant-tag {
+  align-self: flex-start;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--chrome-muted);
+  border: 1px solid var(--chrome-border);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+.variant-tag-alt {
+  color: var(--chrome-accent);
+  border-color: var(--chrome-accent);
+}
+.variant-name {
+  font-weight: 700;
+  font-size: 13px;
+}
+.variant-swatches {
+  display: flex;
+}
+.variant-fonts {
+  font-size: 11px;
+  color: var(--chrome-muted);
+}
+.variant-mode {
+  font-size: 11px;
+  color: var(--chrome-faint);
+}
+
 /* ── Shortcuts panel ────────────────────────────────────────────── */
 .shortcut-row {
   display: flex;

@@ -108,7 +108,7 @@
         "applicationCategory": "WebApplication",
         "operatingSystem": "Web",
         "url": "https://bukkyai.duckdns.org/app",
-        "offers": { "@type": "AggregateOffer", "lowPrice": "0", "highPrice": "49.99", "priceCurrency": "USD" },
+        "offers": { "@type": "AggregateOffer", "lowPrice": "0", "highPrice": "35", "priceCurrency": "USD" },
         "publisher": { "@id": "https://bukkyai.duckdns.org/#org" }
       }
     ]

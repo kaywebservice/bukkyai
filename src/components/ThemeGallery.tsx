@@ -38,7 +38,7 @@ export default function ThemeGallery(p: Props) {
           <div className="theme-plus-banner">
             <b>100+ themes — Plus only</b>
             <p>Upgrade to Plus to apply any of {GENERATED_THEMES.length} generated design systems with one click.</p>
-            <button className="btn btn-primary" onClick={p.onUpgrade}>Upgrade to Plus — $49.99/mo</button>
+            <button className="btn btn-primary" onClick={p.onUpgrade}>Upgrade to Plus — $35/mo</button>
           </div>
         )}
 

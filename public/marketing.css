@@ -205,6 +205,12 @@ section h2 { font-family: var(--font-display); font-size: clamp(28px, 3.6vw, 40p
 .faq-a p { padding: 0 18px 16px; font-size: 14px; color: var(--muted); }
 
 /* Pricing */
+.bill-btn {
+  border: none; background: transparent; padding: 8px 18px; border-radius: 999px;
+  cursor: pointer; font: inherit; font-size: 13px; font-weight: 600; color: var(--muted);
+}
+.bill-btn.bill-on { background: var(--accent); color: #fff; }
+.bill-save { display: inline-block; font-size: 10.5px; background: #2f9e44; color: #fff; border-radius: 999px; padding: 1px 7px; margin-left: 4px; vertical-align: middle; }
 .pricing-tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: stretch; }
 .pricing-tier { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 30px; display: flex; flex-direction: column; }
 .pricing-tier.featured { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--shadow-md); }

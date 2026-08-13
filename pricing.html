@@ -26,10 +26,14 @@
 
 <section style="padding-top: 20px">
   <div class="wrap">
+    <div class="billing-switch" style="display:flex;justify-content:center;gap:6px;margin-bottom:28px;background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:5px;width:fit-content;margin-left:auto;margin-right:auto">
+      <button id="b-monthly" class="bill-btn bill-on">Monthly</button>
+      <button id="b-yearly" class="bill-btn">Yearly <span class="bill-save">save 20%</span></button>
+    </div>
     <div class="pricing-tiers">
       <div class="pricing-tier">
         <b>Free</b>
-        <div class="pricing-price">$0<span>/forever</span></div>
+        <div class="pricing-price" data-month="$0" data-year="$0">$0<span>/forever</span></div>
         <p class="pricing-desc">For building and experimenting — no time limit, no credits.</p>
         <ul>
           <li>Unlimited local projects</li>
@@ -38,18 +42,20 @@
           <li>AI image generation</li>
           <li>Static HTML / ZIP export</li>
           <li>Blog, i18n, animations, cart</li>
+          <li>Community support</li>
         </ul>
         <a class="btn" href="/app?tier=free">Start free</a>
       </div>
       <div class="pricing-tier featured">
         <b>Pro</b>
-        <div class="pricing-price">$19<span>/month</span></div>
+        <div class="pricing-price" data-month="$19" data-year="$15">$19<span>/month</span></div>
         <p class="pricing-desc">For publishing, sharing and growing your site.</p>
         <ul>
           <li>Everything in Free</li>
           <li>One-click publish &amp; share links</li>
           <li>Custom domains</li>
           <li>Cloud save across devices</li>
+          <li>Team collaboration &amp; invites</li>
           <li>Firebase auth / member areas</li>
           <li>Checkout with payments</li>
           <li>Priority support</li>
@@ -58,13 +64,15 @@
       </div>
       <div class="pricing-tier">
         <b>Plus</b>
-        <div class="pricing-price">$49.99<span>/month</span></div>
+        <div class="pricing-price" data-month="$35" data-year="$28">$35<span>/month</span></div>
         <p class="pricing-desc">For growing businesses that need more room to move.</p>
         <ul>
           <li>Everything in Pro</li>
           <li>5 published sites</li>
           <li>Higher publish limits &amp; priority builds</li>
-          <li>Advanced analytics &amp; A/B testing</li>
+          <li>Advanced analytics</li>
+          <li>A/B testing with variant previews</li>
+          <li>All 132 theme-generator themes</li>
           <li>Dedicated support (faster replies)</li>
         </ul>
         <a class="btn" href="/app?tier=plus">Get Plus</a>
@@ -76,21 +84,31 @@
 <section style="padding-top: 40px">
   <div class="wrap">
     <div class="section-label">What's included</div>
-    <h2>Both plans, compared.</h2>
+    <h2>Every plan, every feature.</h2>
     <div class="table-wrap" style="margin-top: 24px">
         <table>
           <thead><tr><th>Feature</th><th>Free</th><th>Pro</th><th>Plus</th></tr></thead>
           <tbody>
+            <tr><td colspan="4" style="font-weight:700;color:var(--accent)">Build &amp; design</td></tr>
             <tr><td>AI website generation (multi-page)</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
             <tr><td>Visual editor &amp; inline editing</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>6 full multi-page templates</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Theme generator (132 design systems)</td><td class="no">Limited</td><td class="no">Limited</td><td class="yes">All 132</td></tr>
+            <tr><td>Design harmony score + harmonize</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Blog, RSS, i18n, animations, cart</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Working forms (Formspree/Web3Forms)</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td colspan="4" style="font-weight:700;color:var(--accent)">Publish &amp; grow</td></tr>
             <tr><td>Static HTML / ZIP / React / CMS export</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
-            <tr><td>Blog, SEO, i18n, animations, cart</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
             <tr><td>One-click publish &amp; share links</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Published sites</td><td class="no">0</td><td class="yes">1</td><td class="yes">5</td></tr>
             <tr><td>Custom domains</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
             <tr><td>Cloud save &amp; cross-device sync</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
             <tr><td>Team collaboration &amp; invites</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
-            <tr><td>Published sites</td><td class="no">0</td><td class="yes">1</td><td class="yes">5</td></tr>
-            <tr><td>Advanced analytics &amp; A/B testing</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
+            <tr><td>Advanced analytics</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
+            <tr><td>A/B testing with variant previews</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
+            <tr><td>SEO audit + AI auto-fix, sitemap, RSS</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td colspan="4" style="font-weight:700;color:var(--accent)">Support</td></tr>
+            <tr><td>Community support</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
             <tr><td>Priority support</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
             <tr><td>Dedicated support (faster replies)</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
           </tbody>
@@ -106,7 +124,9 @@
     <div class="faq-wrap">
       <div class="faq-item"><button class="faq-q">Is the Free plan really free forever?<span class="chev">▾</span></button><div class="faq-a"><p>Yes. Building, editing and exporting never expire and never run out of credits.</p></div></div>
       <div class="faq-item"><button class="faq-q">What does Pro actually unlock?<span class="chev">▾</span></button><div class="faq-a"><p>One-click publishing to a live link, custom domains, cloud save across devices, team collaboration and priority support.</p></div></div>
-      <div class="faq-item"><button class="faq-q">Can I cancel anytime?<span class="chev">▾</span></button><div class="faq-a"><p>Yes — it's month to month. Cancel in the app, no guilt trip.</p></div></div>
+      <div class="faq-item"><button class="faq-q">What does Plus add over Pro?<span class="chev">▾</span></button><div class="faq-a"><p>Five published sites instead of one, all 132 theme-generator themes, advanced analytics, A/B testing with variant previews, and dedicated support.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Is there a yearly discount?<span class="chev">▾</span></button><div class="faq-a"><p>Yes — pay yearly and save 20%: Pro is $15/mo and Plus is $28/mo billed annually.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Can I cancel anytime?<span class="chev">▾</span></button><div class="faq-a"><p>Yes — it's month to month (or year to year). Cancel in the app, no guilt trip.</p></div></div>
       <div class="faq-item"><button class="faq-q">Do I keep my work if I downgrade?<span class="chev">▾</span></button><div class="faq-a"><p>Always. Your projects and exports stay yours whether you're on Free or Pro.</p></div></div>
     </div>
   </div>
@@ -134,6 +154,23 @@
       }
     });
   });
+  var monthlyBtn = document.getElementById("b-monthly");
+  var yearlyBtn = document.getElementById("b-yearly");
+  function applyBilling(yearly) {
+    document.querySelectorAll(".pricing-price").forEach(function (el) {
+      var m = el.getAttribute("data-month") || "$0";
+      var y = el.getAttribute("data-year") || m;
+      var val = yearly ? y : m;
+      var period = yearly ? "/mo · billed yearly" : "/month";
+      el.innerHTML = val + '<span>' + period + '</span>';
+    });
+    if (monthlyBtn && yearlyBtn) {
+      monthlyBtn.classList.toggle("bill-on", !yearly);
+      yearlyBtn.classList.toggle("bill-on", yearly);
+    }
+  }
+  if (monthlyBtn) monthlyBtn.addEventListener("click", function () { applyBilling(false); });
+  if (yearlyBtn) yearlyBtn.addEventListener("click", function () { applyBilling(true); });
 </script>
 </body>
 </html>
