@@ -1,0 +1,62 @@
+// Generates public/sitemap.xml from the canonical page list.
+// Run BEFORE vite build (npm run build already does this).
+import { writeFileSync, mkdirSync, readdirSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const SITE = "https://bukkyai.duckdns.org";
+
+// Static marketing pages + their priorities.
+const staticPages = [
+  ["/", 1.0, "daily"],
+  ["/features", 0.9, "weekly"],
+  ["/templates", 0.9, "weekly"],
+  ["/tools", 0.8, "weekly"],
+  ["/pricing", 0.9, "weekly"],
+  ["/faq", 0.6, "monthly"],
+  ["/contact", 0.5, "monthly"],
+];
+
+// Programmatic pages live in programmatic/*.html — collect them.
+// Map file names (templates-bakery.html) to pretty routes (/templates/bakery).
+const progDir = join(root, "programmatic");
+let progPages = [];
+try {
+  progPages = readdirSync(progDir)
+    .filter((f) => f.endsWith(".html"))
+    .map((f) => {
+      const base = f.replace(/\.html$/, "");
+      const idx = base.indexOf("-");
+      const cat = idx >= 0 ? base.slice(0, idx) : base;
+      const rest = idx >= 0 ? base.slice(idx + 1) : "";
+      const route = cat === "templates" ? `/templates/${rest}`
+        : cat === "industries" ? `/industries/${rest}`
+        : cat === "use" ? `/use-cases/${base.slice("use-cases-".length)}`
+        : cat === "compare" ? `/compare/${rest}`
+        : cat === "how" ? `/how-to/${base.slice("how-to-".length)}`
+        : `/${base}`;
+      return route;
+    })
+    .sort();
+} catch {
+  // programmatic dir may not exist yet
+}
+
+const urls = [];
+for (const [path, prio, freq] of staticPages) {
+  urls.push(`  <url><loc>${SITE}${path}</loc><changefreq>${freq}</changefreq><priority>${prio}</priority></url>`);
+}
+for (const path of progPages) {
+  urls.push(`  <url><loc>${SITE}${path}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>`);
+}
+
+const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.join("\n")}
+</urlset>
+`;
+
+mkdirSync(join(root, "public"), { recursive: true });
+writeFileSync(join(root, "public", "sitemap.xml"), xml);
+console.log(`sitemap.xml written with ${staticPages.length + progPages.length} URLs`);

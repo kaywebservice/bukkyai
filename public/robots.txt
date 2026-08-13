@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://bukkyai.duckdns.org/sitemap.xml

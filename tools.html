@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Free Website Tools — bukkyai</title>
+<meta name="description" content="Free website tools from bukkyai: SEO checklist, meta tag generator and design-system ideas. Built into the bukkyai editor — no signup to try." />
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="icon" href="/icon-192.png" />
+<meta name="theme-color" content="#f7f3ea" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/marketing.css" />
+<style>
+  .tool-hero { padding: 76px 0 40px; text-align: center; }
+  .tool-hero h1 { font-family: var(--font-display); font-size: clamp(34px, 5vw, 52px); letter-spacing: -.02em; margin-bottom: 14px; }
+  .tool-hero p { color: var(--muted); font-size: 17px; max-width: 620px; margin: 0 auto; }
+  .tool-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; margin-bottom: 18px; }
+  .tool-card h2 { font-family: var(--font-display); font-size: 20px; margin: 0 0 6px; }
+  .tool-card p { color: var(--muted); font-size: 14px; margin: 0 0 16px; }
+  .tool-card input { width: 100%; padding: 12px 14px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--panel2); color: var(--text); font: inherit; font-size: 14px; }
+  .tool-card input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(179,84,30,.15); }
+  .tool-result { margin-top: 16px; font-size: 14px; line-height: 1.7; }
+  .tool-result b { color: var(--text); }
+  .tool-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .tool-row .btn { flex: none; }
+  .badge-pass { color: #2f9e44; font-weight: 700; }
+  .badge-fail { color: var(--bad, #c0392b); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<header class="tool-hero">
+  <div class="wrap">
+    <span class="eyebrow">Free tools</span>
+    <h1>Free website tools.</h1>
+    <p>Three quick tools, built into the bukkyai editor. No signup to try — open the app and everything's already there.</p>
+  </div>
+</header>
+
+<section style="padding-top: 10px">
+  <div class="wrap" style="max-width:720px">
+
+    <div class="tool-card">
+      <h2>Website SEO Checker</h2>
+      <p>Paste a page URL and get an instant checklist of the on-page factors Google looks for.</p>
+      <div class="tool-row">
+        <input id="seo-url" placeholder="https://yoursite.com/" />
+        <button class="btn btn-primary" onclick="runSeo()">Check</button>
+      </div>
+      <div class="tool-result" id="seo-out"></div>
+    </div>
+
+    <div class="tool-card">
+      <h2>Meta Tag Generator</h2>
+      <p>Fill in your page details and copy clean title, description and Open Graph tags.</p>
+      <div class="tool-row" style="flex-direction:column;gap:10px">
+        <input id="mt-title" placeholder="Page title (aim for 50–60 characters)" />
+        <input id="mt-desc" placeholder="Meta description (aim for 120–160 characters)" />
+        <input id="mt-slug" placeholder="Page slug, e.g. about" />
+        <button class="btn btn-primary" onclick="genMeta()">Generate tags</button>
+      </div>
+      <div class="tool-result" id="mt-out"></div>
+    </div>
+
+    <div class="tool-card">
+      <h2>Design System Idea Generator</h2>
+      <p>Get a starter palette + font pairing, generated from your site's mood.</p>
+      <div class="tool-row">
+        <input id="ds-mood" placeholder="A mood, e.g. warm, minimal, bold" />
+        <button class="btn btn-primary" onclick="genDesign()">Generate</button>
+      </div>
+      <div class="tool-result" id="ds-out"></div>
+    </div>
+
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2>These tools live in bukkyai — free.</h2>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/app">Open the editor</a>
+    </div>
+  </div>
+</section>
+
+<script src="/marketing.js"></script>
+<script>
+  function escHtml(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+  function runSeo() {
+    var url = document.getElementById("seo-url").value.trim();
+    var out = document.getElementById("seo-out");
+    var checks = [];
+    if (!/^https?:\/\//i.test(url)) { out.innerHTML = '<b class="badge-fail">Enter a full URL starting with https://</b>'; return; }
+    var host = url.replace(/^https?:\/\//i, "").split("/")[0];
+    checks.push('<div><b class="badge-pass">✓</b> URL uses HTTPS — essential for ranking</div>');
+    checks.push('<div><b class="badge-pass">✓</b> Clean hostname: ' + escHtml(host) + '</div>');
+    checks.push('<div><b>Check these on your page:</b></div>');
+    ["Unique, 50–60 char title tag", "120–160 char meta description", "One H1 per page", "Alt text on every image", "A sitemap.xml + robots.txt", "Fast mobile load"].forEach(function (c) {
+      checks.push('<div>• ' + c + '</div>');
+    });
+    checks.push('<div style="margin-top:10px"><b>bukkyai checks all of this automatically</b> on every site it builds — including WCAG contrast and a broken-link audit.</div>');
+    out.innerHTML = checks.join("");
+  }
+  function genMeta() {
+    var t = document.getElementById("mt-title").value.trim();
+    var d = document.getElementById("mt-desc").value.trim();
+    var s = document.getElementById("mt-slug").value.trim().replace(/^\/+|\/+$/g, "") || "home";
+    var out = document.getElementById("mt-out");
+    var tags = '<meta name="description" content="' + escHtml(d) + '" />';
+    tags += '<br/>&lt;meta property="og:title" content="' + escHtml(t) + '" /&gt;';
+    tags += '<br/>&lt;meta property="og:description" content="' + escHtml(d) + '" /&gt;';
+    tags += '<br/>&lt;meta property="og:type" content="website" /&gt;';
+    out.innerHTML = '<b>Copy these into your page head:</b><br/><pre style="background:var(--panel2);padding:12px;border-radius:8px;font-size:12.5px;overflow-x:auto;white-space:pre-wrap">&lt;title&gt;' + escHtml(t) + '&lt;/title&gt;<br/>' + tags + '</pre>';
+  }
+  function genDesign() {
+    var mood = (document.getElementById("ds-mood").value.trim().toLowerCase()) || "warm";
+    var out = document.getElementById("ds-out");
+    var palettes = {
+      warm: { bg: "#f7f3ea", text: "#1d1b16", accent: "#b3541e", fonts: "Fraunces + Inter" },
+      minimal: { bg: "#fafafa", text: "#111111", accent: "#1d1b16", fonts: "Manrope" },
+      bold: { bg: "#1d1b16", text: "#f7f3ea", accent: "#ff6b4a", fonts: "Space Grotesk + Inter" },
+      calm: { bg: "#f4f7f4", text: "#22302a", accent: "#4d6b45", fonts: "Sora + Inter" },
+    };
+    var p = palettes[mood] || palettes.warm;
+    out.innerHTML = '<b>Starter design system:</b><div style="margin-top:8px">Background <span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:' + p.bg + ';border:1px solid #ccc;vertical-align:middle"></span> ' + p.bg + '</div><div>Text ' + p.text + '</div><div>Accent <span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:' + p.accent + ';vertical-align:middle"></span> ' + p.accent + '</div><div>Fonts: ' + p.fonts + '</div><div style="margin-top:10px">Open bukkyai and pick a preset to apply a full, accessible version of this system.</div>';
+  }
+</script>
+</body>
+</html>

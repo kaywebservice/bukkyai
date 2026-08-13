@@ -1002,7 +1002,7 @@ function renderSection(
     <span>${te(`${r}.copyright`, h.copyright ?? "", "span")}</span>
     <span>${esc(doc.meta.title)}</span>
   </div>
-  ${h.note ? `<p class="bk-footer-note">${te(`${r}.note`, h.note, "span")}</p>` : ""}
+  ${h.note ? `<p class="bk-footer-note">${te(`${r}.note`, h.note, "span").replace(/Kaywebservice Enterprise Solutions/, `<a href="https://bukkyai.duckdns.org/" target="_blank" rel="noopener">Kaywebservice Enterprise Solutions</a>`)}</p>` : ""}
 </footer>`;
     }
 

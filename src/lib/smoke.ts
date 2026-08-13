@@ -4,7 +4,7 @@ import { renderCss } from "./renderCss";
 import { singleFileHtml, multiPageHtml } from "./export";
 import { contrastRatio } from "./color";
 import { FULL_TEMPLATES } from "./templatesFull";
-
+import { readFileSync, readdirSync } from "node:fs";
 export type SmokeResult = { results: [string, boolean][]; pass: number; total: number };
 
 export function runSmoke(): SmokeResult {
@@ -135,6 +135,24 @@ export function runSmoke(): SmokeResult {
     ["Maintenance mode renders coming-soon page", maintenanceHtml.includes("Back soon") && maintenanceHtml.includes("x@y.com")],
     ["Maintenance mode publishes single index.html", maintenanceFiles.length === 1 && maintenanceFiles[0].path === "index.html"],
     ["Multi-page browser preview embeds all pages", multiPageHtml(doc).includes("bk-pages") && multiPageHtml(doc).includes("var pages =")],
+    ["Marketing sitemap exists with programmatic URLs", (() => {
+      try {
+        const s = readFileSync("public/sitemap.xml", "utf8");
+        return s.includes("/compare/wix") && s.includes("/templates/bakery") && s.includes("/industries/real-estate");
+      } catch { return false; }
+    })()],
+    ["Programmatic pages generated (24+)", (() => {
+      try {
+        const n = readdirSync("programmatic").filter((f: string) => f.endsWith(".html")).length;
+        return n >= 24;
+      } catch { return false; }
+    })()],
+    ["Backlink in published footer", (() => {
+      const bk = JSON.parse(JSON.stringify(doc)) as typeof doc;
+      const foot = bk.pages[0].sections.find((s) => s.type === "footer");
+      if (foot && "note" in (foot.content as object)) (foot.content as { note?: string }).note = "Designed by Kaywebservice Enterprise Solutions.";
+      return renderPage(bk, bk.pages[0], false).includes("https://bukkyai.duckdns.org/");
+    })()],
     ["Contrast math sane", contrastRatio("#241a12", "#f7f2ea") > 7],
   ];
 

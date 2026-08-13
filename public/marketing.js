@@ -30,6 +30,7 @@
       '<div class="nav-links">' +
         '<div class="mega-trigger"><button class="nav-link">Product <span class="mega-caret">▼</span></button>' + mega + '</div>' +
         '<a class="nav-link' + isActive("features") + '" href="/features">Features</a>' +
+        '<a class="nav-link' + isActive("tools") + '" href="/tools">Tools</a>' +
         '<a class="nav-link' + isActive("templates") + '" href="/templates">Templates</a>' +
         '<a class="nav-link' + isActive("pricing") + '" href="/pricing">Pricing</a>' +
         '<a class="nav-link' + isActive("faq") + '" href="/faq">FAQ</a>' +
@@ -42,6 +43,7 @@
     '<div class="mobile-menu">' +
       '<span class="m-group-title">Product</span>' +
       '<a href="/features">Website builder</a>' +
+      '<a href="/tools">Free tools</a>' +
       '<a href="/templates">Templates</a>' +
       '<a href="/pricing">Pricing</a>' +
       '<span class="m-group-title">Resources</span>' +
@@ -80,6 +82,45 @@
   document.body.appendChild(footer);
 
   document.getElementById("year").textContent = new Date().getFullYear();
+
+  // ── SEO: canonical + Organization / SoftwareApplication / FAQ JSON-LD ──
+  var canonical = document.createElement("link");
+  canonical.rel = "canonical";
+  canonical.href = "https://bukkyai.duckdns.org" + (location.pathname === "/" ? "/" : location.pathname);
+  document.head.appendChild(canonical);
+
+  var schema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://bukkyai.duckdns.org/#org",
+        "name": "bukkyai",
+        "url": "https://bukkyai.duckdns.org/",
+        "description": "AI website builder that plans, designs and writes your entire website from a short description.",
+        "sameAs": []
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "bukkyai",
+        "applicationCategory": "WebApplication",
+        "operatingSystem": "Web",
+        "url": "https://bukkyai.duckdns.org/app",
+        "offers": { "@type": "AggregateOffer", "lowPrice": "0", "highPrice": "49.99", "priceCurrency": "USD" },
+        "publisher": { "@id": "https://bukkyai.duckdns.org/#org" }
+      }
+    ]
+  };
+  var faqItems = Array.prototype.slice.call(document.querySelectorAll(".faq-item")).map(function (item) {
+    var q = item.querySelector(".faq-q");
+    var a = item.querySelector(".faq-a");
+    return { "@type": "Question", name: q ? q.textContent.replace("▾", "").trim() : "", acceptedAnswer: { "@type": "Answer", text: a ? a.textContent.trim() : "" } };
+  }).filter(function (x) { return x.name; });
+  if (faqItems.length) schema["@graph"].push({ "@type": "FAQPage", mainEntity: faqItems });
+  var ld = document.createElement("script");
+  ld.type = "application/ld+json";
+  ld.textContent = JSON.stringify(schema);
+  document.head.appendChild(ld);
 
   var burger = document.querySelector(".nav-burger");
   var mobileMenu = document.querySelector(".mobile-menu");
