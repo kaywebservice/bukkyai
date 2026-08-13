@@ -127,6 +127,8 @@ window.__BKKY__ = ${JSON.stringify({
     posts: doc.posts ?? [],
     password: doc.password || "",
     stripeLink: doc.stripePaymentLink || (import.meta.env.VITE_DEFAULT_PAYMENT_LINK as string | undefined) || "",
+    formEndpoint: doc.forms?.endpoint || "",
+    currency: (doc.pages.flatMap((p) => p.sections).find((s) => s.type === "products")?.content as { currency?: string } | undefined)?.currency || "$",
     translations: doc.languages?.translations || {},
     supported: doc.languages?.supported ?? [],
     defaultLang: doc.languages?.default ?? doc.meta.lang,
@@ -141,16 +143,52 @@ document.querySelectorAll(".bk-form form").forEach(function(f){
     }
     e.preventDefault();
     var s = f.querySelector(".bk-form-success");
-    if(s) s.textContent = "Thanks! Your message has been sent. We'll get back to you shortly.";
-    f.reset();
+    if (!s) return;
+    var ep = cfg.formEndpoint;
+    if (!ep) {
+      s.textContent = "Thanks! (Demo mode — the site owner hasn\u2019t connected a form service yet.)";
+      f.reset();
+      return;
+    }
+    var payload = new URLSearchParams(new FormData(f));
+    payload.set("_subject", document.title + " — " + (f.getAttribute("data-form-label") || "form"));
+    s.textContent = "Sending\u2026";
+    fetch(ep, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+      body: payload.toString()
+    }).then(function (r) {
+      if (r.ok) { s.textContent = "Thanks! Your message has been sent."; f.reset(); }
+      else throw new Error("status " + r.status);
+    }).catch(function () {
+      s.textContent = "Sorry, sending failed. Please try again or email us directly.";
+    });
   });
 });
 document.querySelectorAll(".bk-newsletter form").forEach(function(f){
   f.addEventListener("submit", function(e){
     e.preventDefault();
     var s = f.querySelector(".bk-form-success");
-    if(s) s.textContent = "You're on the list — check your inbox.";
-    f.reset();
+    if (!s) return;
+    var ep = cfg.formEndpoint;
+    if (!ep) {
+      s.textContent = "You're on the list — check your inbox. (Demo mode — no form service connected yet.)";
+      f.reset();
+      return;
+    }
+    var payload = new URLSearchParams(new FormData(f));
+    payload.set("_subject", document.title + " — newsletter signup");
+    s.textContent = "Sending\u2026";
+    fetch(ep, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+      body: payload.toString()
+    }).then(function (r) {
+      if (r.ok) { s.textContent = "You're on the list — check your inbox."; f.reset(); }
+      else throw new Error("status " + r.status);
+    }).catch(function () {
+      s.textContent = "Sorry, signup failed. Please try again.";
+    });
   });
 });
 document.addEventListener("click", function(e){
@@ -882,9 +920,30 @@ const SITE_FEATURES_SCRIPT = `(function () {
   function loadCart() { try { return JSON.parse(localStorage.getItem(cartKey) || "[]"); } catch { return []; } }
   function saveCart(cart) { try { localStorage.setItem(cartKey, JSON.stringify(cart)); } catch {} }
   function cartCount(cart) { return cart.reduce(function (s, i) { return s + i.qty; }, 0); }
+  function fmtMoney(n) { return (Number(n) || 0).toFixed(2); }
   function renderCartBadge() {
     var badge = document.getElementById("bk-cart-count");
     if (badge) badge.textContent = cartCount(loadCart());
+  }
+  function renderCartDrawer() {
+    var box = document.getElementById("bk-cart-items");
+    if (!box) return;
+    var cart = loadCart();
+    if (!cart.length) {
+      box.innerHTML = '<p style="padding:8px 0;color:var(--muted)">Your cart is empty.</p>';
+      return;
+    }
+    var rows = cart.map(function (i) {
+      return '<div class="bk-cart-item">' +
+        '<div class="bk-cart-item-main"><div class="bk-cart-item-name">' + i.name + '</div>' +
+        '<div class="bk-cart-item-sub">' + (cfg.currency || "$") + fmtMoney(i.price) + " × " + i.qty + "</div></div>" +
+        '<button class="bk-cart-remove" data-remove="' + i.id + '" aria-label="Remove">✕</button></div>';
+    }).join("");
+    var total = cart.reduce(function (s, i) { return s + (Number(i.price) || 0) * i.qty; }, 0);
+    box.innerHTML = rows +
+      '<div class="bk-cart-total"><span>Total</span><span>' + (cfg.currency || "$") + fmtMoney(total) + "</span></div>" +
+      '<button id="bk-cart-checkout" class="bk-btn bk-btn-primary">Checkout</button>' +
+      (cfg.stripeLink ? "" : '<p class="bk-cart-note">Checkout not configured by the site owner yet.</p>');
   }
   document.addEventListener("click", function (e) {
     var btn = e.target.closest ? e.target.closest(".bk-add-to-cart") : null;
@@ -897,16 +956,34 @@ const SITE_FEATURES_SCRIPT = `(function () {
       else cart.push({ id: id, name: btn.getAttribute("data-product-name"), price: Number(btn.getAttribute("data-product-price")) || 0, qty: 1 });
       saveCart(cart);
       renderCartBadge();
+      renderCartDrawer();
       var done = document.createElement("span");
       done.textContent = "Added";
       btn.parentNode.replaceChild(done, btn);
+      return;
+    }
+    var rem = e.target.closest ? e.target.closest(".bk-cart-remove") : null;
+    if (rem) {
+      var id2 = rem.getAttribute("data-remove");
+      saveCart(loadCart().filter(function (i) { return i.id !== id2; }));
+      renderCartBadge();
+      renderCartDrawer();
+      return;
+    }
+    var checkout = e.target.closest ? e.target.closest("#bk-cart-checkout") : null;
+    if (checkout) {
+      if (!cfg.stripeLink) return;
+      window.location.href = cfg.stripeLink;
       return;
     }
     var toggle = e.target.closest ? e.target.closest("#bk-cart-toggle") : null;
     if (toggle) {
       e.preventDefault();
       var drawer = document.getElementById("bk-cart-drawer");
-      if (drawer) drawer.classList.add("bk-open");
+      if (drawer) {
+        renderCartDrawer();
+        drawer.classList.add("bk-open");
+      }
     }
     if (e.target.closest && e.target.closest("#bk-cart-close")) {
       var dr = document.getElementById("bk-cart-drawer");

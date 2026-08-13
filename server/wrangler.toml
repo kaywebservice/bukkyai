@@ -1,3 +1,7 @@
 name = "bukkyai-publish-kw"
 main = "worker.js"
 compatibility_date = "2025-01-01"
+
+[[kv_namespaces]]
+binding = "ENTITLEMENTS"
+id = "d43294b11f124d8eb60f56718e8b72c0"

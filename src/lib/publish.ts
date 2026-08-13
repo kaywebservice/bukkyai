@@ -1,10 +1,15 @@
 // Client-side publish: send the static site to YOUR publish worker
-// (server/worker.js). The worker holds the GitHub token + optional license check.
+// (server/worker.js). The worker holds the GitHub token, the Creem seller key,
+// and the entitlement store — the browser never sees any of them.
 import type { SiteBlueprint } from "./types";
 import { renderStaticSite } from "./render";
 
 export function publishEndpoint(): string {
   return (import.meta.env.VITE_PUBLISH_ENDPOINT as string | undefined) ?? "";
+}
+
+function apiBase(): string {
+  return publishEndpoint().replace(/\/publish$/, "").replace(/\/+$/, "");
 }
 
 export function proLicense(): string {
@@ -25,7 +30,44 @@ export function setProUnlocked(v: boolean): void {
   } catch {}
 }
 
-export async function publishSite(doc: SiteBlueprint): Promise<{ url?: string; error?: string }> {
+// Create a Creem checkout session bound to the buyer's email (server-side).
+export async function startProCheckout(email: string): Promise<{ url?: string; error?: string }> {
+  const base = apiBase();
+  if (!base) return { error: "Checkout not configured — VITE_PUBLISH_ENDPOINT is empty. Add it to .env (see server/README.md)." };
+  try {
+    const res = await fetch(`${base}/api/checkout`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+    if (!res.ok) return { error: data.error ?? `Checkout returned ${res.status}` };
+    if (!data.url) return { error: "Checkout returned no URL." };
+    return { url: data.url };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+// Ask the worker whether this email has a paid entitlement.
+export async function fetchEntitlement(email: string): Promise<boolean> {
+  const base = apiBase();
+  if (!base) return false;
+  try {
+    const res = await fetch(`${base}/api/entitlement`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) return false;
+    const data = (await res.json()) as { active?: boolean };
+    return Boolean(data.active);
+  } catch {
+    return false;
+  }
+}
+
+export async function publishSite(doc: SiteBlueprint, email: string): Promise<{ url?: string; error?: string }> {
   const endpoint = publishEndpoint();
   if (!endpoint) return { error: "Publish endpoint not configured. Add VITE_PUBLISH_ENDPOINT to .env (see server/README.md)." };
   try {
@@ -33,7 +75,7 @@ export async function publishSite(doc: SiteBlueprint): Promise<{ url?: string; e
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ files, license: proLicense() }),
+      body: JSON.stringify({ files, email, license: proLicense() }),
     });
     const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
     if (!res.ok) return { error: data.error ?? `Publish returned ${res.status}` };

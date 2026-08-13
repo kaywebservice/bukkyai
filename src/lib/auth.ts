@@ -5,6 +5,7 @@ export type AuthUser = {
   email: string | null;
   name: string | null;
   photo: string | null;
+  emailVerified: boolean;
 };
 
 function config(): { apiKey: string; authDomain: string; projectId: string; appId: string } | null {
@@ -49,6 +50,7 @@ function toAuthUser(u: User | null): AuthUser | null {
     email: u.email,
     name: u.displayName,
     photo: u.photoURL,
+    emailVerified: u.emailVerified,
   };
 }
 
@@ -106,6 +108,54 @@ export async function signOut(): Promise<void> {
     // ignore
   }
 }
+
+export async function sendPasswordReset(email: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const auth = await getAuth();
+    const { sendPasswordResetEmail } = await import("firebase/auth");
+    await sendPasswordResetEmail(auth, email);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+export async function sendVerificationEmail(): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const auth = await getAuth();
+    const user = auth.currentUser;
+    if (!user) return { ok: false, error: "No signed-in user." };
+    const { sendEmailVerification } = await import("firebase/auth");
+    await sendEmailVerification(user);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+async function reloadUser(): Promise<void> {
+  try {
+    const auth = await getAuth();
+    if (auth.currentUser) await auth.currentUser.reload();
+  } catch {
+    // ignore
+  }
+}
+
+export async function deleteAccount(): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const auth = await getAuth();
+    const user = auth.currentUser;
+    if (!user) return { ok: false, error: "No signed-in user." };
+    const { deleteUser } = await import("firebase/auth");
+    await deleteUser(user);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+export { reloadUser };
 
 export function onAuthChange(cb: (user: AuthUser | null) => void): () => void {
   if (!authConfigured()) return () => {};

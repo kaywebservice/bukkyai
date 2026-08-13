@@ -1127,7 +1127,7 @@ input[type="range"] {
 .toast {
   position: fixed;
   bottom: 18px;
-  left: 50%;
+   left: 50%;
   transform: translateX(-50%);
   background: var(--chrome-panel2);
   border: 1px solid var(--chrome-border);
@@ -1136,4 +1136,51 @@ input[type="range"] {
   font-size: 13px;
   box-shadow: var(--chrome-shadow);
   z-index: 300;
+}
+
+/* ── Mobile / narrow layout ────────────────────────────────────── */
+@media (max-width: 900px) {
+  .app {
+    grid-template-rows: auto 1fr;
+  }
+  .header {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 46px;
+    padding: 8px 10px;
+    gap: 8px;
+    row-gap: 8px;
+  }
+  .project-picker {
+    flex-wrap: wrap;
+    margin-left: 0;
+  }
+  .project-select {
+    min-width: 120px;
+  }
+  .header-spacer {
+    display: none;
+  }
+  .busy-pill {
+    order: 10;
+    width: 100%;
+  }
+  .app-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 55vh) 45vh;
+  }
+  .left-rail {
+    display: none;
+  }
+  .right-panel {
+    border-left: none;
+    border-top: 1px solid var(--chrome-border);
+  }
+  .preview-toolbar {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  .preview-toolbar .device-switcher {
+    flex-wrap: wrap;
+  }
 }

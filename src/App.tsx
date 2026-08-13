@@ -36,7 +36,7 @@ import { DESIGN_PRESETS } from "./lib/presets";
 import { canGenerateImages, generateSiteImage } from "./lib/images";
 import { authConfigured, onAuthChange } from "./lib/auth";
 import { deleteCloudProject, listCloudProjects, saveProjectToCloud } from "./lib/cloud";
-import { proUnlocked, publishSite, setProUnlocked } from "./lib/publish";
+import { fetchEntitlement, publishSite, setProUnlocked, startProCheckout } from "./lib/publish";
 import {
   addAsset,
   addAssetDataUrl,
@@ -103,7 +103,7 @@ export default function App() {
   const [selected, setSelected] = useState<{ p: number; s: number } | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [tab, setTab] = useState<Tab>("chat");
-  const [settings, setSettings] = useState<LLMSettings & { githubToken?: string; formEndpoint?: string; analyticsDomain?: string }>(loadSettings);
+  const [settings, setSettings] = useState<LLMSettings & { githubToken?: string }>(loadSettings);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [busyLabel, setBusyLabel] = useState("");
@@ -122,6 +122,7 @@ export default function App() {
   const [fit, setFit] = useState(true);
   const [clipboard, setClipboard] = useState<{ type: SectionType; content: SectionContent[SectionType] } | null>(null);
   const [authUid, setAuthUid] = useState<string | null>(null);
+  const [authEmail, setAuthEmail] = useState<string | null>(null);
   const [cloudOn, setCloudOn] = useState(() => {
     try { return localStorage.getItem("bukkyai.cloudOn") === "1"; } catch { return false; }
   });
@@ -136,7 +137,10 @@ export default function App() {
 
   useEffect(() => {
     if (!authConfigured()) return;
-    return onAuthChange((u) => setAuthUid(u?.uid ?? null));
+    return onAuthChange((u) => {
+      setAuthUid(u?.uid ?? null);
+      setAuthEmail(u?.email ?? null);
+    });
   }, []);
 
   // Pull cloud projects into the local list when signed in + sync on
@@ -264,36 +268,62 @@ export default function App() {
   };
 
   const buyPro = () => {
-    const link = paymentLink();
-    if (!link) {
-      showToast("Set a payment link in Settings first");
-      return;
-    }
-    window.open(link, "_blank", "noopener");
-    // Soft gate: mark unlocked after returning from checkout (hard gate lives in the
-    // publish worker via PRO_LICENSE_KEY). Revisit once Creem webhooks are wired.
-    setTimeout(() => setProUnlocked(true), 2500);
-    showToast("Unlocking Pro…");
+    void (async () => {
+      if (!authEmail) {
+        pushMsg({ role: "assistant", text: "Sign in first — paid Pro access is tied to your account email, then you get a live checkout.", kind: "error" });
+        setAuthOpen(true);
+        return;
+      }
+      const res = await startProCheckout(authEmail);
+      if (res.error || !res.url) {
+        const link = paymentLink();
+        if (!link) {
+          pushMsg({ role: "assistant", text: res.error ?? "Checkout isn't configured yet.", kind: "error" });
+          return;
+        }
+        pushMsg({ role: "assistant", text: `Opening checkout in a new tab — access unlocks automatically after you pay. (${res.error ?? ""})` });
+        window.open(link, "_blank", "noopener");
+        return;
+      }
+      pushMsg({ role: "assistant", text: "Opening secure checkout — you'll return here and Pro unlocks automatically." });
+      window.location.assign(res.url);
+    })();
   };
 
   const publishAndShare = async () => {
     if (!doc) return;
-    if (!proUnlocked()) {
-      pushMsg({ role: "assistant", text: "Publish is a Pro feature. Unlock it from Pricing.", kind: "error" });
-      setPricingOpen(true);
+    if (!authEmail) {
+      pushMsg({ role: "assistant", text: "Sign in to publish — publishing is a paid Pro feature tied to your account email.", kind: "error" });
+      setAuthOpen(true);
       return;
     }
     runBusy("Publishing your site…", async () => {
-      const res = await publishSite(doc);
+      const res = await publishSite(doc, authEmail);
       if (res.error) {
         pushMsg({ role: "assistant", text: `Publish failed: ${res.error}`, kind: "error" });
         showToast("Publish failed");
+        if (res.error.toLowerCase().includes("pro required")) setPricingOpen(true);
       } else {
+        const ok = await fetchEntitlement(authEmail);
+        setProUnlocked(ok);
         pushMsg({ role: "assistant", text: `Your site is live at ${res.url} — share it anywhere.` });
         showToast("Published!");
       }
     });
   };
+
+  // Refresh Pro entitlement when the signed-in email changes, and when a buyer
+  // returns from checkout (?creem=success). The worker is the source of truth.
+  useEffect(() => {
+    if (!authEmail) return;
+    void fetchEntitlement(authEmail).then((ok) => {
+      setProUnlocked(ok);
+      if (ok && new URLSearchParams(window.location.search).get("creem") === "success") {
+        showToast("Pro unlocked — Publish & share is ready");
+        try { window.history.replaceState(null, "", window.location.pathname); } catch {}
+      }
+    });
+  }, [authEmail]);
 
   const loadDemo = () => {
     const existing = listProjects().find((p) => p.name === "Northwind Coffee (demo)");
@@ -881,17 +911,27 @@ export default function App() {
     showToast(`Inserted media`);
   };
 
-  const saveSettingsCb = (s: LLMSettings & { githubToken?: string; formEndpoint?: string; analyticsDomain?: string }) => {
+  const saveSettingsCb = (s: LLMSettings & { githubToken?: string }) => {
     setSettings(s);
     saveSettings(s);
     pushMsg({ role: "system", text: `AI provider set to ${s.provider}. Everything still runs locally — no credits, no limits.` });
   };
 
-  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string }) => {
+  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string }) => {
     if (!doc) return;
     const next = { ...doc };
     if (m.password !== undefined) next.password = m.password;
     if (m.stripePaymentLink !== undefined) next.stripePaymentLink = m.stripePaymentLink;
+    if (m.formEndpoint !== undefined) {
+      const ep = (m.formEndpoint ?? "").trim();
+      next.forms = { ...(next.forms ?? {}), endpoint: ep || undefined };
+    }
+    if (m.analyticsDomain !== undefined) {
+      const d = (m.analyticsDomain ?? "").trim().toLowerCase();
+      if (!d) next.analytics = undefined;
+      else if (d.includes(".")) next.analytics = { plausible: d };
+      else next.analytics = { goatcounter: d };
+    }
     const head = m.embedHead ?? "";
     const body = m.embedBody ?? "";
     next.embeds = {
@@ -1303,6 +1343,8 @@ export default function App() {
             stripePaymentLink: doc?.stripePaymentLink,
             embedHead: doc?.embeds?.head?.[0],
             embedBody: doc?.embeds?.body?.[0],
+            formEndpoint: doc?.forms?.endpoint,
+            analyticsDomain: doc?.analytics ? (doc.analytics.plausible ?? doc.analytics.goatcounter ?? "") : "",
           }}
           cloudOn={cloudOn}
           signedIn={Boolean(authUid)}
@@ -1350,7 +1392,7 @@ export default function App() {
   );
 }
 
-function StatusFooter({ busy, busyLabel, error, hasPages, doc, settings, history }: { busy: boolean; busyLabel: string; error: string | null; hasPages: boolean; doc: SiteBlueprint | null; settings: LLMSettings & { githubToken?: string; formEndpoint?: string; analyticsDomain?: string }; history: Checkpoint[] }) {
+function StatusFooter({ busy, busyLabel, error, hasPages, doc, settings, history }: { busy: boolean; busyLabel: string; error: string | null; hasPages: boolean; doc: SiteBlueprint | null; settings: LLMSettings & { githubToken?: string }; history: Checkpoint[] }) {
   return (
     <div className="status-bar">
       <span className={`status-dot ${busy ? "busy" : error ? "err" : hasPages ? "ok" : "warn"}`} />

@@ -2,13 +2,13 @@ import { useState } from "react";
 import type { LLMSettings } from "../lib/types";
 import { defaultModel } from "../lib/llm";
 
-type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string };
+type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string };
 type Props = {
-  settings: LLMSettings & { githubToken?: string; formEndpoint?: string; analyticsDomain?: string };
+  settings: LLMSettings & { githubToken?: string };
   siteMeta?: SiteMeta;
   cloudOn?: boolean;
   signedIn?: boolean;
-  onSave: (s: LLMSettings & { githubToken?: string; formEndpoint?: string; analyticsDomain?: string }) => void;
+  onSave: (s: LLMSettings & { githubToken?: string }) => void;
   onSaveSiteMeta: (m: SiteMeta) => void;
   onToggleCloud: (on: boolean) => void;
   onClose: () => void;
@@ -16,7 +16,14 @@ type Props = {
 
 export default function SettingsModal(p: Props) {
   const [s, setS] = useState(p.settings);
-  const [meta, setMeta] = useState({ password: p.siteMeta?.password ?? "", stripePaymentLink: p.siteMeta?.stripePaymentLink ?? "", embedHead: p.siteMeta?.embedHead ?? "", embedBody: p.siteMeta?.embedBody ?? "" });
+  const [meta, setMeta] = useState({
+    password: p.siteMeta?.password ?? "",
+    stripePaymentLink: p.siteMeta?.stripePaymentLink ?? "",
+    embedHead: p.siteMeta?.embedHead ?? "",
+    embedBody: p.siteMeta?.embedBody ?? "",
+    formEndpoint: p.siteMeta?.formEndpoint ?? "",
+    analyticsDomain: p.siteMeta?.analyticsDomain ?? "",
+  });
 
   const provider = s.provider;
   const model = s.model || defaultModel(provider);
@@ -87,21 +94,21 @@ export default function SettingsModal(p: Props) {
         <div className="settings-row">
           <label>Form endpoint (optional)</label>
           <input
-            value={s.formEndpoint ?? ""}
-            placeholder="https://formspree.io/f/xxx or Web3Forms access_key"
-            onChange={(e) => setS({ ...s, formEndpoint: e.target.value })}
+            value={meta.formEndpoint}
+            placeholder="https://formspree.io/f/xxx or https://api.web3forms.com/submit"
+            onChange={(e) => setMeta({ ...meta, formEndpoint: e.target.value })}
           />
           <div className="settings-note">
-            Your exported contact & newsletter forms will POST here. Leave empty to keep the live in-page
-            confirmation. (Formspree and Web3Forms both work out of the box.)
+            Your contact & newsletter forms POST here when the site is exported/published. Formspree and
+            Web3Forms both work out of the box. Leave empty and forms show a friendly demo note.
           </div>
         </div>
         <div className="settings-row">
           <label>Analytics domain (optional)</label>
           <input
-            value={s.analyticsDomain ?? ""}
+            value={meta.analyticsDomain}
             placeholder="yourdomain.com → Plausible; or goatcounter subdomain"
-            onChange={(e) => setS({ ...s, analyticsDomain: e.target.value })}
+            onChange={(e) => setMeta({ ...meta, analyticsDomain: e.target.value })}
           />
           <div className="settings-note">
             Turns on Plausible (if you give a full domain) or GoatCounter (if you give a subdomain, e.g.

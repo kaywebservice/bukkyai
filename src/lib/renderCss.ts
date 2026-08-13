@@ -301,6 +301,15 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.12;letter-spacing:-.01em;
 .bk-cart-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
 .bk-cart-drawer-head button{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
 .bk-cart-items{flex:1;overflow-y:auto;padding:16px 20px}
+.bk-cart-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.bk-cart-item-main{min-width:0}
+.bk-cart-item-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bk-cart-item-sub{color:var(--muted);font-size:13px;margin-top:2px}
+.bk-cart-remove{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px}
+.bk-cart-remove:hover{color:var(--text)}
+.bk-cart-total{display:flex;justify-content:space-between;align-items:center;padding:14px 0;font-weight:700}
+.bk-cart-note{color:var(--muted);font-size:12px;margin-top:8px}
+#bk-cart-checkout{width:100%;text-align:center;display:block}
 
 /* motion */
 .bk-motion-fade,.bk-motion-slide-up,.bk-motion-slide-left,.bk-motion-slide-right,.bk-motion-zoom,.bk-motion-marquee{opacity:0}
