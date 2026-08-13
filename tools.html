@@ -145,6 +145,12 @@
       <div class="tool-result" id="lc-out"></div>
     </div>
 
+    <div class="tool-card">
+      <h2>Google Business Profile Checklist</h2>
+      <p>For local businesses: the free listing that drives "near me" traffic. Work through these in order.</p>
+      <div class="tool-result" id="gmb-out"></div>
+    </div>
+
   </div>
 </section>
 
@@ -345,6 +351,41 @@
     });
   }
   launchChecklist();
+  function gmbChecklist() {
+    var items = [
+      "Claim your profile at business.google.com (it's free)",
+      "Verify your business (postcard / phone / video)",
+      "Category = what customers search, not your trade title",
+      "Full address + service area, if you deliver",
+      "Hours set — including holiday closures",
+      "Phone number that's a real number, not a tracking line",
+      "Website field points to your live site",
+      "10+ high-quality photos, incl. your entrance and menu/works",
+      "Intro (75 words): who you are + what makes you different",
+      "Products/services listed with prices",
+      "Q&A section pre-answered (hours, parking, policies)",
+      "Ask 5-10 customers for reviews, reply to every one",
+      "Post once a week (offers, new photos, updates)",
+      "Check insights monthly — where the 'near me' traffic goes",
+    ];
+    var out = document.getElementById("gmb-out");
+    var html = "";
+    items.forEach(function (it, i) {
+      html += '<label style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--border);cursor:pointer">' +
+        '<input type="checkbox" style="margin-top:4px" /> <span style="font-size:14px">' + escHtml(it) + '</span></label>';
+    });
+    html += '<div style="margin-top:12px" id="gmb-progress"><b>0/' + items.length + '</b> done</div>';
+    html += '<div style="margin-top:8px;color:var(--muted);font-size:13px">Local rankings need 3 things: a verified profile, consistent info, and fresh reviews. Your website backs all three.</div>';
+    out.innerHTML = html;
+    out.querySelectorAll("input").forEach(function () {
+      var el = this;
+      el.addEventListener("change", function () {
+        var done = out.querySelectorAll("input:checked").length;
+        document.getElementById("gmb-progress").innerHTML = "<b>" + done + "/" + items.length + "</b> done";
+      });
+    });
+  }
+  gmbChecklist();
 </script>
 </body>
 </html>

@@ -7,6 +7,7 @@
 <meta name="description" content="bukkyai turns a plain-English brief into a complete, live website: design system, every page written for you, then publish to your own URL. Designed by Kaywebservice Enterprise Solutions." />
 <meta property="og:title" content="bukkyai — AI website builder" />
 <meta property="og:description" content="Describe your site. bukkyai builds it — design, copy, pages, then live on the web. Designed by Kaywebservice Enterprise Solutions." />
+<meta property="og:image" content="https://bukkyai.duckdns.org/og/default.png" />
 <link rel="manifest" href="/manifest.webmanifest" />
 <link rel="icon" href="/icon-192.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -19,7 +20,11 @@
 <style>
   .bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .bento .card.big { grid-column: span 2; }
-  @media (max-width: 760px) { .bento { grid-template-columns: 1fr; } .bento .card.big { grid-column: span 1; } }
+  .proof-strip { background: var(--ink); color: var(--cream); }
+  .proof-row { display: flex; justify-content: space-between; gap: 18px; padding: 18px 0; flex-wrap: wrap; }
+  .proof-item b { font-family: var(--font-display); font-size: 20px; display: block; }
+  .proof-item span { font-size: 13px; color: #cfc9bb; }
+  @media (max-width: 760px) { .bento { grid-template-columns: 1fr; } .bento .card.big { grid-column: span 1; } .proof-row { gap: 10px; } .proof-item { flex: 1 1 40%; } }
 </style>
 </head>
 <body>
@@ -50,6 +55,15 @@
     </div>
   </div>
 </header>
+
+<section class="proof-strip">
+  <div class="wrap proof-row">
+    <div class="proof-item"><b>One sentence</b><span>in, whole site out</span></div>
+    <div class="proof-item"><b>6 real demos</b><span>live, clickable, no signup</span></div>
+    <div class="proof-item"><b>176+ pages</b><span>of free guides &amp; tools</span></div>
+    <div class="proof-item"><b>5–10 min</b><span>from brief to draft</span></div>
+  </div>
+</section>
 
 <section id="how">
   <div class="wrap center">

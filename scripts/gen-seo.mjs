@@ -19,10 +19,12 @@ const staticPages = [
   ["/faq", 0.6, "monthly"],
   ["/contact", 0.5, "monthly"],
   ["/blog", 0.7, "weekly"],
-  ["/badge", 0.5, "monthly"],
   ["/blog/how-to-write-a-website-brief", 0.6, "monthly"],
   ["/blog/why-good-design-system-beats-template", 0.6, "monthly"],
   ["/blog/writing-homepage-that-sells", 0.6, "monthly"],
+  ["/blog/how-much-does-website-cost", 0.6, "monthly"],
+  ["/blog/best-website-builder-for-restaurants", 0.6, "monthly"],
+  ["/badge", 0.5, "monthly"],
 ];
 
 // Programmatic pages live in programmatic/*.html — collect them.

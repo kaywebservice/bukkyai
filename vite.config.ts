@@ -34,6 +34,8 @@ export default defineConfig({
         blogBrief: "blog/how-to-write-a-website-brief.html",
         blogDesign: "blog/why-good-design-system-beats-template.html",
         blogHomepage: "blog/writing-homepage-that-sells.html",
+        blogCost: "blog/how-much-does-website-cost.html",
+        blogRestaurant: "blog/best-website-builder-for-restaurants.html",
         referral: "referral.html",
         badge: "badge.html",
         ...progInputs,

@@ -169,4 +169,40 @@
       mobileMenu.classList.toggle("open");
     });
   }
+
+  // Exit-intent popup: gentle reminder on marketing pages, once per session.
+  (function () {
+    var shown = false;
+    try { shown = sessionStorage.getItem("bukkyai.exit") === "1"; } catch (e) {}
+    if (shown) return;
+    if (/^\/app/.test(location.pathname)) return;
+
+    function show() {
+      if (shown) return;
+      shown = true;
+      try { sessionStorage.setItem("bukkyai.exit", "1"); } catch (e) {}
+      var el = document.createElement("div");
+      el.className = "exit-pop";
+      el.innerHTML =
+        '<div class="exit-card">' +
+          '<button class="exit-x" aria-label="Close">&times;</button>' +
+          '<div class="exit-mark">b</div>' +
+          '<h3>Still deciding?</h3>' +
+          '<p>Describe your business in one sentence — bukkyai plans, writes and designs the whole site. Free to build, you own every file.</p>' +
+          '<a class="btn btn-primary" href="/app">Try it — it\'s free</a>' +
+          '<a class="exit-live" href="/playground">See live demos first →</a>' +
+        '</div>';
+      document.body.appendChild(el);
+      el.querySelector(".exit-x").addEventListener("click", function () { el.remove(); });
+      el.addEventListener("click", function (e) { if (e.target === el) el.remove(); });
+    }
+
+    document.addEventListener("mouseout", function (e) {
+      if (e.relatedTarget === null && e.clientY < 40) show();
+    });
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) show();
+    });
+    setTimeout(show, 30000); // fallback: show once after 30s
+  })();
 })();

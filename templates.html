@@ -13,6 +13,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/marketing.css" />
+<style>
+  .tpl-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .tpl-actions .btn { flex: 1; }
+  .tpl-note { text-align: center; color: var(--muted); font-size: 13px; margin-top: 16px; }
+</style>
 </head>
 <body>
 
@@ -27,13 +32,14 @@
 <section style="padding-top: 20px">
   <div class="wrap">
     <div class="tpl-grid">
-      <a class="tpl-card" href="/app"><div class="tpl-thumb" style="background:linear-gradient(135deg,#d9b98c,#b3541e)">June &amp; Oak</div><div class="tpl-body"><b>Bakery &amp; café</b><span>6 pages · menu, story, visit, ordering with cart, journal</span></div></a>
-      <a class="tpl-card" href="/app"><div class="tpl-thumb" style="background:linear-gradient(135deg,#8aa29e,#3d5a52)">Northwind</div><div class="tpl-body"><b>SaaS product</b><span>6 pages · features, pricing, customers, blog, signup</span></div></a>
-      <a class="tpl-card" href="/app"><div class="tpl-thumb" style="background:linear-gradient(135deg,#c9bda3,#6b6355)">Atelier</div><div class="tpl-body"><b>Design studio</b><span>5 pages · work, studio, journal, contact</span></div></a>
-      <a class="tpl-card" href="/app"><div class="tpl-thumb" style="background:linear-gradient(135deg,#a8c3a0,#4d6b45)">Verdant</div><div class="tpl-body"><b>Wellness brand</b><span>5 pages · shop with cart, farm story, rituals, contact</span></div></a>
-      <a class="tpl-card" href="/app"><div class="tpl-thumb" style="background:linear-gradient(135deg,#7f92a8,#24374a)">Harbor House</div><div class="tpl-body"><b>Boutique hotel</b><span>5 pages · rooms, stay, dining, booking</span></div></a>
-      <a class="tpl-card" href="/app"><div class="tpl-thumb" style="background:linear-gradient(135deg,#c98f6e,#7a3c1e)">Metro</div><div class="tpl-body"><b>Restaurant &amp; bar</b><span>5 pages · menu, hours, events, reserve</span></div></a>
+      <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#d9b98c,#b3541e)">June &amp; Oak</div><div class="tpl-body"><b>Bakery &amp; café</b><span>6 pages · menu, story, visit, ordering with cart, journal</span><div class="tpl-actions"><a class="btn btn-sm" href="/previews/bakery/index.html" target="_blank" rel="noopener">Live preview</a><a class="btn btn-sm btn-primary" href="/app?template=bakery">Remix</a></div></div></div>
+      <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#8aa29e,#3d5a52)">Northwind</div><div class="tpl-body"><b>SaaS product</b><span>6 pages · features, pricing, customers, blog, signup</span><div class="tpl-actions"><a class="btn btn-sm" href="/previews/saas/index.html" target="_blank" rel="noopener">Live preview</a><a class="btn btn-sm btn-primary" href="/app?template=saas">Remix</a></div></div></div>
+      <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#c9bda3,#6b6355)">Atelier</div><div class="tpl-body"><b>Design studio</b><span>5 pages · work, studio, journal, contact</span><div class="tpl-actions"><a class="btn btn-sm" href="/previews/atelier/index.html" target="_blank" rel="noopener">Live preview</a><a class="btn btn-sm btn-primary" href="/app?template=studio">Remix</a></div></div></div>
+      <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#a8c3a0,#4d6b45)">Verdant</div><div class="tpl-body"><b>Wellness brand</b><span>5 pages · shop with cart, farm story, rituals, contact</span><div class="tpl-actions"><a class="btn btn-sm" href="/previews/verdant/index.html" target="_blank" rel="noopener">Live preview</a><a class="btn btn-sm btn-primary" href="/app?template=wellness">Remix</a></div></div></div>
+      <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#7f92a8,#24374a)">Harbor House</div><div class="tpl-body"><b>Boutique hotel</b><span>5 pages · rooms, stay, dining, booking</span><div class="tpl-actions"><a class="btn btn-sm" href="/previews/harbor/index.html" target="_blank" rel="noopener">Live preview</a><a class="btn btn-sm btn-primary" href="/app?template=hotel">Remix</a></div></div></div>
+      <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#c98f6e,#7a3c1e)">Metro</div><div class="tpl-body"><b>Restaurant &amp; bar</b><span>5 pages · menu, hours, events, reserve</span><div class="tpl-actions"><a class="btn btn-sm" href="/previews/metro/index.html" target="_blank" rel="noopener">Live preview</a><a class="btn btn-sm btn-primary" href="/app?template=restaurant">Remix</a></div></div></div>
     </div>
+    <p class="tpl-note">Click <b>Live preview</b> to open the full site — no signup. Click <b>Remix</b> to open it in the editor and make it yours. Or <a href="/playground" style="color:var(--accent)">try all six in the playground</a>.</p>
   </div>
 </section>
 

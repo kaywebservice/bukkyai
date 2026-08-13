@@ -316,6 +316,36 @@ export const INDUSTRIES = [
     accent: "#37474f",
     grad: "#90a4ae,#37474f",
   },
+  {
+    slug: "dentist",
+    name: "Dentist",
+    title: "Dentist Website Builder",
+    meta: "A dentist website with treatments, team and booking. Describe your practice, get the whole site.",
+    h1: "Dentist Website Builder",
+    blurb: "Treatments, your team, insurance info and easy booking — a dental site that reassures patients.",
+    accent: "#2f6f9f",
+    grad: "#9ab8d9,#2f6f9f",
+  },
+  {
+    slug: "roofer",
+    name: "Roofer",
+    title: "Roofer Website Builder",
+    meta: "A roofing website with services, service areas and free-quote requests. bukkyai builds it.",
+    h1: "Roofer Website Builder",
+    blurb: "Services, a project gallery, service areas and a quote form — a roofing site built for local jobs.",
+    accent: "#8a6d3b",
+    grad: "#c9b99a,#8a6d3b",
+  },
+  {
+    slug: "tutor",
+    name: "Tutoring",
+    title: "Tutoring Website Builder",
+    meta: "A tutoring website with subjects, availability and booking. bukkyai builds and writes it for you.",
+    h1: "Tutoring Website Builder",
+    blurb: "Subjects, approach, availability and a booking form — a tutor site that fills slots.",
+    accent: "#4d6b45",
+    grad: "#a8c3a0,#4d6b45",
+  },
 ];
 
 export const USE_CASES = [
@@ -442,7 +472,7 @@ export const USE_CASES = [
 ];
 
 // City × industry local pages (programmatic local SEO).
-export const CITIES = ["Austin", "Houston", "Denver", "Phoenix", "Miami", "Seattle", "Portland", "Nashville", "Chicago", "San Diego", "Orlando", "Dallas", "Atlanta", "Boston", "Brooklyn"];
+export const CITIES = ["Austin", "Houston", "Denver", "Phoenix", "Miami", "Seattle", "Portland", "Nashville", "Chicago", "San Diego", "Orlando", "Dallas", "Atlanta", "Boston", "Brooklyn", "Las Vegas", "Philadelphia", "Charlotte", "San Antonio", "Minneapolis"];
 export const LOCAL_INDUSTRIES = [
   ["bakery", "Bakery"],
   ["restaurant", "Restaurant"],
@@ -452,6 +482,9 @@ export const LOCAL_INDUSTRIES = [
   ["landscaping", "Landscaping"],
   ["photography", "Photographer"],
   ["barbershop", "Barbershop"],
+  ["dentist", "Dentist"],
+  ["roofer", "Roofer"],
+  ["tutor", "Tutor"],
 ];
 
 export const COMPARISONS = [

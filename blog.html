@@ -26,6 +26,13 @@
   .blog-card h2 a:hover { color: var(--accent); }
   .blog-card p { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 0 0 16px; }
   .blog-card .read { font-size: 13px; font-weight: 700; color: var(--accent); margin-top: auto; }
+  .blog-newsletter { max-width: 720px; margin: 8px auto 0; background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px 26px; text-align: center; }
+  .blog-newsletter h3 { font-family: var(--font-display); font-size: 19px; margin: 0 0 6px; }
+  .blog-newsletter p { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+  .nl-form { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .nl-form input { padding: 11px 14px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--panel2); color: var(--text); font: inherit; font-size: 14px; width: min(320px, 70vw); }
+  .nl-msg { font-size: 13px; color: var(--accent); margin-top: 10px; min-height: 18px; }
+  .nl-rss { display: inline-block; margin-top: 8px; font-size: 12px; color: var(--muted); }
   @media (max-width: 760px) { .blog-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -42,7 +49,32 @@
 <section style="padding-top: 10px; padding-bottom: 30px">
   <div class="wrap" style="max-width: 900px">
 
+    <div class="blog-newsletter">
+      <h3>New guide every week, no spam.</h3>
+      <p>Practical advice on building a website that makes you money. Unsubscribe anytime.</p>
+      <form class="nl-form" onsubmit="return nlSubmit(event)">
+        <input type="email" id="nl-email" placeholder="you@email.com" required />
+        <button class="btn btn-primary" type="submit">Subscribe</button>
+      </form>
+      <div class="nl-msg" id="nl-msg"></div>
+      <a class="nl-rss" href="/blog/feed.xml">RSS feed →</a>
+    </div>
+
     <div class="blog-grid">
+
+      <article class="blog-card">
+        <div class="meta">Cost</div>
+        <h2><a href="/blog/how-much-does-website-cost">How much does a small business website cost in 2026?</a></h2>
+        <p>A real breakdown — DIY builders, freelancers, agencies — and why most of what you pay for is planning and words, not "a website."</p>
+        <span class="read">Read the guide →</span>
+      </article>
+
+      <article class="blog-card">
+        <div class="meta">Guides</div>
+        <h2><a href="/blog/best-website-builder-for-restaurants">Best website builder for restaurants (2026)</a></h2>
+        <p>Menu, hours, reservations, one good photo — and the builders that deliver it without a six-month project.</p>
+        <span class="read">Read the guide →</span>
+      </article>
 
       <article class="blog-card">
         <div class="meta">Planning</div>
@@ -80,5 +112,20 @@
 </section>
 
 <script src="/marketing.js"></script>
+<script>
+  function nlSubmit(e) {
+    var email = document.getElementById("nl-email").value.trim();
+    var msg = document.getElementById("nl-msg");
+    if (!/^\S+@\S+\.\S+$/.test(email)) { msg.textContent = "Enter a valid email."; return false; }
+    msg.textContent = "You're on the list. First guide lands this week.";
+    document.getElementById("nl-email").value = "";
+    try {
+      var subs = JSON.parse(localStorage.getItem("bukkyai.newsletter") || "[]");
+      subs.push({ email: email, at: Date.now() });
+      localStorage.setItem("bukkyai.newsletter", JSON.stringify(subs));
+    } catch (e) {}
+    return false;
+  }
+</script>
 </body>
 </html>

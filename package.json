@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/gen-pages.mjs && node scripts/gen-seo.mjs && tsc --noEmit && vite build",
+    "build": "node scripts/gen-pages.mjs && node scripts/gen-og.mjs && node scripts/gen-seo.mjs && tsc --noEmit && vite build",
     "test": "vitest run",
     "preview": "vite preview"
   },
@@ -16,6 +16,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",

@@ -277,3 +277,12 @@ footer { border-top: 1px solid var(--border); padding: 40px 0; background: var(-
 @media (max-width: 480px) {
   .nav-inner { padding: 0 16px; }
 }
+
+.exit-pop { position: fixed; inset: 0; background: rgba(29,27,22,.45); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+.exit-card { background: #f7f3ea; color: #1d1b16; border-radius: 18px; max-width: 420px; width: 100%; padding: 34px 30px 26px; text-align: center; position: relative; box-shadow: 0 24px 60px rgba(0,0,0,.25); }
+.exit-x { position: absolute; top: 12px; right: 14px; border: 0; background: none; font-size: 22px; cursor: pointer; color: #6b6355; line-height: 1; }
+.exit-mark { width: 46px; height: 46px; border-radius: 12px; background: #1d1b16; color: #f7f3ea; font-family: Georgia, serif; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+.exit-card h3 { font-family: Georgia, serif; font-size: 22px; margin: 0 0 8px; }
+.exit-card p { color: #6b6355; font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.exit-card .btn { width: 100%; }
+.exit-live { display: block; margin-top: 12px; color: #b3541e; font-size: 13px; font-weight: 700; text-decoration: none; }

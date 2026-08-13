@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<title>bukkyai blog</title>
+<link>https://bukkyai.duckdns.org/blog</link>
+<atom:link href="https://bukkyai.duckdns.org/blog/feed.xml" rel="self" type="application/rss+xml"/>
+<description>Practical guides on planning, writing and designing a business website — the same ideas bukkyai uses to build your site in minutes.</description>
+<language>en</language>
+<item>
+<title>Best website builder for restaurants (2026)</title>
+<link>https://bukkyai.duckdns.org/blog/best-website-builder-for-restaurants</link>
+<guid isPermaLink="true">https://bukkyai.duckdns.org/blog/best-website-builder-for-restaurants</guid>
+<description>Menu, hours, reservations, one good photo — and the builders that deliver it without a six-month project.</description>
+</item>
+<item>
+<title>How much does a small business website cost in 2026?</title>
+<link>https://bukkyai.duckdns.org/blog/how-much-does-website-cost</link>
+<guid isPermaLink="true">https://bukkyai.duckdns.org/blog/how-much-does-website-cost</guid>
+<description>A real breakdown of what a small business website costs: DIY builders, agencies, freelancers — and where the money really goes.</description>
+</item>
+<item>
+<title>Writing a homepage that sells without sounding salesy</title>
+<link>https://bukkyai.duckdns.org/blog/writing-homepage-that-sells</link>
+<guid isPermaLink="true">https://bukkyai.duckdns.org/blog/writing-homepage-that-sells</guid>
+<description>Headlines, subheads and one clear call to action. The small changes that turn a homepage from "about us" into a page that quietly does its job.</description>
+</item>
+<item>
+<title>Why a real design system beats choosing a template</title>
+<link>https://bukkyai.duckdns.org/blog/why-good-design-system-beats-template</link>
+<guid isPermaLink="true">https://bukkyai.duckdns.org/blog/why-good-design-system-beats-template</guid>
+<description>Colors, fonts and spacing done consistently make a site look like a business, not a template. Here's what a design system is — and why yours should be yours.</description>
+</item>
+<item>
+<title>How to write a website brief that gets you the right site</title>
+<link>https://bukkyai.duckdns.org/blog/how-to-write-a-website-brief</link>
+<guid isPermaLink="true">https://bukkyai.duckdns.org/blog/how-to-write-a-website-brief</guid>
+<description>The single most important paragraph when you build a website is the first one. Here's how to describe your business so the site that comes back actually sounds like you.</description>
+</item>
+</channel>
+</rss>
