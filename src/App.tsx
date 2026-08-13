@@ -33,6 +33,7 @@ import {
   translateSite,
 } from "./lib/builder";
 import { DESIGN_PRESETS } from "./lib/presets";
+import { harmonizeDesign as harmonize } from "./lib/harmony";
 import { canGenerateImages, generateSiteImage } from "./lib/images";
 import { authConfigured, onAuthChange } from "./lib/auth";
 import { deleteCloudProject, listCloudProjects, saveProjectToCloud } from "./lib/cloud";
@@ -601,6 +602,13 @@ export default function App() {
     if (projectId) persistDoc(projectId, next);
     if (designTimer.current) window.clearTimeout(designTimer.current);
     designTimer.current = window.setTimeout(() => mutate(next, "Design tweak", "manual"), 900);
+  };
+
+  const harmonizeDesign = () => {
+    if (!doc) return;
+    const res = harmonize(doc.design);
+    changeDesign(res.design);
+    showToast(`Harmony ${res.before.total} → ${res.after.total}: ${res.changes[0] ?? "no changes needed"}`);
   };
 
   const applyPreset = (name: string) => {
@@ -1261,6 +1269,7 @@ export default function App() {
                 onApplyPreset={applyPreset}
                 onUploadBrand={uploadBrand}
                 onSetTone={setTone}
+                onHarmonize={harmonizeDesign}
               />
             )}
             {tab === "media" && (

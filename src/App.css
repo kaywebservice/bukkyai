@@ -1184,3 +1184,80 @@ input[type="range"] {
     flex-wrap: wrap;
   }
 }
+
+/* ── Design harmony engine ─────────────────────────────────────── */
+.harmony-card {
+  background: var(--chrome-panel2);
+  border: 1px solid var(--chrome-border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.harmony-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.harmony-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.harmony-score {
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.harmony-score-green { color: #4ade80; }
+.harmony-score-amber { color: #fbbf24; }
+.harmony-score-red { color: #f87171; }
+.harmony-axis {
+  display: grid;
+  grid-template-columns: 52px 1fr 30px;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--chrome-muted);
+  margin-bottom: 6px;
+}
+.harmony-axis b {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--chrome-text);
+}
+.harmony-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--chrome-bg);
+  overflow: hidden;
+}
+.harmony-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+.harmony-fill-green { background: #4ade80; }
+.harmony-fill-amber { background: #fbbf24; }
+.harmony-fill-red { background: #f87171; }
+.harmony-notes {
+  margin: 10px 0 4px;
+  padding: 0;
+  list-style: none;
+}
+.harmony-notes li {
+  font-size: 12px;
+  color: var(--chrome-muted);
+  padding: 2px 0 2px 14px;
+  position: relative;
+}
+.harmony-notes li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--chrome-accent);
+}

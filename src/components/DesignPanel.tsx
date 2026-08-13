@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import type { SiteBlueprint } from "../lib/types";
 import { PRESETS, BRAND_TAGS } from "../lib/designPresets";
+import { scoreDesign, type HarmonyScore } from "../lib/harmony";
 
 type Props = {
   doc: SiteBlueprint;
@@ -7,11 +9,59 @@ type Props = {
   onApplyPreset: (name: string) => void;
   onUploadBrand: (f: File) => void;
   onSetTone: (t: "default" | "bold" | "minimal") => void;
+  onHarmonize: () => void;
 };
 
+function scoreTone(total: number): string {
+  return total >= 80 ? "green" : total >= 60 ? "amber" : "red";
+}
+
+function ScoreGauge({ score, onHarmonize }: { score: HarmonyScore; onHarmonize: () => void }) {
+  const tone = scoreTone(score.total);
+  return (
+    <div className="harmony-card">
+      <div className="harmony-head">
+        <span className="harmony-title">Design harmony</span>
+        <span className={`harmony-score harmony-score-${tone}`}>{score.total}</span>
+      </div>
+      <div className="harmony-axis">
+        <span>Colors</span>
+        <div className="harmony-bar">
+          <div className={`harmony-fill harmony-fill-${scoreTone(score.axes.colors)}`} style={{ width: `${score.axes.colors}%` }} />
+        </div>
+        <b>{score.axes.colors}</b>
+      </div>
+      <div className="harmony-axis">
+        <span>Fonts</span>
+        <div className="harmony-bar">
+          <div className={`harmony-fill harmony-fill-${scoreTone(score.axes.fonts)}`} style={{ width: `${score.axes.fonts}%` }} />
+        </div>
+        <b>{score.axes.fonts}</b>
+      </div>
+      <div className="harmony-axis">
+        <span>Layout</span>
+        <div className="harmony-bar">
+          <div className={`harmony-fill harmony-fill-${scoreTone(score.axes.layout)}`} style={{ width: `${score.axes.layout}%` }} />
+        </div>
+        <b>{score.axes.layout}</b>
+      </div>
+      <ul className="harmony-notes">
+        {score.notes.map((n) => (
+          <li key={n}>{n}</li>
+        ))}
+      </ul>
+      <button className="btn" style={{ width: "100%", marginTop: 6 }} onClick={onHarmonize}>
+        Harmonize design
+      </button>
+    </div>
+  );
+}
+
 export default function DesignPanel(p: Props) {
+  const score = useMemo(() => scoreDesign(p.doc.design), [p.doc.design]);
   return (
     <div>
+      <ScoreGauge score={score} onHarmonize={p.onHarmonize} />
       <div className="panel-label">Voice & tone</div>
       <textarea
         className="chat-input"
