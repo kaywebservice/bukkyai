@@ -11,7 +11,7 @@ export default function PlanView(p: Props) {
   if (!p.plan) {
     return (
       <div className="settings-note">
-        Describe your site and Kaywebservice will first show you the structure — sitemap, sections, and tone —
+        Describe your site and bukkyai will first show you the structure — sitemap, sections, and tone —
         before generating anything. You approve the plan, then it builds.
       </div>
     );

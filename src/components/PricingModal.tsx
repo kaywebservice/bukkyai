@@ -19,7 +19,7 @@ export default function PricingModal(p: Props) {
     <div className="modal-overlay" onClick={p.onClose}>
       <div className="modal pricing-modal" ref={modalRef} role="dialog" aria-modal="true" aria-label="Pricing" onClick={(e) => e.stopPropagation()}>
         <div className="inspector-head">
-          <h2 style={{ margin: 0, fontSize: 18 }}>Kaywebservice</h2>
+          <h2 style={{ margin: 0, fontSize: 18 }}>bukkyai</h2>
           <button className="btn btn-sm btn-ghost" onClick={p.onClose}>
             Close
           </button>

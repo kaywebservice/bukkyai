@@ -38,7 +38,7 @@ export async function generateOgImage(doc: SiteBlueprint, width = 1200, height =
 
   ctx.fillStyle = c.accent;
   ctx.font = `600 20px "${heading}"`;
-  ctx.fillText("Kaywebservice", 72, height - 88);
+  ctx.fillText("bukkyai", 72, height - 88);
 
   return canvas.toDataURL("image/png");
 }

@@ -171,7 +171,7 @@ export async function downloadCmsExport(doc: SiteBlueprint): Promise<void> {
   }
   zip.file(
     "cms-README.md",
-    `# Migrating from Kaywebservice\n\nEach page is exported as Markdown with the section content in JSON blocks.\nYou can import these into WordPress, Webflow, or any CMS that accepts Markdown.\nThe site itself is also included as static HTML in the main export.`
+    `# Migrating from bukkyai\n\nEach page is exported as Markdown with the section content in JSON blocks.\nYou can import these into WordPress, Webflow, or any CMS that accepts Markdown.\nThe site itself is also included as static HTML in the main export.`
   );
   const blob = await zip.generateAsync({ type: "blob" });
   triggerDownload(blob, "bukkyai-cms-export.zip");
@@ -227,7 +227,7 @@ export default defineConfig({ plugins: [react()] });
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kaywebservice site</title>
+    <title>bukkyai site</title>
   </head>
   <body>
     <div id="root"></div>
@@ -334,7 +334,7 @@ export async function backupToGithub(token: string, doc: SiteBlueprint, name: st
         accept: "application/vnd.github+json",
       },
       body: JSON.stringify({
-        description: `Kaywebservice backup — ${name}`,
+        description: `bukkyai backup — ${name}`,
         public: false,
         files: {
           "site.json": { content: JSON.stringify(doc, null, 2) },
@@ -381,7 +381,7 @@ export async function deployToGithubPages(
     if (!repo.ok) {
       const created = await gh(`/user/repos`, {
         method: "POST",
-        body: JSON.stringify({ name: repoName, private: false, auto_init: true, description: `Site built with Kaywebservice — ${doc.meta.title}` }),
+        body: JSON.stringify({ name: repoName, private: false, auto_init: true, description: `Site built with bukkyai — ${doc.meta.title}` }),
       });
       if (!created.ok) return { error: `Could not create repo: ${String(created.data.message ?? "")}` };
     }
@@ -450,7 +450,7 @@ Designed by Kaywebservice Enterprise Solutions.
 ## Files
 - \`index.html\` (+ page files) — the site. Static, server-rendered HTML. No framework, no build step.
 - \`styles\` — the design system is embedded as CSS custom properties in every page.
-- \`site.json\` — the full editable blueprint. Open it back in Kaywebservice (Import) to keep editing.
+- \`site.json\` — the full editable blueprint. Open it back in bukkyai (Import) to keep editing.
 - \`robots.txt\`, \`sitemap.xml\` — SEO essentials, generated automatically.
 
 ## Deploy (any of these, ~1 minute)
@@ -461,7 +461,7 @@ Designed by Kaywebservice Enterprise Solutions.
 **Any static host** — upload the files. There is no backend.
 
 ## Keep editing
-Import \`site.json\` in Kaywebservice → Edit → Export again. Your changes, your data, always.
+Import \`site.json\` in bukkyai → Edit → Export again. Your changes, your data, always.
 `;
 }
 

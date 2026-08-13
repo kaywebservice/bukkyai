@@ -181,7 +181,7 @@ export function saveProjectAs(doc: SiteBlueprint, name: string): string {
 export function importProjectFromJson(json: string): { meta: ProjectMeta; doc: SiteBlueprint } | { error: string } {  try {
     const parsed = JSON.parse(json) as SiteBlueprint;
     if (!parsed.meta || !parsed.design || !Array.isArray(parsed.pages)) {
-      return { error: "Not a valid Kaywebservice blueprint. Expected meta, design, and pages." };
+      return { error: "Not a valid bukkyai blueprint. Expected meta, design, and pages." };
     }
     const name = parsed.meta.title || "Imported site";
     const meta: ProjectMeta = { id: uid("prj"), name, at: Date.now() };
