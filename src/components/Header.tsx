@@ -117,6 +117,7 @@ export default function Header(p: Props) {
 
       <div className="header-spacer" />
 
+      <div className="header-actions">
       {p.busy && (
         <div className="busy-pill">
           <span className="spinner" />
@@ -220,6 +221,7 @@ export default function Header(p: Props) {
           Sign in
         </button>
       )}
+      </div>
     </div>
   );
 }
