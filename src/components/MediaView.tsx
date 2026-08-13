@@ -48,8 +48,15 @@ export default function MediaView(p: Props) {
       )}
 
       {!p.assets.length ? (
-        <div className="settings-note">No images uploaded yet. Drag one in via the upload button, or pick a
-          hero/gallery image by rewriting that section with AI.</div>
+        <div className="empty-state">
+          <div className="empty-icon">🖼️</div>
+          <b>No images yet</b>
+          <p>Upload a photo or generate one with AI — it'll be optimized and hosted automatically.</p>
+          <label className="btn btn-primary" style={{ cursor: "pointer" }}>
+            ↑ Upload image
+            <input type="file" accept="image/*" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) p.onUpload(f); }} />
+          </label>
+        </div>
       ) : visible.length === 0 ? (
         <div className="settings-note" style={{ marginTop: 8 }}>No images match “{q}”.</div>
       ) : (

@@ -142,7 +142,16 @@ export default function PostsView(p: Props) {
       {!editing && (
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {p.posts.length === 0 ? (
-            <div className="settings-note">No posts yet. Add one, then drop a "Blog posts" section onto any page.</div>
+            <div className="empty-state">
+              <div className="empty-icon">✍️</div>
+              <b>No posts yet</b>
+              <p>Write one yourself, import a Markdown file, or let AI draft three in your site's voice.</p>
+              {p.onGeneratePosts && (
+                <button className="btn btn-primary" onClick={p.onGeneratePosts} disabled={p.busy}>
+                  ✦ Write 3 with AI
+                </button>
+              )}
+            </div>
           ) : (
             p.posts.map((post) => (
               <div key={post.id} className="inspector-section" style={{ padding: 10, cursor: "pointer" }} onClick={() => setEditingId(post.id)}>

@@ -255,7 +255,13 @@ export default function Inspector(p: Props) {
   const section: Section | undefined = page?.sections[p.selected.s];
   const [genBusy, setGenBusy] = useState<string | null>(null);
   if (!page || !section) {
-    return <div className="settings-note">Click a section in the preview (edit mode on) or the left rail to inspect it.</div>;
+    return (
+      <div className="empty-state">
+        <div className="empty-icon">🎯</div>
+        <b>Nothing selected</b>
+        <p>Turn on Edit mode and click a section in the preview — or pick one in the left rail — to inspect and edit every field here.</p>
+      </div>
+    );
   }
 
   const content = section.content as Obj;
