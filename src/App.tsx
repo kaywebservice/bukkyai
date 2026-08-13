@@ -37,7 +37,7 @@ import { harmonizeDesign as harmonize } from "./lib/harmony";
 import { generateOgImage as renderOgImage } from "./lib/ogImage";
 import { canGenerateImages, generateSiteImage } from "./lib/images";
 import { authConfigured, onAuthChange } from "./lib/auth";
-import { deleteCloudProject, listCloudProjects, saveProjectToCloud, subscribeCloudProject } from "./lib/cloud";
+import { acceptInvite, deleteCloudProject, listCloudProjects, saveProjectToCloud, shareProject, subscribeCloudProject } from "./lib/cloud";
 import { fetchEntitlement, publishSite, setProUnlocked, startProCheckout } from "./lib/publish";
 import {
   addAsset,
@@ -92,6 +92,7 @@ import SeoPanel from "./components/SeoPanel";
 import AnalyticsView from "./components/AnalyticsView";
 import AuthModal from "./components/AuthModal";
 import StarterGallery from "./components/StarterGallery";
+import ShareModal from "./components/ShareModal";
 import PricingModal from "./components/PricingModal";
 import { starterById } from "./lib/starterSites";
 
@@ -103,6 +104,8 @@ export default function App() {
   const [doc, setDoc] = useState<SiteBlueprint | null>(null);
   const [history, setHistory] = useState<Checkpoint[]>([]);
   const [cursor, setCursor] = useState(-1);
+  const [invites, setInvites] = useState<{ id: string; name: string; role: string }[]>([]);
+  const [shareOpen, setShareOpen] = useState(false);
   const [pageIdx, setPageIdx] = useState(0);
   const [selected, setSelected] = useState<{ p: number; s: number } | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -151,12 +154,13 @@ export default function App() {
   useEffect(() => {
     if (!authUid || !cloudOn) return;
     let cancelled = false;
-    void listCloudProjects(authUid).then((list) => {
+    void listCloudProjects(authUid, authEmail ?? undefined).then(({ projects: cloudList, invites: cloudInvites }) => {
       if (cancelled) return;
+      setInvites(cloudInvites.map((i) => ({ id: i.id, name: i.name, role: i.role ?? "viewer" })));
       const local = listProjects();
       let changed = false;
       const next = [...local];
-      for (const cp of list) {
+      for (const cp of cloudList) {
         if (!local.some((p) => p.id === cp.id)) {
           persistDoc(cp.id, cp.doc);
           next.unshift({ id: cp.id, name: cp.name, at: cp.at });
@@ -169,11 +173,12 @@ export default function App() {
       }
     });
     return () => { cancelled = true; };
-  }, [authUid, cloudOn]);
+  }, [authUid, cloudOn, authEmail]);
 
   // Debounced cloud save on doc changes
   useEffect(() => {
     if (!authUid || !cloudOn || !doc || !projectId) return;
+    if (myRole.current === "viewer") return;
     const name = projects.find((p) => p.id === projectId)?.name ?? "Project";
     const t = window.setTimeout(() => {
       void saveProjectToCloud(authUid, projectId, name, doc, history).catch(() => {});
@@ -183,10 +188,13 @@ export default function App() {
 
   // Realtime collaboration: apply remote changes pushed from other devices/tabs.
   const lastRemoteAt = useRef(0);
+  const myRole = useRef<"owner" | "editor" | "viewer" | undefined>(undefined);
   useEffect(() => {
     if (!authUid || !cloudOn || !projectId) return;
     const unsub = subscribeCloudProject(authUid, projectId, (cp) => {
-      if (!cp || !cp.doc || cp.at <= lastRemoteAt.current) return;
+      if (!cp || !cp.doc) return;
+      myRole.current = cp.role;
+      if (cp.at <= lastRemoteAt.current) return;
       lastRemoteAt.current = cp.at;
       setDoc(cp.doc);
       setAssets(loadAssets(projectId));
@@ -195,6 +203,30 @@ export default function App() {
     return unsub;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUid, cloudOn, projectId]);
+
+  const acceptInviteHandler = async (id: string) => {
+    if (!authUid || !authEmail) return;
+    const res = await acceptInvite(authUid, authEmail, id);
+    if (res.ok) {
+      setInvites((inv) => inv.filter((i) => i.id !== id));
+      showToast("Invite accepted");
+      const cloudList = await listCloudProjects(authUid, authEmail);
+      const found = cloudList.projects.find((p) => p.id === id);
+      if (found && !listProjects().some((p) => p.id === id)) {
+        persistDoc(id, found.doc);
+        const next = [{ id: found.id, name: found.name, at: found.at }, ...listProjects()];
+        persistProjectsList(next);
+        setProjects(listProjects());
+      }
+    } else {
+      showToast(res.error ?? "Could not accept invite");
+    }
+  };
+
+  const shareCurrentProject = async (email: string, role: "editor" | "viewer") => {
+    if (!authUid || !projectId) return { ok: false, error: "Open a project first." };
+    return shareProject(authUid, projectId, email, role);
+  };
 
   useEffect(() => {
     if (projectId) persistChat(projectId, messages);
@@ -1238,7 +1270,17 @@ export default function App() {
         onOpenSettings={() => setSettingsOpen(true)}
         onAuth={() => setAuthOpen(true)}
         onPricing={() => setPricingOpen(true)}
+        onShare={authUid && cloudOn ? () => setShareOpen(true) : undefined}
+        invites={invites.length}
+        onAcceptInvites={invites.length ? async () => { for (const i of invites) await acceptInviteHandler(i.id); } : undefined}
       />
+      {shareOpen && (
+        <ShareModal
+          projectName={projects.find((p) => p.id === projectId)?.name ?? "Project"}
+          onShare={shareCurrentProject}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
 
       <div className="app-main">
         <LeftRail

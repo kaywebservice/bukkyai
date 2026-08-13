@@ -27,6 +27,9 @@ type Props = {
   onOpenSettings: () => void;
   onAuth: () => void;
   onPricing: () => void;
+  onShare?: () => void;
+  invites?: number;
+  onAcceptInvites?: () => void;
 };
 
 export default function Header(p: Props) {
@@ -170,6 +173,16 @@ export default function Header(p: Props) {
       <button className="btn" onClick={p.onOpenSettings} title="Settings">
         Settings
       </button>
+      {p.onShare && (
+        <button className="btn btn-ghost" onClick={p.onShare} title="Share the active project">
+          Share
+        </button>
+      )}
+      {p.onAcceptInvites && p.invites ? (
+        <button className="btn btn-ghost" onClick={p.onAcceptInvites} title={`${p.invites} pending invite${p.invites > 1 ? "s" : ""}`}>
+          Invites ({p.invites})
+        </button>
+      ) : null}
       <button className="btn btn-ghost" onClick={p.onPricing} title="Pricing">
         Pricing
       </button>

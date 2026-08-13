@@ -100,8 +100,8 @@ export default function AuthModal(p: Props) {
                 if (!window.confirm("Delete your account permanently? Projects and cloud saves are removed. This cannot be undone.")) return;
                 try {
                   const { listCloudProjects, deleteCloudProject } = await import("../lib/cloud");
-                  const list = await listCloudProjects(user.uid);
-                  for (const cp of list) await deleteCloudProject(user.uid, cp.id);
+                  const { projects } = await listCloudProjects(user.uid);
+                  for (const cp of projects) await deleteCloudProject(user.uid, cp.id);
                 } catch {
                   // best-effort cloud cleanup
                 }

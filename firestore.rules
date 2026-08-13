@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Shared projects with team roles.
+    // - owner: full control
+    // - editor (in members): read + write
+    // - viewer (in members): read only
+    // - invitees (email in invites): read the project and may accept (self-register as member)
+    match /projects/{projectId} {
+      allow read: if request.auth != null
+        && (resource.data.ownerId == request.auth.uid
+            || request.auth.uid in resource.data.members
+            || request.auth.token.email in resource.data.invites);
+      allow create: if request.auth != null
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.memberUids.hasOnly([request.auth.uid]);
+      allow update: if request.auth != null
+        && (resource.data.ownerId == request.auth.uid
+            || request.resource.data.members[request.auth.uid] == "editor"
+            || request.auth.token.email in resource.data.invites);
+      allow delete: if request.auth != null
+        && resource.data.ownerId == request.auth.uid;
+    }
+
+    // Legacy per-user projects: still readable/writable by their owner, so the
+    // automatic migration (users/{uid}/projects -> projects/{pid}) can run.
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}

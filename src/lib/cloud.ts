@@ -1,16 +1,6 @@
-// Firestore cloud sync — per-user project storage.
+// Firestore cloud sync — shared project storage with team roles.
 // Requires: Firebase configured (VITE_FIREBASE_*), user signed in, and Firestore
-// enabled in the Firebase console with rules that restrict access to own uid.
-//
-// Suggested security rules:
-//   rules_version = '2';
-//   service cloud.firestore {
-//     match /databases/{db}/documents {
-//       match /users/{uid}/{document=**} {
-//         allow read, write: if request.auth != null && request.auth.uid == uid;
-//       }
-//     }
-//   }
+// enabled with rules that allow the shared /projects collection (see firestore.rules).
 import type { Checkpoint, SiteBlueprint } from "./types";
 
 let fsPromise: Promise<import("firebase/firestore").Firestore> | null = null;
@@ -37,33 +27,102 @@ export type CloudProject = {
   name: string;
   at: number;
   doc: SiteBlueprint;
+  role?: "owner" | "editor" | "viewer";
+};
+
+type CloudDoc = {
+  ownerId: string;
+  name: string;
+  at: number;
+  doc: SiteBlueprint;
   history?: Checkpoint[];
+  members: Record<string, "owner" | "editor" | "viewer">;
+  memberUids: string[];
+  invites?: Record<string, "editor" | "viewer">;
+  inviteEmails?: string[];
 };
 
 export async function saveProjectToCloud(uid: string, projectId: string, name: string, doc: SiteBlueprint, history?: Checkpoint[]): Promise<{ ok: boolean; error?: string }> {
   try {
     const db = await getDb();
-    const { doc: d, setDoc } = await import("firebase/firestore");
-    await setDoc(d(db, "users", uid, "projects", projectId), {
+    const { doc: d, setDoc, getDoc } = await import("firebase/firestore");
+    const ref = d(db, "projects", projectId);
+    const existing = await getDoc(ref);
+    const payload: Record<string, unknown> = {
       name,
       at: Date.now(),
       doc: JSON.parse(JSON.stringify(doc)) as SiteBlueprint,
       ...(history && history.length ? { history: JSON.parse(JSON.stringify(history)) as Checkpoint[] } : {}),
-    });
+    };
+    if (!existing.exists()) {
+      payload.ownerId = uid;
+      payload.members = { [uid]: "owner" };
+      payload.memberUids = [uid];
+      payload.invites = {};
+      payload.inviteEmails = [];
+    }
+    await setDoc(ref, payload, { merge: true });
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
-export async function listCloudProjects(uid: string): Promise<CloudProject[]> {
+export async function listCloudProjects(uid: string, email?: string): Promise<{ projects: CloudProject[]; invites: CloudProject[] }> {
+  const projects: CloudProject[] = [];
+  const invites: CloudProject[] = [];
   try {
     const db = await getDb();
-    const { collection, getDocs, query, orderBy } = await import("firebase/firestore");
-    const snap = await getDocs(query(collection(db, "users", uid, "projects"), orderBy("at", "desc")));
-    return snap.docs.map((d) => d.data() as CloudProject);
+    const { collection, query, where, getDocs } = await import("firebase/firestore");
+
+    const mine = await getDocs(query(collection(db, "projects"), where("memberUids", "array-contains", uid)));
+    for (const snap of mine.docs) {
+      const d = snap.data() as CloudDoc;
+      projects.push({ id: snap.id, name: d.name, at: d.at, doc: d.doc, role: d.members?.[uid] });
+    }
+
+    if (email) {
+      const invited = await getDocs(query(collection(db, "projects"), where("inviteEmails", "array-contains", email)));
+      for (const snap of invited.docs) {
+        const d = snap.data() as CloudDoc;
+        const role = d.invites?.[email] ?? "viewer";
+        invites.push({ id: snap.id, name: d.name, at: d.at, doc: d.doc, role });
+      }
+    }
+
+    await migrateLegacy(db, uid, projects);
   } catch {
-    return [];
+    // rules not enabled / no network — return what we have
+  }
+  return { projects, invites };
+}
+
+async function migrateLegacy(db: import("firebase/firestore").Firestore, uid: string, known: CloudProject[]): Promise<void> {
+  try {
+    const { collection, query, getDocs, doc, getDoc, setDoc } = await import("firebase/firestore");
+    const legacy = await getDocs(query(collection(db, "users", uid, "projects")));
+    if (legacy.empty) return;
+    const knownIds = new Set(known.map((p) => p.id));
+    for (const snap of legacy.docs) {
+      const pid = snap.id;
+      if (knownIds.has(pid)) continue;
+      const d = snap.data() as CloudProject;
+      const ref = doc(db, "projects", pid);
+      const existing = await getDoc(ref);
+      if (existing.exists()) continue;
+      await setDoc(ref, {
+        ownerId: uid,
+        name: d.name,
+        at: d.at,
+        doc: d.doc,
+        members: { [uid]: "owner" },
+        memberUids: [uid],
+        invites: {},
+        inviteEmails: [],
+      });
+    }
+  } catch {
+    // ignore — migration is best-effort
   }
 }
 
@@ -71,9 +130,10 @@ export async function loadCloudProject(uid: string, projectId: string): Promise<
   try {
     const db = await getDb();
     const { doc, getDoc } = await import("firebase/firestore");
-    const snap = await getDoc(doc(db, "users", uid, "projects", projectId));
+    const snap = await getDoc(doc(db, "projects", projectId));
     if (!snap.exists()) return null;
-    return snap.data() as CloudProject;
+    const d = snap.data() as CloudDoc;
+    return { id: snap.id, name: d.name, at: d.at, doc: d.doc, role: d.members?.[uid] };
   } catch {
     return null;
   }
@@ -82,10 +142,71 @@ export async function loadCloudProject(uid: string, projectId: string): Promise<
 export async function deleteCloudProject(uid: string, projectId: string): Promise<void> {
   try {
     const db = await getDb();
-    const { doc, deleteDoc } = await import("firebase/firestore");
-    await deleteDoc(doc(db, "users", uid, "projects", projectId));
+    const { doc, getDoc, deleteDoc, updateDoc } = await import("firebase/firestore");
+    const ref = doc(db, "projects", projectId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    const d = snap.data() as CloudDoc;
+    if (d.ownerId === uid) {
+      await deleteDoc(ref);
+    } else {
+      const members = { ...(d.members ?? {}) };
+      delete members[uid];
+      await updateDoc(ref, {
+        members,
+        memberUids: (d.memberUids ?? []).filter((x) => x !== uid),
+      });
+    }
   } catch {
     // ignore
+  }
+}
+
+export async function shareProject(
+  uid: string,
+  projectId: string,
+  email: string,
+  role: "editor" | "viewer"
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const db = await getDb();
+    const { doc, getDoc, updateDoc } = await import("firebase/firestore");
+    const ref = doc(db, "projects", projectId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return { ok: false, error: "Project not found in cloud." };
+    const d = snap.data() as CloudDoc;
+    if (d.ownerId !== uid) return { ok: false, error: "Only the owner can invite collaborators." };
+    const invitee = email.trim().toLowerCase();
+    if (!invitee) return { ok: false, error: "Enter an email address." };
+    const invites = { ...(d.invites ?? {}) };
+    invites[invitee] = role;
+    const inviteEmails = Array.from(new Set([...(d.inviteEmails ?? []), invitee]));
+    await updateDoc(ref, { invites, inviteEmails });
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+export async function acceptInvite(uid: string, email: string, projectId: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const db = await getDb();
+    const { doc, getDoc, updateDoc } = await import("firebase/firestore");
+    const ref = doc(db, "projects", projectId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return { ok: false, error: "Invite not found." };
+    const d = snap.data() as CloudDoc;
+    const role = d.invites?.[email] ?? "viewer";
+    const members = { ...(d.members ?? {}) };
+    members[uid] = role;
+    const memberUids = Array.from(new Set([...(d.memberUids ?? []), uid]));
+    const invites = { ...(d.invites ?? {}) };
+    delete invites[email];
+    const inviteEmails = (d.inviteEmails ?? []).filter((x) => x !== email);
+    await updateDoc(ref, { members, memberUids, invites, inviteEmails });
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -99,9 +220,12 @@ export function subscribeCloudProject(
   void getDb().then(async (db) => {
     if (cancelled) return;
     const { doc, onSnapshot } = await import("firebase/firestore");
-    const ref = doc(db, "users", uid, "projects", projectId);
+    const ref = doc(db, "projects", projectId);
     unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists()) onRemote(snap.data() as CloudProject);
+      if (snap.exists()) {
+        const d = snap.data() as CloudDoc;
+        onRemote({ id: snap.id, name: d.name, at: d.at, doc: d.doc, role: d.members?.[uid] });
+      }
     });
   });
   return () => {
