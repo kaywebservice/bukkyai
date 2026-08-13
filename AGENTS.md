@@ -132,12 +132,22 @@ masked errors locally that then broke the clean Vercel build. Keep it this way.
 - **Google Business Profile checklist** added to `/tools`.
 - **Local SEO**: 20 cities × 11 industries (added Las Vegas, Philadelphia, Charlotte, San Antonio, Minneapolis + dentist, roofer, tutor) → **279 programmatic pages, 295 sitemap URLs.**
 
+**Search engines & indexing (shipped)**
+- **IndexNow**: `scripts/ping-indexnow.mjs` pings Bing/Yandex/Seznam after every `npm run build` (key at `public/indexnow-key.txt` = `9e04a25db17c63f8f71cd062a7f68d76`). Pings the sitemap URL by default, or specific URLs as args.
+- **Bing/Yandex verification**: placeholder meta tags (`msvalidate.01`, `yandex-verification`) in `public/marketing.js` — paste real codes there to enable. `indexnow` meta tag points to the key file.
+- **Programmatic hubs**: `/templates/index`, `/industries`, `/use-cases`, `/how-to` index pages linking all programmatic pages together (generated in `gen-pages.mjs` via `hubIndex()`, rewrites in `vercel.json`).
+- **Schema depth**: LocalBusiness/ProfessionalService on all 220 local pages, FAQPage on all comparison pages, HowTo on how-to pages, Article + BreadcrumbList via marketing.js.
+- **Share button** on every generated site: floating share control in the site JS (`render.ts`) — native Web Share API on mobile, copy-link on desktop.
+- **Design system generator**: `/design-system` standalone page (9 moods, WCAG contrast check, CSS output) + linked from `/tools`.
+- **SEO report**: `scripts/seo-report.mjs` — `node scripts/seo-report.mjs --live [--limit N]` crawls all sitemap URLs from bukkyai.duckdns.org and reports 404s/redirects (runs HEAD, concurrency 12). Without `--live`, validates the sitemap only. Exit 1 on errors → wire into CI/launch.
+
 ---
 
 ## Pending user actions (remind at the start of each session)
 
 - **[TO DO] Deploy the worker:** `cd server && npx wrangler deploy` — needed so the referral endpoints (`/api/referral`, `/api/referral/visit`, `/api/referral/stats`) go live. Until deployed, the "Refer & earn" panel in the app shows an error and `/ref?ref=` links won't record visits.
-- **[TO DO] Search Console re-indexing:** after Vercel deploys a push, re-request indexing in Google Search Console for new/changed URLs (recent additions: `/blog/*` ×5, `/playground`, `/compare`, `/badge`, `/og/*.png` images, `/templates`, `/tools`, `/made-with`, 279 programmatic pages incl. new city×industry locals).
+- **[TO DO] Bing Webmaster Tools:** verify the site at bing.com/webmasters and paste the code into the `BING_CODE` placeholder in `public/marketing.js` (same for Yandex via `YANDEX_CODE`). Submit `sitemap.xml`. IndexNow already pings on every build once verification meta is present.
+- **[TO DO] Search Console re-indexing:** after Vercel deploys a push, re-request indexing in Google Search Console for new/changed URLs (recent additions: `/blog/*` ×5, `/playground`, `/compare`, `/badge`, `/og/*.png` images, `/templates`, `/tools`, `/made-with`, 283 programmatic pages incl. new city×industry locals + hub index pages).
 - **[TO DO] Cross-post drafts:** `drafts/*.md` are ready to paste to Medium/LinkedIn/Hashnode (with canonical links) — I can't post, the user must. See `drafts/README.md` for per-platform steps.
 - **[TO DO] Creem side:** Plus price set to $35 in the UI; user should confirm the same price in Creem (annual plans optional).
 

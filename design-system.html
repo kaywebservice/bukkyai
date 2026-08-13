@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Design System Generator — free from bukkyai</title>
+<meta name="description" content="Generate a complete, WCAG-checked design system in seconds — colors, fonts and spacing for your brand — free, no signup. Then apply it to a full website in bukkyai." />
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="icon" href="/icon-192.png" />
+<meta name="theme-color" content="#f7f3ea" />
+<meta name="google-site-verification" content="vzREjfhomsn9KoFEywBS7ebsa7Wo-ttVmnc8jPh7l70" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/marketing.css" />
+<style>
+  .ds-hero { padding: 84px 0 30px; text-align: center; }
+  .ds-hero h1 { font-family: var(--font-display); font-size: clamp(34px, 5vw, 52px); letter-spacing: -.02em; margin-bottom: 14px; }
+  .ds-hero p { color: var(--muted); font-size: 17px; max-width: 640px; margin: 0 auto; }
+  .ds-card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 18px; }
+  .ds-card h2 { font-family: var(--font-display); font-size: 20px; margin: 0 0 6px; }
+  .ds-card p { color: var(--muted); font-size: 14px; margin: 0 0 16px; }
+  .ds-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .ds-row input { padding: 11px 14px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--panel2); color: var(--text); font: inherit; font-size: 14px; flex: 1; min-width: 200px; }
+  .ds-chip { border: 1px solid var(--border); background: var(--panel2); border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text); }
+  .ds-chip.active { background: var(--ink); border-color: var(--ink); color: var(--cream); }
+  .ds-swatches { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+  .ds-swatch { width: 120px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  .ds-swatch .color { height: 64px; }
+  .ds-swatch .label { font-size: 11px; padding: 8px 10px; background: var(--panel2); color: var(--muted); }
+  .ds-swatch .label b { display: block; color: var(--text); font-size: 12px; margin-bottom: 2px; }
+  .ds-fonts { display: flex; gap: 14px; flex-wrap: wrap; margin: 14px 0; }
+  .ds-font { flex: 1; min-width: 200px; border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; background: var(--panel2); }
+  .ds-font b { font-size: 13px; display: block; margin-bottom: 6px; }
+  .ds-pass { color: #2f9e44; font-weight: 700; font-size: 13px; }
+  .ds-copy { width: 100%; min-height: 140px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--panel2); color: var(--text); font: inherit; font-size: 12.5px; padding: 12px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<header class="ds-hero">
+  <div class="wrap">
+    <span class="eyebrow">Free design tool</span>
+    <h1>Design System Generator</h1>
+    <p>A complete, WCAG-checked design system — colors, fonts and spacing — generated from your brand's mood. Free, no signup.</p>
+  </div>
+</header>
+
+<section style="padding-top: 10px">
+  <div class="wrap" style="max-width: 760px">
+
+    <div class="ds-card">
+      <h2>1. Describe your brand</h2>
+      <p>A mood word works best: warm, bold, calm, minimal, luxury, playful…</p>
+      <div class="ds-row">
+        <input id="ds-mood" placeholder="warm, bold, calm, luxury, playful…" value="warm" />
+        <button class="btn btn-primary" onclick="genSystem()">Generate</button>
+      </div>
+    </div>
+
+    <div class="ds-card">
+      <h2>2. Pick a mood</h2>
+      <div class="ds-row" id="ds-moods"></div>
+    </div>
+
+    <div class="ds-card" id="ds-out" style="display:none">
+      <h2>Your design system</h2>
+      <p id="ds-desc"></p>
+      <div class="ds-swatches" id="ds-swatches"></div>
+      <div class="ds-fonts" id="ds-fonts"></div>
+      <div class="ds-pass" id="ds-contrast"></div>
+      <div style="margin-top:14px">
+        <button class="btn btn-sm btn-ghost" onclick="copySystem()">Copy CSS</button>
+        <a class="btn btn-sm btn-primary" href="/app" style="margin-left:8px">Apply it to a full site →</a>
+      </div>
+      <textarea class="ds-copy" id="ds-css" readonly style="margin-top:12px"></textarea>
+    </div>
+
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2>Want the whole site to match?</h2>
+    <p>Describe your business in bukkyai — the design system is generated automatically, then every page is written and designed against it.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/app">Build your site free</a>
+      <a class="btn btn-ghost" href="/tools">More free tools</a>
+    </div>
+  </div>
+</section>
+
+<script src="/marketing.js"></script>
+<script>
+  var SYSTEMS = {
+    warm: {
+      name: "Warm & artisanal", bg: "#f7f3ea", surface: "#fff", text: "#1d1b16", accent: "#b3541e",
+      heading: "Fraunces", body: "Inter",
+    },
+    minimal: {
+      name: "Minimal", bg: "#fafafa", surface: "#ffffff", text: "#111111", accent: "#111111",
+      heading: "Manrope", body: "Manrope",
+    },
+    bold: {
+      name: "Bold & loud", bg: "#1d1b16", surface: "#2a271f", text: "#f7f3ea", accent: "#ff6b4a",
+      heading: "Space Grotesk", body: "Inter",
+    },
+    calm: {
+      name: "Calm & organic", bg: "#f4f7f4", surface: "#ffffff", text: "#22302a", accent: "#4d6b45",
+      heading: "Sora", body: "Inter",
+    },
+    luxury: {
+      name: "Luxury", bg: "#faf6f0", surface: "#ffffff", text: "#1c1917", accent: "#9a6b3f",
+      heading: "Playfair Display", body: "Lato",
+    },
+    playful: {
+      name: "Playful", bg: "#fdf6ff", surface: "#ffffff", text: "#2d1b3d", accent: "#8b5cf6",
+      heading: "Baloo 2", body: "Nunito",
+    },
+    corporate: {
+      name: "Corporate", bg: "#f4f6f8", surface: "#ffffff", text: "#0f172a", accent: "#2563eb",
+      heading: "Merriweather", body: "Inter",
+    },
+    editorial: {
+      name: "Editorial", bg: "#fbfaf6", surface: "#ffffff", text: "#16130d", accent: "#b3541e",
+      heading: "Source Serif 4", body: "Source Sans 3",
+    },
+    tech: {
+      name: "Tech", bg: "#f6f8fb", surface: "#ffffff", text: "#0f172a", accent: "#0ea5e9",
+      heading: "Space Grotesk", body: "IBM Plex Sans",
+    },
+  };
+  var MOODS = ["warm", "minimal", "bold", "calm", "luxury", "playful", "corporate", "editorial", "tech"];
+  var current = "warm";
+
+  function contrast(hex1, hex2) {
+    function lum(hex) {
+      var c = hex.replace("#", "");
+      if (c.length !== 6) return 0;
+      var r = parseInt(c.slice(0, 2), 16) / 255, g = parseInt(c.slice(2, 4), 16) / 255, b = parseInt(c.slice(4, 6), 16) / 255;
+      var f = function (v) { return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+      return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+    }
+    var l1 = Math.max(lum(hex1), lum(hex2)), l2 = Math.min(lum(hex1), lum(hex2));
+    return (l1 + 0.05) / (l2 + 0.05);
+  }
+
+  MOODS.forEach(function (m) {
+    var b = document.createElement("button");
+    b.className = "ds-chip" + (m === "warm" ? " active" : "");
+    b.textContent = SYSTEMS[m].name;
+    b.onclick = function () {
+      current = m;
+      document.querySelectorAll(".ds-chip").forEach(function (c) { c.classList.remove("active"); });
+      b.classList.add("active");
+      document.getElementById("ds-mood").value = m;
+      genSystem();
+    };
+    document.getElementById("ds-moods").appendChild(b);
+  });
+
+  function hexToRgba(hex, a) {
+    var c = hex.replace("#", "");
+    var n = parseInt(c.length === 3 ? c.split("").map(function (x) { return x + x; }).join("") : c, 16);
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+  }
+
+  function genSystem() {
+    var mood = (document.getElementById("ds-mood").value.trim().toLowerCase()) || "warm";
+    var s = SYSTEMS[mood] || SYSTEMS.warm;
+    current = mood;
+    document.querySelectorAll(".ds-chip").forEach(function (c) {
+      c.classList.toggle("active", c.textContent === s.name);
+    });
+    document.getElementById("ds-desc").textContent = s.name + " — generated from the mood word \"" + mood + "\".";
+    var swatches = [
+      ["Background", s.bg], ["Surface", s.surface], ["Text", s.text], ["Accent", s.accent],
+    ];
+    document.getElementById("ds-swatches").innerHTML = swatches.map(function (sw) {
+      return '<div class="ds-swatch"><div class="color" style="background:' + sw[1] + '"></div><div class="label"><b>' + sw[0] + '</b>' + sw[1] + '</div></div>';
+    }).join("");
+    document.getElementById("ds-fonts").innerHTML =
+      '<div class="ds-font"><b>Headings</b><span style="font-family:&quot;' + s.heading + '&quot;,serif;font-size:22px;font-weight:700">' + s.heading + '</span></div>' +
+      '<div class="ds-font"><b>Body</b><span style="font-family:&quot;' + s.body + '&quot;,sans-serif;font-size:18px">' + s.body + '</span></div>';
+    var cr = contrast(s.text, s.bg);
+    var ca = contrast("#ffffff", s.accent);
+    var pass = cr >= 4.5 && ca >= 4.5;
+    document.getElementById("ds-contrast").innerHTML =
+      (pass ? "WCAG AA passed" : "WCAG AA not met — try a darker text or accent") + " · text/bg ratio " + cr.toFixed(2) + ":1 · button contrast " + ca.toFixed(2) + ":1";
+    document.getElementById("ds-css").value =
+      ":root {\n  --bg: " + s.bg + ";\n  --surface: " + s.surface + ";\n  --text: " + s.text + ";\n  --accent: " + s.accent + ";\n  --heading-font: \"" + s.heading + "\", Georgia, serif;\n  --body-font: \"" + s.body + "\", system-ui, sans-serif;\n  --radius: 14px;\n  --space-sm: 8px;\n  --space-md: 16px;\n  --space-lg: 32px;\n  --shadow: 0 10px 30px " + hexToRgba(s.text, 0.08) + ";\n}";
+    document.getElementById("ds-out").style.display = "block";
+  }
+
+  function copySystem() {
+    var t = document.getElementById("ds-css");
+    t.select();
+    try { navigator.clipboard && navigator.clipboard.writeText(t.value); } catch (e) {}
+  }
+
+  genSystem();
+</script>
+</body>
+</html>

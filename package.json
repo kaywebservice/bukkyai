@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/gen-pages.mjs && node scripts/gen-og.mjs && node scripts/gen-seo.mjs && tsc --noEmit && vite build",
+    "build": "node scripts/gen-pages.mjs && node scripts/gen-og.mjs && node scripts/gen-seo.mjs && tsc --noEmit && vite build && node scripts/ping-indexnow.mjs",
     "test": "vitest run",
     "preview": "vite preview"
   },

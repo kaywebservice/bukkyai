@@ -239,6 +239,31 @@ document.addEventListener("click", function(e){
   var a = e.target && e.target.closest ? e.target.closest('a[href^="#bkpage:"]') : null;
   if(a){ e.preventDefault(); window.parent.postMessage({type:"bk-nav", slug: a.getAttribute("href").slice(8)}, "*"); }
 });
+// Floating share button (native share on mobile, copy link on desktop)
+(function () {
+  var url = encodeURIComponent(location.href);
+  var btn = document.createElement("a");
+  btn.href = "https://twitter.com/intent/tweet?url=" + url;
+  btn.target = "_blank";
+  btn.rel = "noopener";
+  btn.setAttribute("aria-label", "Share this page");
+  btn.style.cssText = "position:fixed;right:18px;bottom:18px;width:48px;height:48px;border-radius:50%;background:var(--accent, #1d1b16);color:var(--accent-c, #fff);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.18);z-index:999;text-decoration:none;font-size:20px;transition:transform .15s";
+  btn.innerHTML = "&#x2197;";
+  btn.onmouseenter = function () { btn.style.transform = "scale(1.08)"; };
+  btn.onmouseleave = function () { btn.style.transform = "scale(1)"; };
+  btn.onclick = function (e) {
+    if (navigator.share) {
+      e.preventDefault();
+      navigator.share({ title: document.title, url: location.href }).catch(function () {});
+    } else {
+      e.preventDefault();
+      try { navigator.clipboard.writeText(location.href); } catch (err) {}
+      btn.innerHTML = "&#x2713;";
+      setTimeout(function () { btn.innerHTML = "&#x2197;"; }, 1600);
+    }
+  };
+  document.body.appendChild(btn);
+})();
 ${SITE_FEATURES_SCRIPT}
 </script>
 ${embedsBody}

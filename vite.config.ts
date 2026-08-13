@@ -38,6 +38,7 @@ export default defineConfig({
         blogRestaurant: "blog/best-website-builder-for-restaurants.html",
         referral: "referral.html",
         badge: "badge.html",
+        designSystem: "design-system.html",
         ...progInputs,
       },
     },

@@ -12,6 +12,7 @@
     { "source": "/blog", "destination": "/blog.html" },
     { "source": "/ref", "destination": "/referral.html" },
     { "source": "/badge", "destination": "/badge.html" },
+    { "source": "/design-system", "destination": "/design-system.html" },
     { "source": "/app", "destination": "/app.html" },
     { "source": "/templates/:slug", "destination": "/templates-:slug.html" },
     { "source": "/industries/:slug", "destination": "/industries-:slug.html" },
@@ -19,6 +20,10 @@
     { "source": "/compare/:slug", "destination": "/compare-:slug.html" },
     { "source": "/how-to/:slug", "destination": "/how-to-:slug.html" },
     { "source": "/compare", "destination": "/compare.html" },
+    { "source": "/templates/index", "destination": "/templates-index.html" },
+    { "source": "/industries", "destination": "/industries-index.html" },
+    { "source": "/use-cases", "destination": "/use-cases-index.html" },
+    { "source": "/how-to", "destination": "/how-to-index.html" },
     { "source": "/local", "destination": "/local.html" },
     { "source": "/local/:city/:industry", "destination": "/local-:city-:industry.html" }
   ]

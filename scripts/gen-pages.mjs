@@ -11,7 +11,7 @@ mkdirSync(outDir, { recursive: true });
 
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function pageShell({ title, meta, h1, blurb, accent, grad, body, slug, cat, related, howto }) {
+function pageShell({ title, meta, h1, blurb, accent, grad, body, slug, cat, related, howto, ld }) {
   const links = [
     '<a href="/features">Website builder</a>',
     '<a href="/tools">Free tools</a>',
@@ -20,6 +20,9 @@ function pageShell({ title, meta, h1, blurb, accent, grad, body, slug, cat, rela
     '<a href="/app">Open editor</a>',
     ...(related || []),
   ].join(" · ");
+  const extraLd = ld
+    ? `<script type="application/ld+json">${JSON.stringify(ld)}</script>`
+    : "";
   const howtoLd = howto ? `
 <script type="application/ld+json">
 {
@@ -46,7 +49,7 @@ function pageShell({ title, meta, h1, blurb, accent, grad, body, slug, cat, rela
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/marketing.css" />${howtoLd}
+<link rel="stylesheet" href="/marketing.css" />${howtoLd}${extraLd}
 <style>
   .prog-hero { padding: 76px 0 44px; text-align: center; }
   .prog-hero h1 { font-family: var(--font-display); font-size: clamp(34px, 5vw, 52px); letter-spacing: -.02em; margin-bottom: 14px; }
@@ -165,7 +168,15 @@ for (const c of COMPARISONS) {
       </table>
     </div>
     <p style="color:var(--muted)">The simplest test is to try it: describe your site, approve the plan and see how fast a finished website appears.</p>`;
-  writeFileSync(join(outDir, `compare-${c.slug}.html`), pageShell({ title: c.title, meta: c.meta, h1: c.h1, blurb: `An honest ${c.name} comparison.`, accent: "#6d5ae8", grad: "#a89bff,#6d5ae8", body, slug: c.slug, cat: "Comparison", related: ['<a href="/compare">All comparisons</a>', '<a href="/templates">Templates</a>'] }));
+  writeFileSync(join(outDir, `compare-${c.slug}.html`), pageShell({ title: c.title, meta: c.meta, h1: c.h1, blurb: `An honest ${c.name} comparison.`, accent: "#6d5ae8", grad: "#a89bff,#6d5ae8", body, slug: c.slug, cat: "Comparison", related: ['<a href="/compare">All comparisons</a>', '<a href="/templates">Templates</a>'], ld: {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      { "@type": "Question", name: `Is bukkyai better than ${c.name}?`, acceptedAnswer: { "@type": "Answer", text: `It depends what you need. bukkyai writes and designs your whole site from a sentence and exports open HTML; ${c.name} is strong when its specific strengths match your workflow. Try bukkyai free and compare.` } },
+      { "@type": "Question", name: `Can I export my site if I use bukkyai?`, acceptedAnswer: { "@type": "Answer", text: "Yes. bukkyai exports open HTML, a ZIP, or a React project — you own every file and can host anywhere." } },
+      { "@type": "Question", name: `How long does bukkyai take vs ${c.name}?`, acceptedAnswer: { "@type": "Answer", text: `Most bukkyai sites go from one-line brief to a written, designed draft in minutes, then you edit visually. With ${c.name}, expect to invest time learning the tool and writing content.` } },
+    ],
+  } }));
   count++;
 }
 
@@ -188,6 +199,75 @@ const compareIndexBody = `
   </div>`;
 writeFileSync(join(outDir, "compare.html"), pageShell({ title: "bukkyai vs other website builders", meta: "Honest comparisons: bukkyai vs Wix, Squarespace, WordPress, Webflow, Framer, GoDaddy, Carrd, Lovable and more — what each is best at.", h1: "bukkyai vs other website builders", blurb: "Honest, side-by-side comparisons. Try the simplest test: describe your site and watch it build.", accent: "#6d5ae8", grad: "#a89bff,#6d5ae8", body: compareIndexBody, slug: "compare", cat: "Comparison", related: ['<a href="/templates">Templates</a>', '<a href="/industries">Industry websites</a>'] }));
 count++;
+
+// Hub index pages — link every programmatic page together (internal linking).
+function hubIndex({ file, title, meta, h1, blurb, items, accent, grad, cat }) {
+  const cards = items
+    .map((it) => `<a class="hub-card" href="${it.href}"><b>${it.title}</b><span>${it.desc}</span></a>`)
+    .join("\n");
+  const body = `
+    <style>
+      .hub-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; margin-top:8px; }
+      .hub-card { display:block; background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px 20px; text-decoration:none; transition:all .15s; }
+      .hub-card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:var(--shadow-md); }
+      .hub-card b { color:var(--text); font-size:15px; display:block; margin-bottom:4px; }
+      .hub-card span { color:var(--muted); font-size:13px; }
+    </style>
+    <div class="hub-grid">${cards}</div>
+    <div style="margin-top:26px">
+      <p style="color:var(--muted)">Don't see what you need? Describe your business in bukkyai — the site builds itself, whatever the industry.</p>
+    </div>`;
+  writeFileSync(join(outDir, file), pageShell({ title, meta, h1, blurb, accent, grad, body, slug: file.replace(/\.html$/, ""), cat, related: ['<a href="/templates">Templates</a>', '<a href="/compare">Comparisons</a>', '<a href="/local">Local</a>'] }));
+  count++;
+}
+
+hubIndex({
+  file: "templates-index.html",
+  title: "All bukkyai templates",
+  meta: "Every bukkyai template: bakery, restaurant, SaaS, portfolio, wellness, hotel, fitness, clinic and more — fully written and designed, ready to remix.",
+  h1: "All bukkyai templates",
+  blurb: "Every ready-made multi-page template. Open a live preview, remix it, make it yours.",
+  accent: "#b3541e",
+  grad: "#d9b98c,#b3541e",
+  cat: "Templates",
+  items: TEMPLATES.map((t) => ({ href: `/templates/${t.slug}`, title: `${t.name} template`, desc: t.blurb })),
+});
+
+hubIndex({
+  file: "industries-index.html",
+  title: "Industry website builders",
+  meta: "Website builders for every industry: real estate, restaurants, salons, dentists, roofers, tutors, plumbers and more. Describe your business, get the site.",
+  h1: "Industry website builders",
+  blurb: "A website builder purpose-built for your industry — describe your business and get the whole site.",
+  accent: "#4d6b45",
+  grad: "#a8c3a0,#4d6b45",
+  cat: "Industries",
+  items: INDUSTRIES.map((i) => ({ href: `/industries/${i.slug}`, title: i.name, desc: i.blurb })),
+});
+
+hubIndex({
+  file: "use-cases-index.html",
+  title: "Website use cases",
+  meta: "What can bukkyai build? Landing pages, online stores, blogs, portfolios, weddings, events, courses, membership sites and more.",
+  h1: "Website use cases",
+  blurb: "Whatever the goal — a store, a portfolio, a landing page — bukkyai builds it from a sentence.",
+  accent: "#2f6f9f",
+  grad: "#9ab8d9,#2f6f9f",
+  cat: "Use cases",
+  items: USE_CASES.map((u) => ({ href: `/use-cases/${u.slug}`, title: u.name, desc: u.blurb })),
+});
+
+hubIndex({
+  file: "how-to-index.html",
+  title: "Website how-to guides",
+  meta: "Practical, no-code guides: how to make a website, a restaurant website, a portfolio and more — the same path bukkyai automates for you.",
+  h1: "How to build a website",
+  blurb: "Step-by-step guides, with the bukkyai shortcut at every step.",
+  accent: "#2f6f63",
+  grad: "#8aa29e,#3d5a52",
+  cat: "Guides",
+  items: HOW_TOS.map((h) => ({ href: `/how-to/${h.slug}`, title: h.name, desc: h.meta })),
+});
 
 // How-tos → /how-to/{slug}
 for (const h of HOW_TOS) {
@@ -238,6 +318,15 @@ for (const city of CITIES) {
         slug: `${citySlug}-${slug}`,
         cat: `${city} · ${name}`,
         related,
+        ld: {
+          "@context": "https://schema.org",
+          "@type": "ProfessionalService",
+          name: `${name} Website Builder in ${city}`,
+          description: `Build a ${nameL} website in ${city} with bukkyai — written, designed and ready in minutes.`,
+          areaServed: { "@type": "City", name: city },
+          url: `https://bukkyai.duckdns.org/local/${citySlug}/${slug}`,
+          provider: { "@type": "Organization", name: "bukkyai", url: "https://bukkyai.duckdns.org/" },
+        },
       })
     );
     count++;

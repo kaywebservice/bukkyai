@@ -13,6 +13,7 @@ const staticPages = [
   ["/features", 0.9, "weekly"],
   ["/templates", 0.9, "weekly"],
   ["/tools", 0.8, "weekly"],
+  ["/design-system", 0.7, "monthly"],
   ["/made-with", 0.8, "weekly"],
   ["/playground", 0.8, "weekly"],
   ["/pricing", 0.9, "weekly"],
@@ -40,10 +41,10 @@ try {
       const cat = idx >= 0 ? base.slice(0, idx) : base;
       const rest = idx >= 0 ? base.slice(idx + 1) : "";
       const route = cat === "templates" ? `/templates/${rest}`
-        : cat === "industries" ? `/industries/${rest}`
-        : cat === "use" ? `/use-cases/${base.slice("use-cases-".length)}`
+        : cat === "industries" ? (rest === "index" ? "/industries" : `/industries/${rest}`)
+        : cat === "use" ? (rest === "index" ? "/use-cases" : `/use-cases/${rest}`)
         : cat === "compare" ? (rest ? `/compare/${rest}` : "/compare")
-        : cat === "how" ? `/how-to/${base.slice("how-to-".length)}`
+        : cat === "how" ? (rest === "index" ? "/how-to" : `/how-to/${rest}`)
         : cat === "local" ? `/local/${rest.replace(/-/, "/")}`   // rest = {city}-{industry}
         : `/${base}`;
       return route;

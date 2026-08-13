@@ -12,6 +12,7 @@
         '<a href="/templates">Templates<small>6 ready-made multi-page sites</small></a>' +
 '<a href="/playground">Live demos<small>Preview and remix, no signup</small></a>' +
         '<a href="/features#blog">Blog & SEO<small>Posts, sitemap, RSS, JSON-LD</small></a>' +
+        '<a href="/industries">Industries<small>Builders for every type of business</small></a>' +
       '</div>' +
       '<div class="mega-group"><h4>Business</h4>' +
         '<a href="/pricing">Pricing<small>Free to build, Pro to publish</small></a>' +
@@ -96,6 +97,29 @@
   canonical.rel = "canonical";
   canonical.href = "https://bukkyai.duckdns.org" + (location.pathname === "/" ? "/" : location.pathname);
   document.head.appendChild(canonical);
+
+  // Bing & Yandex webmaster verification — paste your codes below from
+  // bing.com/webmasters and webmaster.yandex.ru, then rebuild.
+  var BING_CODE = "";  // e.g. "ABCDEF0123456789ABCDEF0123456789"
+  var YANDEX_CODE = ""; // e.g. "abcdef0123456789"
+  if (BING_CODE) {
+    var bingMeta = document.createElement("meta");
+    bingMeta.name = "msvalidate.01";
+    bingMeta.content = BING_CODE;
+    document.head.appendChild(bingMeta);
+  }
+  if (YANDEX_CODE) {
+    var yandexMeta = document.createElement("meta");
+    yandexMeta.name = "yandex-verification";
+    yandexMeta.content = YANDEX_CODE;
+    document.head.appendChild(yandexMeta);
+  }
+  if (BING_CODE || YANDEX_CODE) {
+    var idx = document.createElement("meta");
+    idx.name = "indexnow";
+    idx.content = "https://bukkyai.duckdns.org/indexnow-key.txt";
+    document.head.appendChild(idx);
+  }
 
   var schema = {
     "@context": "https://schema.org",
