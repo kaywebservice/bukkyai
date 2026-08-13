@@ -10,6 +10,7 @@ type Props = {
   onStatus: (label: string) => void;
   onApplyDoc: (doc: SiteBlueprint, label: string, source: "edit") => void;
   onGenerateOg: () => void;
+  onFillAlt: () => void;
 };
 
 type Issue = ReturnType<typeof auditSite>["issues"][number];
@@ -69,6 +70,9 @@ export default function SeoPanel(p: Props) {
         </button>
         <button className="btn btn-sm btn-ghost" onClick={p.onGenerateOg} disabled={p.busy}>
           Generate share image
+        </button>
+        <button className="btn btn-sm btn-ghost" onClick={p.onFillAlt} disabled={p.busy}>
+          Fill alt text
         </button>
       </div>
 

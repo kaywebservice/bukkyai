@@ -5,7 +5,7 @@ type Props = {
   pageIdx: number;
   onSelectPage: (i: number) => void;
   onAddPage: () => void;
-  onRenamePage: (idx: number, patch: Partial<Pick<Page, "slug" | "title" | "description">>) => void;
+  onRenamePage: (idx: number, patch: Partial<Pick<Page, "slug" | "title" | "description" | "password">>) => void;
   onDeletePage: (idx: number) => void;
 };
 import type { Page } from "../lib/types";
@@ -52,6 +52,14 @@ export default function PagesManager(p: Props) {
               rows={2}
               value={page.description}
               onChange={(e) => p.onRenamePage(i, { description: e.target.value })}
+            />
+          </div>
+          <div className="json-field">
+            <label>Password protect (optional)</label>
+            <input
+              value={page.password ?? ""}
+              onChange={(e) => p.onRenamePage(i, { password: e.target.value })}
+              placeholder="Leave empty for a public page"
             />
           </div>
           <button className="btn btn-sm" style={{ width: "100%" }} onClick={() => p.onSelectPage(i)}>

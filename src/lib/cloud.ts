@@ -28,6 +28,7 @@ export type CloudProject = {
   at: number;
   doc: SiteBlueprint;
   role?: "owner" | "editor" | "viewer";
+  history?: Checkpoint[];
 };
 
 type CloudDoc = {
@@ -133,8 +134,7 @@ export async function loadCloudProject(uid: string, projectId: string): Promise<
     const snap = await getDoc(doc(db, "projects", projectId));
     if (!snap.exists()) return null;
     const d = snap.data() as CloudDoc;
-    return { id: snap.id, name: d.name, at: d.at, doc: d.doc, role: d.members?.[uid] };
-  } catch {
+    return { id: snap.id, name: d.name, at: d.at, doc: d.doc, role: d.members?.[uid], history: d.history };   } catch {
     return null;
   }
 }

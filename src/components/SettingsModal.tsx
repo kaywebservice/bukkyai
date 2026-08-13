@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { LLMSettings } from "../lib/types";
 import { defaultModel } from "../lib/llm";
 
-type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; customFonts?: string; emailServiceProvider?: string; emailServiceEndpoint?: string; emailServiceApiKey?: string; emailServiceListId?: string; coupons?: string; orderNotify?: string; maintenanceEnabled?: boolean; maintenanceTitle?: string; maintenanceText?: string; maintenanceEmail?: string };
+type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; popupTrigger?: "time" | "exit" | "scroll"; popupScrollPct?: number; customFonts?: string; emailServiceProvider?: string; emailServiceEndpoint?: string; emailServiceApiKey?: string; emailServiceListId?: string; coupons?: string; orderNotify?: string; maintenanceEnabled?: boolean; maintenanceTitle?: string; maintenanceText?: string; maintenanceEmail?: string };
 type Props = {
   settings: LLMSettings & { githubToken?: string };
   siteMeta?: SiteMeta;
@@ -39,6 +39,8 @@ export default function SettingsModal(p: Props) {
     popupButtonLabel: p.siteMeta?.popupButtonLabel ?? "",
     popupCtaUrl: p.siteMeta?.popupCtaUrl ?? "",
     popupDelaySec: p.siteMeta?.popupDelaySec ?? 6,
+    popupTrigger: p.siteMeta?.popupTrigger ?? "time",
+    popupScrollPct: p.siteMeta?.popupScrollPct ?? 60,
     customFonts: p.siteMeta?.customFonts ?? "",
     emailServiceProvider: p.siteMeta?.emailServiceProvider ?? "",
     emailServiceEndpoint: p.siteMeta?.emailServiceEndpoint ?? "",
@@ -299,6 +301,17 @@ export default function SettingsModal(p: Props) {
             <div className="settings-row"><label>Button label</label><input value={meta.popupButtonLabel} onChange={(e) => setMeta({ ...meta, popupButtonLabel: e.target.value })} placeholder="Subscribe" /></div>
             <div className="settings-row"><label>Button link (optional)</label><input value={meta.popupCtaUrl} onChange={(e) => setMeta({ ...meta, popupCtaUrl: e.target.value })} placeholder="https://…" /></div>
             <div className="settings-row"><label>Delay (seconds)</label><input type="number" value={meta.popupDelaySec} onChange={(e) => setMeta({ ...meta, popupDelaySec: Number(e.target.value) || 0 })} /></div>
+            <div className="settings-row">
+              <label>Show when</label>
+              <select value={meta.popupTrigger} onChange={(e) => setMeta({ ...meta, popupTrigger: e.target.value as "time" | "exit" | "scroll" })}>
+                <option value="time">After a few seconds</option>
+                <option value="exit">Visitor is about to leave</option>
+                <option value="scroll">Visitor scrolls down</option>
+              </select>
+            </div>
+            {meta.popupTrigger === "scroll" && (
+              <div className="settings-row"><label>Scroll depth (%)</label><input type="number" value={meta.popupScrollPct} onChange={(e) => setMeta({ ...meta, popupScrollPct: Number(e.target.value) || 60 })} /></div>
+            )}
           </>
         )}
 

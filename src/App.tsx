@@ -35,11 +35,12 @@ import {
 import { DESIGN_PRESETS } from "./lib/presets";
 import { streamLLM } from "./lib/llm";
 import { DISCUSS_SYSTEM, discussUser } from "./lib/prompts";
+import { fillAltText } from "./lib/audit";
 import { harmonizeDesign as harmonize } from "./lib/harmony";
 import { generateOgImage as renderOgImage } from "./lib/ogImage";
 import { canGenerateImages, generateSiteImage } from "./lib/images";
 import { authConfigured, onAuthChange } from "./lib/auth";
-import { acceptInvite, clearPresence, deleteCloudProject, listCloudProjects, saveProjectToCloud, shareProject, subscribeCloudProject, subscribePresence, updatePresence, type PresenceInfo } from "./lib/cloud";
+import { acceptInvite, clearPresence, deleteCloudProject, listCloudProjects, loadCloudProject, saveProjectToCloud, shareProject, subscribeCloudProject, subscribePresence, updatePresence, type PresenceInfo } from "./lib/cloud";
 import { fetchEntitlement, proUnlocked, publishSite, setProUnlocked, startProCheckout } from "./lib/publish";
 import {
   addAsset,
@@ -73,6 +74,7 @@ import {
   downloadReactProject,
   downloadSingleFile,
   downloadStaticZip,
+  printBlueprint,
   publishPreview,
 } from "./lib/export";
 import Header from "./components/Header";
@@ -114,6 +116,7 @@ export default function App() {
   const [tourOpen, setTourOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [cloudHistory, setCloudHistory] = useState<Checkpoint[]>([]);
   const [presence, setPresence] = useState<PresenceInfo[]>([]);
   const [pro, setPro] = useState(() => proUnlocked());
   const [pageIdx, setPageIdx] = useState(0);
@@ -256,6 +259,25 @@ export default function App() {
       setPresence([]);
     };
   }, [authUid, cloudOn, projectId, authEmail]);
+
+  // Load cloud history for the current project (for the History tab).
+  useEffect(() => {
+    if (!authUid || !cloudOn || !projectId) {
+      setCloudHistory([]);
+      return;
+    }
+    void loadCloudProject(authUid, projectId).then((cp) => {
+      setCloudHistory(cp?.history ?? []);
+    });
+  }, [authUid, cloudOn, projectId, cursor]);
+
+  const restoreCloudVersion = (cp: Checkpoint) => {
+    if (!projectId) return;
+    setDoc(cp.doc);
+    setAssets(loadAssets(projectId));
+    mutate(cp.doc, `Restored cloud version: ${cp.label}`, "manual");
+    showToast("Restored cloud version");
+  };
 
   const acceptInviteHandler = async (id: string) => {
     if (!authUid || !authEmail) return;
@@ -756,6 +778,17 @@ export default function App() {
     });
   };
 
+  const fillAlts = () => {
+    if (!doc) return;
+    const { doc: next, count } = fillAltText(doc);
+    if (count === 0) {
+      showToast("All images already have alt text");
+      return;
+    }
+    mutate(next, `Filled ${count} image alt text`, "edit");
+    showToast(`Filled ${count} alt text`);
+  };
+
   const generatePosts = () => {
     if (!doc) return;
     if (!settings.apiKey?.trim()) {
@@ -944,7 +977,7 @@ export default function App() {
     setSelected(null);
   };
 
-  const renamePage = (idx: number, patch: Partial<Pick<Page, "slug" | "title" | "description">>) => {
+  const renamePage = (idx: number, patch: Partial<Pick<Page, "slug" | "title" | "description" | "password">>) => {
     if (!doc) return;
     const next = JSON.parse(JSON.stringify(doc)) as SiteBlueprint;
     const cur = next.pages[idx];
@@ -1091,7 +1124,7 @@ export default function App() {
     pushMsg({ role: "system", text: `AI provider set to ${s.provider}. Everything still runs locally — no credits, no limits.` });
   };
 
-  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; customFonts?: string; emailServiceProvider?: string; emailServiceEndpoint?: string; emailServiceApiKey?: string; emailServiceListId?: string; coupons?: string; orderNotify?: string; maintenanceEnabled?: boolean; maintenanceTitle?: string; maintenanceText?: string; maintenanceEmail?: string }) => {
+  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark"; siteUrl?: string; stickyNav?: boolean; announcementText?: string; announcementHref?: string; popupEnabled?: boolean; popupTitle?: string; popupText?: string; popupButtonLabel?: string; popupCtaUrl?: string; popupDelaySec?: number; popupTrigger?: "time" | "exit" | "scroll"; popupScrollPct?: number; customFonts?: string; emailServiceProvider?: string; emailServiceEndpoint?: string; emailServiceApiKey?: string; emailServiceListId?: string; coupons?: string; orderNotify?: string; maintenanceEnabled?: boolean; maintenanceTitle?: string; maintenanceText?: string; maintenanceEmail?: string }) => {
     if (!doc) return;
     const next = { ...doc };
     if (m.password !== undefined) next.password = m.password;
@@ -1150,6 +1183,8 @@ export default function App() {
             buttonLabel: m.popupButtonLabel?.trim() || undefined,
             ctaUrl: m.popupCtaUrl?.trim() || undefined,
             delaySec: m.popupDelaySec ?? 6,
+            trigger: m.popupTrigger ?? "time",
+            scrollPct: m.popupScrollPct ?? 60,
           }
         : undefined;
     }
@@ -1511,6 +1546,9 @@ export default function App() {
             showToast("Blueprint JSON exported");
           }
         }}
+        onPrintPlan={() => {
+          if (doc) printBlueprint(doc);
+        }}
         onPublishPreview={() => {
           if (doc) {
             void publishPreview(doc);
@@ -1742,7 +1780,15 @@ export default function App() {
               <div className="settings-note">Turn on Edit mode and click any section of the preview, or pick a section in the left rail, to edit its content directly — free and instant.</div>
             )}
             {tab === "plan" && <PlanView plan={plan} busy={busy} onApprove={approvePlan} onDiscard={discardPlan} />}
-            {tab === "history" && <HistoryView history={history} cursor={cursor} onRestore={restore} />}
+            {tab === "history" && (
+              <HistoryView
+                history={history}
+                cursor={cursor}
+                onRestore={restore}
+                cloudHistory={cloudHistory}
+                onRestoreCloud={restoreCloudVersion}
+              />
+            )}
             {tab === "posts" && doc && (
               <PostsView
                 posts={doc.posts ?? []}
@@ -1781,6 +1827,7 @@ export default function App() {
                 onStatus={(l) => setBusyLabel(l)}
                 onApplyDoc={(d, label, source) => mutate(d, label, source)}
                 onGenerateOg={generateOgImage}
+                onFillAlt={fillAlts}
               />
             )}
             {tab === "analytics" && doc && (
@@ -1818,6 +1865,8 @@ export default function App() {
             popupButtonLabel: doc?.popup?.buttonLabel,
             popupCtaUrl: doc?.popup?.ctaUrl,
             popupDelaySec: doc?.popup?.delaySec,
+            popupTrigger: doc?.popup?.trigger,
+            popupScrollPct: doc?.popup?.scrollPct,
             customFonts: (doc?.customFonts ?? []).map((f) => `${f.name} ${f.url}${f.weight ? ` ${f.weight}` : ""}`).join("\n"),
             emailServiceProvider: doc?.forms?.emailService?.provider ?? "",
             emailServiceEndpoint: doc?.forms?.emailService?.endpoint ?? "",

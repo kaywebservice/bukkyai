@@ -361,6 +361,13 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.12;letter-spacing:-.01em;
 .bk-comment-form input,.bk-comment-form textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--rd-md);background:var(--surface);color:var(--text);font-size:14px}
 .bk-comment-form .bk-btn{align-self:flex-start}
 .bk-comment-status{font-size:13px;color:var(--muted)}
+.bk-page-gate{position:fixed;inset:0;z-index:9997;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+.bk-page-gate-card{width:min(360px,100%);background:var(--surface);border:1px solid var(--border);border-radius:var(--rd-lg);padding:26px;text-align:center}
+.bk-page-gate-card h2{margin:0 0 6px}
+.bk-page-gate-card p{color:var(--muted);font-size:14px;margin:0 0 16px}
+.bk-page-gate-card input{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:var(--rd-md);background:var(--bg);color:var(--text);font-size:15px;margin-bottom:10px}
+.bk-page-gate-card .bk-btn{width:100%}
+.bk-page-gate-err{color:#e74c3c;font-size:13px;margin-top:10px;min-height:18px}
 #bk-cart-checkout{width:100%;text-align:center;display:block}
 
 /* motion */

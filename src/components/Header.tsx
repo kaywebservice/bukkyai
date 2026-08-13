@@ -21,6 +21,7 @@ type Props = {
   onExportReact: () => void;
   onExportCms: () => void;
   onBlueprintJson?: () => void;
+  onPrintPlan?: () => void;
   onPublishPreview: () => void;
   onGithubBackup: () => void;
   onDeploy: () => void;
@@ -152,6 +153,10 @@ export default function Header(p: Props) {
             <button onClick={() => { p.onBlueprintJson?.(); setExportOpen(false); }}>
               <span className="pop-title">Blueprint JSON</span>
               <span className="pop-desc">The full editable document — open format, open forever</span>
+            </button>
+            <button onClick={() => { p.onPrintPlan?.(); setExportOpen(false); }}>
+              <span className="pop-title">Print site plan (PDF)</span>
+              <span className="pop-desc">A print-ready summary — save it from the print dialog</span>
             </button>
             <button onClick={() => { p.onPublishPreview(); setExportOpen(false); }}>
               <span className="pop-title">Publish preview</span>

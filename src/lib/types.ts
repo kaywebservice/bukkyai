@@ -221,6 +221,7 @@ export type Page = {
   title: string;
   description: string;
   sections: Section[];
+  password?: string;
 };
 
 export type NavLink = { label: string; href: string };
@@ -257,7 +258,7 @@ export type SiteBlueprint = {
   theme?: SiteTheme;
   maintenance?: { enabled: boolean; title?: string; text?: string; email?: string };
   announcement?: { text: string; href?: string };
-  popup?: { enabled: boolean; title?: string; text?: string; buttonLabel?: string; ctaUrl?: string; delaySec?: number };
+  popup?: { enabled: boolean; title?: string; text?: string; buttonLabel?: string; ctaUrl?: string; delaySec?: number; trigger?: "time" | "exit" | "scroll"; scrollPct?: number };
   customFonts?: { name: string; url: string; weight?: string; style?: string }[];
   coupons?: { code: string; percentOff: number }[];
   orderNotify?: string;

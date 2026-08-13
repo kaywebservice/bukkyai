@@ -22,6 +22,8 @@ type Props = {
   history: Checkpoint[];
   cursor: number;
   onRestore: (idx: number) => void;
+  cloudHistory?: Checkpoint[];
+  onRestoreCloud?: (cp: Checkpoint) => void;
 };
 
 export default function HistoryView(p: Props) {
@@ -61,6 +63,29 @@ export default function HistoryView(p: Props) {
           <div className="settings-note">No checkpoints yet.</div>
         )}
       </div>
+
+      {p.cloudHistory && p.cloudHistory.length > 0 && (
+        <>
+          <div className="panel-label" style={{ marginTop: 16 }}>
+            Cloud history
+          </div>
+          <div className="settings-note">
+            Versions synced to your account from any device. Restore one to continue from it.
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {p.cloudHistory.map((h) => (
+              <div key={h.id} className="history-item" onClick={() => p.onRestoreCloud?.(h)}>
+                <span className="history-dot" style={{ background: "#8b7bff" }} />
+                <div className="history-main">
+                  <div className="history-label">{h.label}</div>
+                  <div className="history-meta">Cloud · {SOURCE_LABEL[h.source] ?? h.source}</div>
+                </div>
+                <span className="history-time">{time(h.at)}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </>
   );
 }

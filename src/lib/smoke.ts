@@ -57,13 +57,16 @@ export function runSmoke(): SmokeResult {
   shopDoc2.orderNotify = "https://formspree.io/f/order";
   shopDoc2.forms = { endpoint: "https://formspree.io/f/abcd1234", emailService: { provider: "mailchimp", endpoint: "https://x/list", apiKey: "k", listId: "L" } };
   const shop2Html = renderPage(shopDoc2, shopDoc2.pages[0], false);
-
-  const blogDoc = JSON.parse(JSON.stringify(doc)) as typeof doc;  blogDoc.posts = [
+  const blogDoc = JSON.parse(JSON.stringify(doc)) as typeof doc;
+  blogDoc.posts = [
     { id: "p1", slug: "one", title: "One", excerpt: "", content: "", date: "2026-01-01", category: "News" },
     { id: "p2", slug: "two", title: "Two", excerpt: "", content: "", date: "2026-01-02", category: "Guides" },
   ];
   blogDoc.pages[0].sections.push({ id: "pg_blog", type: "posts", content: { heading: "Blog" } });
+  blogDoc.pages[0].password = "secret123";
   const blogHtml = renderPage(blogDoc, blogDoc.pages[0], false);
+  const blogHtmlEdit = renderPage(blogDoc, blogDoc.pages[0], true);
+  const blogFiles = renderStaticSite(blogDoc).files;
 
   const maintenanceDoc = JSON.parse(JSON.stringify(doc)) as typeof doc;
   maintenanceDoc.maintenance = { enabled: true, title: "Back soon", text: "Rebuilding.", email: "x@y.com" };
@@ -125,6 +128,9 @@ export function runSmoke(): SmokeResult {
     ["Disabled add-to-cart for out-of-stock", shop2Html.includes("data-stock=\"0\" disabled")],
     ["Blog category chips render", blogHtml.includes("bk-chip") && blogHtml.includes("Guides")],
     ["Comment form in post modal", blogHtml.includes("bk-comment-form")],
+    ["Per-page password gate renders", blogHtml.includes("data-page-password=\"secret123\"")],
+    ["Password gate hidden in edit mode", !blogHtmlEdit.includes("data-page-password=\"secret123\"")],
+    ["Category archive pages generated", blogFiles.some((f) => f.path === "blog/news.html" && f.content.includes("News")) && blogFiles.some((f) => f.path === "blog/guides.html")],
     ["Full templates build and render (6, multi-page)", templatesOk],
     ["Maintenance mode renders coming-soon page", maintenanceHtml.includes("Back soon") && maintenanceHtml.includes("x@y.com")],
     ["Maintenance mode publishes single index.html", maintenanceFiles.length === 1 && maintenanceFiles[0].path === "index.html"],

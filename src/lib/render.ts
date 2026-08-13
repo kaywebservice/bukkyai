@@ -134,6 +134,7 @@ ${embedsHead}
 ${renderNav(doc, previewSlugs)}
 <main id="main">
 ${sections.join("\n")}
+${page.password && !editingMode ? `<div class="bk-page-gate" data-page-password="${esc(page.password)}"><div class="bk-page-gate-card"><h2>${esc(page.title)}</h2><p>This page is protected. Enter the password to view it.</p><input id="bk-page-pwd" type="password" placeholder="Password"/><button id="bk-page-pwd-go" class="bk-btn bk-btn-primary">Unlock</button><div class="bk-page-gate-err"></div></div></div>` : ""}
 </main>
 <script>
 window.__BKKY__ = ${JSON.stringify({
@@ -147,7 +148,7 @@ window.__BKKY__ = ${JSON.stringify({
     defaultLang: doc.languages?.default ?? doc.meta.lang,
     cookie: doc.cookieConsent ? { enabled: !!doc.cookieConsent.enabled, text: doc.cookieConsent.text || "", policyUrl: doc.cookieConsent.policyUrl || "" } : null,
     theme: doc.theme ? { toggle: !!doc.theme.toggle, defaultMode: doc.theme.defaultMode || "auto" } : null,
-    popup: doc.popup ? { enabled: !!doc.popup.enabled, delaySec: doc.popup.delaySec || 6 } : null,
+    popup: doc.popup ? { enabled: !!doc.popup.enabled, delaySec: doc.popup.delaySec || 6, trigger: doc.popup.trigger || "time", scrollPct: doc.popup.scrollPct || 60 } : null,
     coupons: doc.coupons ?? [],
     orderNotify: doc.orderNotify || "",
     emailService: doc.forms?.emailService || null,
@@ -287,6 +288,15 @@ ${(doc.posts ?? []).map((post) => `  <url><loc>${siteBase(doc)}/post/${esc(post.
     path: "feed.xml",
     content: rssFeed(doc),
   });
+
+  // Blog category archive pages (/blog/{category}.html) with all matching posts.
+  const categories = Array.from(new Set((doc.posts ?? []).map((p) => p.category).filter((c): c is string => Boolean(c))));
+  for (const cat of categories) {
+    const catSlug = cat.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    if (!catSlug) continue;
+    files.push({ path: `blog/${catSlug}.html`, content: renderCategoryArchive(doc, cat) });
+  }
+
   if ((doc.redirects ?? []).length > 0) {
     files.push({
       path: "_redirects",
@@ -301,6 +311,57 @@ ${(doc.posts ?? []).map((post) => `  <url><loc>${siteBase(doc)}/post/${esc(post.
   }
   files.push({ path: "404.html", content: renderNotFound(doc) });
   return { files };
+}
+
+export function renderCategoryArchive(doc: SiteBlueprint, category: string): string {
+  const c = doc.design.tokens.colors;
+  const posts = (doc.posts ?? []).filter((p) => p.category === category);
+  const base = siteBase(doc);
+  const cards = posts.map((p) => `
+    <a class="card" href="${base}/post/${esc(p.slug)}.html">
+      ${p.cover ? `<img src="${attrSafe(p.cover)}" alt="${esc(p.title)}"/>` : ""}
+      <div class="card-body">
+        <div class="cat">${esc(p.category ?? "")}</div>
+        <h3>${esc(p.title)}</h3>
+        <p>${esc(p.excerpt || "")}</p>
+      </div>
+    </a>`).join("\n");
+  return `<!doctype html>
+<html lang="${esc(doc.meta.lang)}">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>${esc(category)} — ${esc(doc.meta.title)}</title>
+<meta name="description" content="All posts in the ${esc(category)} category on ${esc(doc.meta.title)}."/>
+<meta name="robots" content="index,follow"/>
+<link rel="canonical" href="${base}/blog/${esc(category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""))}.html"/>
+<link rel="icon" href="${faviconDataUrl(doc)}"/>
+<style>
+:root{--bg:${c.background};--surface:${c.surface};--text:${c.text};--muted:${c.muted};--accent:${c.accent};--accent-c:${c.accentContrast};--border:${c.border}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:48px 24px}
+.wrap{max-width:860px;margin:0 auto}
+h1{font-size:34px;letter-spacing:-0.02em;margin-bottom:8px}
+.sub{color:var(--muted);margin-bottom:28px;font-size:15px}
+.back{display:inline-block;margin-bottom:28px;color:var(--accent);text-decoration:none;font-size:14px}
+.card{display:flex;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;text-decoration:none;color:var(--text);margin-bottom:14px}
+.card img{width:140px;height:140px;object-fit:cover;flex:none}
+.card-body{padding:18px}
+.card-body .cat{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:6px}
+.card-body h3{font-size:19px;margin-bottom:6px}
+.card-body p{color:var(--muted);font-size:14px}
+@media (max-width:640px){.card{flex-direction:column}.card img{width:100%;height:180px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="${base}/">← Back to ${esc(doc.meta.title)}</a>
+  <h1>${esc(category)}</h1>
+  <div class="sub">${posts.length} post${posts.length === 1 ? "" : "s"} in this category</div>
+  ${cards}
+</div>
+</body>
+</html>`;
 }
 
 export function rssFeed(doc: SiteBlueprint): string {
@@ -1151,17 +1212,37 @@ const SITE_FEATURES_SCRIPT = `(function () {
     }, { passive: true });
     toTop.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
   }
-  // Lead-capture popup (once per session)
+  // Lead-capture popup (once per session; time, exit-intent, or scroll trigger)
   var popup = document.getElementById("bk-popup");
   if (popup && cfg.popup && cfg.popup.enabled) {
     var popupKey = "bk-popup-seen";
     var popupSeen = false;
     try { popupSeen = sessionStorage.getItem(popupKey) === "1"; } catch {}
     if (!popupSeen) {
-      var delay = (Number(cfg.popup.delaySec) || 6) * 1000;
-      setTimeout(function () {
+      var showPopup = function () {
         popup.style.display = "flex";
-      }, delay);
+      };
+      var trigger = cfg.popup.trigger || "time";
+      if (trigger === "exit") {
+        document.addEventListener("mouseout", function (e) {
+          if (e.relatedTarget === null && e.clientY <= 20 && !popupSeen) { popupSeen = true; showPopup(); }
+        });
+      } else if (trigger === "scroll") {
+        var scrollPct = Number(cfg.popup.scrollPct) || 60;
+        var scrollFired = false;
+        window.addEventListener("scroll", function () {
+          if (scrollFired) return;
+          var doc = document.documentElement;
+          var total = doc.scrollHeight - window.innerHeight;
+          if (total > 0 && window.scrollY / total >= scrollPct / 100) {
+            scrollFired = true;
+            showPopup();
+          }
+        }, { passive: true });
+      } else {
+        var delay = (Number(cfg.popup.delaySec) || 6) * 1000;
+        setTimeout(showPopup, delay);
+      }
       var closePopup = function () {
         popup.style.display = "none";
         try { sessionStorage.setItem(popupKey, "1"); } catch {}
@@ -1214,6 +1295,25 @@ const SITE_FEATURES_SCRIPT = `(function () {
           }).join("")
         : '<li class="bk-search-empty">No matches.</li>';
     });
+  }
+  // Per-page password gate
+  var pageGate = document.querySelector(".bk-page-gate");
+  if (pageGate) {
+    var gatePwd = pageGate.getAttribute("data-page-password") || "";
+    var gateErr = pageGate.querySelector(".bk-page-gate-err");
+    var gateInput = document.getElementById("bk-page-pwd");
+    var tryUnlock = function () {
+      if (gateInput && gateInput.value === gatePwd) {
+        pageGate.style.display = "none";
+        try { sessionStorage.setItem("bk-page-" + gatePwd, "1"); } catch {}
+      } else if (gateErr) {
+        gateErr.textContent = "Incorrect password.";
+      }
+    };
+    var gateGo = document.getElementById("bk-page-pwd-go");
+    if (gateGo) gateGo.addEventListener("click", tryUnlock);
+    if (gateInput) gateInput.addEventListener("keydown", function (e) { if (e.key === "Enter") tryUnlock(); });
+    try { if (sessionStorage.getItem("bk-page-" + gatePwd) === "1") pageGate.style.display = "none"; } catch {}
   }
   // Language switcher
   var langSel = document.getElementById("bk-lang-switch");  if (langSel) {

@@ -142,8 +142,7 @@ export function auditSite(doc: SiteBlueprint): AuditResult {
   return { score, issues };
 }
 
-function collectHrefs(value: unknown, out: Set<string>): void {
-  if (typeof value === "string") {
+function collectHrefs(value: unknown, out: Set<string>): void {  if (typeof value === "string") {
     if (value.startsWith("/") && !value.startsWith("//")) out.add(value);
     return;
   }
@@ -157,6 +156,45 @@ function collectHrefs(value: unknown, out: Set<string>): void {
       else collectHrefs(v, out);
     }
   }
+}
+
+// Fill every empty image alt from its sibling caption/title/name field (no AI needed).
+export function fillAltText(doc: SiteBlueprint): { doc: SiteBlueprint; count: number } {
+  const next = JSON.parse(JSON.stringify(doc)) as SiteBlueprint;
+  let count = 0;
+  for (const pg of next.pages) {
+    for (const s of pg.sections) {
+      const content = s.content as Record<string, unknown>;
+      if (typeof content.alt === "string" && !content.alt.trim()) {
+        content.alt = suggestAltFor(content);
+        count++;
+      }
+      for (const item of Object.values(content)) {
+        if (!Array.isArray(item)) continue;
+        for (const el of item as Record<string, unknown>[]) {
+          if (!el || typeof el !== "object") continue;
+          if (typeof el.alt === "string" && !el.alt.trim()) {
+            el.alt = suggestAltFor(el, String(s.type));
+            count++;
+          }
+          if (el.alt === undefined && typeof el.url === "string" && el.url) {
+            el.alt = suggestAltFor(el, String(s.type));
+            count++;
+          }
+        }
+      }
+    }
+  }
+  return { doc: next, count };
+}
+
+function suggestAltFor(item: Record<string, unknown>, sectionType = ""): string {
+  const candidates = [item.caption, item.title, item.name, item.alt];
+  for (const c of candidates) {
+    if (typeof c === "string" && c.trim()) return c.trim().slice(0, 140);
+  }
+  const fallback = sectionType ? sectionType.replace(/-/g, " ").replace(/\b\w/g, (m) => m.toUpperCase()) : "";
+  return fallback ? `${fallback} image` : "Image";
 }
 
 export function seoAutoFixPrompt(_doc: SiteBlueprint, issues: AuditIssue[]): string {
