@@ -1,4 +1,4 @@
-const CACHE = "bukkyai-v1";
+const CACHE = "bukkyai-v2";
 const SHELL = ["/", "/app", "/index.html", "/editor.html", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {

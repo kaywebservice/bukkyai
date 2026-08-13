@@ -142,6 +142,9 @@ export default function AuthGate(p: Props) {
               Continue without an account
             </button>
           )}
+          <p className="auth-gate-guest-note">
+            Guest: no login — projects are saved on this device only, and publishing still requires an account.
+          </p>
         </div>
       )}
 

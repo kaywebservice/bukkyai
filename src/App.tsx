@@ -203,13 +203,17 @@ export default function App() {
     const id = map[tmpl] || tmpl;
     const tpl = fullTemplateById(id);
     if (!tpl) return;
+    // Guard: don't silently clobber an existing open project.
+    if (projectId || listProjects().length > 0) {
+      if (!window.confirm(`Open the "${tpl.name}" template as a new project? Your current project stays saved.`)) return;
+    }
     const { meta } = createProject(tpl.name);
     const doc = tpl.build();
     persistDoc(meta.id, doc);
     setProjects(listProjects());
     openProject(meta.id);
     pushMsg({ role: "assistant", text: `Loaded the ${tpl.name} template — every page written and designed. Make it yours.` });
-  }, [gateOpen, authUid]);
+  }, [gateOpen, authUid, projectId]);
 
   useEffect(() => {
     if (!authConfigured()) return;

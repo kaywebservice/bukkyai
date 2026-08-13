@@ -38,8 +38,10 @@ type Props = {
 
 export default function Header(p: Props) {
   const [exportOpen, setExportOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [user, setUser] = useState<{ email: string | null; name: string | null; photo: string | null } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const moreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!authConfigured()) return;
@@ -50,6 +52,7 @@ export default function Header(p: Props) {
   useEffect(() => {
     const h = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setExportOpen(false);
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
     };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
@@ -134,15 +137,6 @@ export default function Header(p: Props) {
         <button className="btn btn-sm" onClick={p.onNewProject} title="New project">
           + New
         </button>
-        <button className="btn btn-sm btn-ghost" onClick={p.onDemo} title="Load the built-in demo site">
-          Demo
-        </button>
-        <label className="btn btn-sm btn-ghost" title="Import a saved blueprint JSON">
-          Import
-          <input type="file" accept=".json,application/json" hidden onChange={(e) => {
-            const f = e.target.files?.[0]; e.target.value = ""; if (f) p.onImport(f);
-          }}/>
-        </label>
       </div>
 
       <div className="header-spacer" />
@@ -154,10 +148,6 @@ export default function Header(p: Props) {
           {p.busyLabel || "Working…"}
         </div>
       )}
-
-      <button className="btn" onClick={p.onSnapshot} title="Save a labeled checkpoint now" disabled={p.busy}>
-        Snapshot
-      </button>
 
       <div className="export-menu" ref={ref}>
         <button className="btn" onClick={() => setExportOpen((v) => !v)} disabled={p.busy}>
@@ -212,11 +202,37 @@ export default function Header(p: Props) {
       <button className="btn" onClick={p.onOpenSettings} title="Settings">
         Settings
       </button>
-      {p.onHelp && (
-        <button className="btn btn-ghost" onClick={p.onHelp} title="Guided tour">
-          Help
+      <div className="more-menu" ref={moreRef}>
+        <button className="btn btn-ghost" onClick={() => setMoreOpen((v) => !v)} title="More actions" aria-label="More actions">
+          ⋯
         </button>
-      )}
+        {moreOpen && (
+          <div className="more-pop">
+            <button onClick={() => { p.onSnapshot(); setMoreOpen(false); }} disabled={p.busy}>
+              <span className="pop-title">Checkpoint</span>
+              <span className="pop-desc">Save a labeled snapshot to undo to later</span>
+            </button>
+            {p.onHelp && (
+              <button onClick={() => { p.onHelp?.(); setMoreOpen(false); }}>
+                <span className="pop-title">Guided tour</span>
+                <span className="pop-desc">Walk through every feature</span>
+              </button>
+            )}
+            <div className="more-pop-sep" />
+            <button onClick={() => { p.onDemo(); setMoreOpen(false); }}>
+              <span className="pop-title">Load demo site</span>
+              <span className="pop-desc">Explore the built-in Northwind demo</span>
+            </button>
+            <label className="more-pop-label">
+              <span className="pop-title">Import project</span>
+              <span className="pop-desc">Open a saved blueprint (.json)</span>
+              <input type="file" accept=".json,application/json" hidden onChange={(e) => {
+                const f = e.target.files?.[0]; e.target.value = ""; if (f) p.onImport(f); setMoreOpen(false);
+              }} />
+            </label>
+          </div>
+        )}
+      </div>
       {p.presence && p.presence.length > 0 && (
         <span className="presence-chip" title={`Editing now: ${p.presence.map((u) => u.name).join(", ")}`}>
           <span className="presence-dot" />
