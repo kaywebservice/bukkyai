@@ -57,9 +57,11 @@ async function getEntitlement(env, email) {
   }
 }
 
-async function setEntitlement(env, email, active) {
+async function setEntitlement(env, email, active, tier) {
   if (!email || !env.ENTITLEMENTS) return;
-  await env.ENTITLEMENTS.put(entKey(email), JSON.stringify({ active, at: Date.now() }));
+  const prev = await getEntitlement(env, email);
+  const nextTier = active ? (tier || prev.tier || "pro") : undefined;
+  await env.ENTITLEMENTS.put(entKey(email), JSON.stringify({ active, at: Date.now(), ...(nextTier ? { tier: nextTier } : {}) }));
 }
 
 export default {
@@ -120,6 +122,11 @@ export default {
       if (!env.CREEM_API_KEY) {
         return json({ error: "Checkout is not configured on the server yet (missing CREEM_API_KEY)." }, 503, cors());
       }
+      const tier = String(body.tier || "pro").toLowerCase();
+      const productId = String(body.productId || "")
+        || (tier === "plus" ? env.CREEM_PLUS_PRODUCT_ID : "")
+        || env.CREEM_PRODUCT_ID
+        || "prod_48AX6fRL1MUIcYUivSHtKa";
       const api = env.CREEM_TEST_MODE === "1" ? "https://test-api.creem.io" : "https://api.creem.io";
       const res = await fetch(`${api}/v1/checkouts`, {
         method: "POST",
@@ -129,10 +136,10 @@ export default {
           "user-agent": "bukkyai-worker",
         },
         body: JSON.stringify({
-          product_id: env.CREEM_PRODUCT_ID || "prod_48AX6fRL1MUIcYUivSHtKa",
+          product_id: productId,
           success_url: `${url.origin}/app?creem=success`,
           customer: { email },
-          metadata: { email, app: "bukkyai" },
+          metadata: { email, app: "bukkyai", tier },
         }),
       });
       let data = {};
@@ -160,9 +167,13 @@ export default {
       const obj = ev.object || {};
       const email = (obj.customer?.email || obj.metadata?.email || "").trim();
       const type = ev.eventType || "";
+      const productId = String(obj.product?.id || obj.product?.product_id || obj.metadata?.product_id || "");
+      const tier = productId && env.CREEM_PLUS_PRODUCT_ID && productId === env.CREEM_PLUS_PRODUCT_ID
+        ? "plus"
+        : String(obj.metadata?.tier || "pro");
       if (email) {
         if (["checkout.completed", "subscription.active", "subscription.paid"].includes(type)) {
-          await setEntitlement(env, email, true);
+          await setEntitlement(env, email, true, tier);
         } else if (["subscription.canceled", "subscription.past_due", "subscription.expired", "refund.created", "dispute.created"].includes(type)) {
           await setEntitlement(env, email, false);
         }

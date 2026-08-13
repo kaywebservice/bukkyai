@@ -42,7 +42,7 @@ import { canGenerateImages, generateSiteImage } from "./lib/images";
 import { authConfigured, onAuthChange } from "./lib/auth";
 import AuthGate, { guestAccessGranted } from "./components/AuthGate";
 import { acceptInvite, clearPresence, deleteCloudProject, listCloudProjects, loadCloudProject, saveProjectToCloud, shareProject, subscribeCloudProject, subscribePresence, updatePresence, type PresenceInfo } from "./lib/cloud";
-import { fetchEntitlement, proUnlocked, publishSite, setProUnlocked, startProCheckout } from "./lib/publish";
+import { fetchEntitlement, fetchEntitlementDetail, proUnlocked, publishSite, setProUnlocked, startProCheckout } from "./lib/publish";
 import {
   addAsset,
   addAssetDataUrl,
@@ -120,6 +120,7 @@ export default function App() {
   const [cloudHistory, setCloudHistory] = useState<Checkpoint[]>([]);
   const [presence, setPresence] = useState<PresenceInfo[]>([]);
   const [pro, setPro] = useState(() => proUnlocked());
+  const [proTier, setProTier] = useState<"pro" | "plus" | undefined>(undefined);
   const [pageIdx, setPageIdx] = useState(0);
   const [selected, setSelected] = useState<{ p: number; s: number } | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -156,6 +157,23 @@ export default function App() {
     setCloudOn(on);
     try { localStorage.setItem("bukkyai.cloudOn", on ? "1" : "0"); } catch {}
   };
+
+  // When arriving via /app?tier=pro|plus from the pricing page, open checkout
+  // for that tier once signed in (the auth gate closes first).
+  const pendingTier = useRef<"pro" | "plus" | null>(null);
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get("tier");
+    if (t === "pro" || t === "plus") pendingTier.current = t;
+  }, []);
+  useEffect(() => {
+    if (gateOpen) return;
+    const t = pendingTier.current;
+    if (!t) return;
+    pendingTier.current = null;
+    window.history.replaceState(null, "", window.location.pathname);
+    buyPro(t);
+    setPricingOpen(true);
+  }, [gateOpen, authUid]);
 
   useEffect(() => {
     if (!authConfigured()) return;
@@ -412,25 +430,25 @@ export default function App() {
     return "";
   };
 
-  const buyPro = () => {
+  const buyPro = (tier: "pro" | "plus" = "pro") => {
     void (async () => {
       if (!authEmail) {
-        pushMsg({ role: "assistant", text: "Sign in first — paid Pro access is tied to your account email, then you get a live checkout.", kind: "error" });
+        pushMsg({ role: "assistant", text: "Sign in first - paid access is tied to your account email, then you get a live checkout.", kind: "error" });
         setAuthOpen(true);
         return;
       }
-      const res = await startProCheckout(authEmail);
+      const res = await startProCheckout(authEmail, tier);
       if (res.error || !res.url) {
         const link = paymentLink();
         if (!link) {
           pushMsg({ role: "assistant", text: res.error ?? "Checkout isn't configured yet.", kind: "error" });
           return;
         }
-        pushMsg({ role: "assistant", text: `Opening checkout in a new tab — access unlocks automatically after you pay. (${res.error ?? ""})` });
+        pushMsg({ role: "assistant", text: `Opening checkout in a new tab - access unlocks automatically after you pay. (${res.error ?? ""})` });
         window.open(link, "_blank", "noopener");
         return;
       }
-      pushMsg({ role: "assistant", text: "Opening secure checkout — you'll return here and Pro unlocks automatically." });
+      pushMsg({ role: "assistant", text: "Opening secure checkout - you'll return here and access unlocks automatically." });
       window.location.assign(res.url);
     })();
   };
@@ -462,10 +480,11 @@ export default function App() {
   // returns from checkout (?creem=success). The worker is the source of truth.
   useEffect(() => {
     if (!authEmail) return;
-    void fetchEntitlement(authEmail).then((ok) => {
-      setProUnlocked(ok);
-      setPro(ok);
-      if (ok && new URLSearchParams(window.location.search).get("creem") === "success") {
+    void fetchEntitlementDetail(authEmail).then((d) => {
+      setProUnlocked(d.active);
+      setPro(d.active);
+      setProTier(d.active ? (d.tier === "plus" ? "plus" : "pro") : undefined);
+      if (d.active && new URLSearchParams(window.location.search).get("creem") === "success") {
         showToast("Pro unlocked — Publish & share is ready");
         try { window.history.replaceState(null, "", window.location.pathname); } catch {}
       }
@@ -1929,6 +1948,7 @@ export default function App() {
           onBuy={buyPro}
           configured={Boolean(paymentLink())}
           pro={pro}
+          tier={proTier}
           signedIn={Boolean(authUid)}
           email={authEmail}
           projectCount={projects.length}

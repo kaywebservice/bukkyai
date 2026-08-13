@@ -49,14 +49,14 @@ export function setProUnlocked(v: boolean): void {
 }
 
 // Create a Creem checkout session bound to the buyer's email (server-side).
-export async function startProCheckout(email: string): Promise<{ url?: string; error?: string }> {
+export async function startProCheckout(email: string, tier: "pro" | "plus" = "pro"): Promise<{ url?: string; error?: string }> {
   const base = apiBase();
   if (!base) return { error: "Checkout not configured — VITE_PUBLISH_ENDPOINT is empty. Add it to .env (see server/README.md)." };
   try {
     const res = await fetch(`${base}/api/checkout`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, tier }),
     });
     const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
     if (!res.ok) return { error: data.error ?? `Checkout returned ${res.status}` };
@@ -82,6 +82,24 @@ export async function fetchEntitlement(email: string): Promise<boolean> {
     return Boolean(data.active);
   } catch {
     return false;
+  }
+}
+
+// Ask the worker for the entitlement plus the purchased tier.
+export async function fetchEntitlementDetail(email: string): Promise<{ active: boolean; tier?: string }> {
+  const base = apiBase();
+  if (!base) return { active: false };
+  try {
+    const res = await fetch(`${base}/api/entitlement`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) return { active: false };
+    const data = (await res.json()) as { active?: boolean; tier?: string };
+    return { active: Boolean(data.active), tier: data.tier };
+  } catch {
+    return { active: false };
   }
 }
 

@@ -1081,11 +1081,12 @@ input[type="range"] {
   white-space: nowrap;
 }
 .pricing-modal {
-  width: 620px;
+  width: 720px;
+  max-width: 94vw;
 }
 .pricing-tiers {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 .pricing-tier {

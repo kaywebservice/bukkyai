@@ -2,9 +2,10 @@ import { useFocusTrap } from "../lib/useFocusTrap";
 
 type Props = {
   onClose: () => void;
-  onBuy: () => void;
+  onBuy: (tier: "pro" | "plus") => void;
   configured?: boolean;
   pro?: boolean;
+  tier?: string;
   signedIn?: boolean;
   email?: string | null;
   projectCount?: number;
@@ -14,7 +15,7 @@ type Props = {
 
 export default function PricingModal(p: Props) {
   const modalRef = useFocusTrap(true, p.onClose);
-  const plan = p.pro ? "Pro" : "Free";
+  const plan = p.tier === "plus" ? "Plus" : p.pro ? "Pro" : "Free";
   return (
     <div className="modal-overlay" onClick={p.onClose}>
       <div className="modal pricing-modal" ref={modalRef} role="dialog" aria-modal="true" aria-label="Pricing" onClick={(e) => e.stopPropagation()}>
@@ -69,7 +70,7 @@ export default function PricingModal(p: Props) {
             </ul>
             {!p.pro && <div className="plan-badge plan-badge-current">Your plan</div>}
           </div>
-          <div className={`pricing-tier pricing-tier-featured${p.pro ? " pricing-tier-active" : ""}`}>
+          <div className={`pricing-tier pricing-tier-featured${p.tier === "pro" || (p.pro && p.tier !== "plus") ? " pricing-tier-active" : ""}`}>
             <b>Pro</b>
             <div className="pricing-price">$19<span>/mo</span></div>
             <ul>
@@ -81,22 +82,40 @@ export default function PricingModal(p: Props) {
               <li>Checkout with payments</li>
               <li>Priority support</li>
             </ul>
-            {p.pro ? (
+            {p.tier === "pro" ? (
               <div className="plan-badge plan-badge-current plan-badge-pro">Active</div>
             ) : (
               <button
                 className="btn btn-primary"
                 style={{ width: "100%", marginTop: 10 }}
-                onClick={p.onBuy}
+                onClick={() => p.onBuy("pro")}
                 disabled={!p.configured}
               >
                 {p.configured ? "Get Pro" : "Configure payment link first"}
               </button>
             )}
-            {!p.pro && !p.configured && (
-              <div className="settings-note" style={{ marginTop: 6 }}>
-                Set a payment link in Settings to enable checkout.
-              </div>
+          </div>
+          <div className={`pricing-tier${p.tier === "plus" ? " pricing-tier-active" : ""}`}>
+            <b>Plus</b>
+            <div className="pricing-price">$49.99<span>/mo</span></div>
+            <ul>
+              <li>Everything in Pro</li>
+              <li>5 published sites</li>
+              <li>Higher publish limits</li>
+              <li>Advanced analytics & A/B testing</li>
+              <li>Dedicated support</li>
+            </ul>
+            {p.tier === "plus" ? (
+              <div className="plan-badge plan-badge-current plan-badge-pro">Active</div>
+            ) : (
+              <button
+                className="btn"
+                style={{ width: "100%", marginTop: 10 }}
+                onClick={() => p.onBuy("plus")}
+                disabled={!p.configured}
+              >
+                {p.configured ? "Get Plus" : "Configure payment link first"}
+              </button>
             )}
           </div>
         </div>
