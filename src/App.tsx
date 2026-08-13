@@ -40,6 +40,7 @@ import { harmonizeDesign as harmonize } from "./lib/harmony";
 import { generateOgImage as renderOgImage } from "./lib/ogImage";
 import { canGenerateImages, generateSiteImage } from "./lib/images";
 import { authConfigured, onAuthChange } from "./lib/auth";
+import AuthGate, { guestAccessGranted } from "./components/AuthGate";
 import { acceptInvite, clearPresence, deleteCloudProject, listCloudProjects, loadCloudProject, saveProjectToCloud, shareProject, subscribeCloudProject, subscribePresence, updatePresence, type PresenceInfo } from "./lib/cloud";
 import { fetchEntitlement, proUnlocked, publishSite, setProUnlocked, startProCheckout } from "./lib/publish";
 import {
@@ -143,6 +144,7 @@ export default function App() {
   const [clipboard, setClipboard] = useState<{ type: SectionType; content: SectionContent[SectionType] } | null>(null);
   const [authUid, setAuthUid] = useState<string | null>(null);
   const [authEmail, setAuthEmail] = useState<string | null>(null);
+  const [gateOpen, setGateOpen] = useState(() => authConfigured() && !guestAccessGranted());
   const [cloudOn, setCloudOn] = useState(() => {
     try { return localStorage.getItem("bukkyai.cloudOn") === "1"; } catch { return false; }
   });
@@ -160,6 +162,7 @@ export default function App() {
     return onAuthChange((u) => {
       setAuthUid(u?.uid ?? null);
       setAuthEmail(u?.email ?? null);
+      if (u) setGateOpen(false);
     });
   }, []);
 
@@ -1942,6 +1945,7 @@ export default function App() {
         onClose={() => setTourOpen(false)}
         onTurnOff={() => turnOffTour()}
       />
+      {gateOpen && <AuthGate onClose={() => setGateOpen(false)} />}
     </div>
   );
 }

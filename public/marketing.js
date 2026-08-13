@@ -35,7 +35,6 @@
         '<a class="nav-link' + isActive("faq") + '" href="/faq">FAQ</a>' +
       '</div>' +
       '<div class="nav-cta">' +
-        '<a class="btn btn-ghost" href="/app">Log in</a>' +
         '<a class="btn btn-primary" href="/app">Get started</a>' +
       '</div>' +
       '<button class="nav-burger" aria-label="Menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>' +
@@ -49,7 +48,6 @@
       '<a href="/faq">FAQ</a>' +
       '<a href="/contact">Contact</a>' +
       '<a class="btn btn-primary" href="/app">Get started</a>' +
-      '<a class="btn btn-ghost" href="/app">Log in</a>' +
     '</div>';
 
   var footHtml = '' +

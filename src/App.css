@@ -1725,6 +1725,157 @@ input[type="range"] {
 }
 
 /* ── UI polish: empty states, hints, micro-motion ──────────────── */
+.auth-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--chrome-bg);
+  overflow-y: auto;
+}
+.auth-gate-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(600px 320px at 20% 0%, color-mix(in srgb, var(--chrome-accent) 14%, transparent), transparent 70%),
+    radial-gradient(600px 320px at 85% 100%, color-mix(in srgb, var(--chrome-accent-2) 10%, transparent), transparent 70%);
+}
+.auth-gate-card {
+  position: relative;
+  width: min(420px, 100%);
+  background: var(--chrome-panel);
+  border: 1px solid var(--chrome-border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+  padding: 34px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.auth-gate-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-weight: 800;
+  font-size: 17px;
+  font-family: var(--font-display);
+}
+.auth-gate-card h1 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.auth-gate-sub {
+  font-size: 14px;
+  color: var(--chrome-muted);
+  margin: 0 0 4px;
+}
+.auth-gate-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+.auth-gate-form input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--chrome-border-strong);
+  border-radius: 10px;
+  background: var(--chrome-panel2);
+  color: var(--chrome-text);
+  font: inherit;
+  font-size: 14px;
+}
+.auth-gate-form input:focus {
+  outline: none;
+  border-color: var(--chrome-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--chrome-accent) 18%, transparent);
+}
+.auth-gate-form .btn {
+  width: 100%;
+  margin-top: 4px;
+}
+.auth-gate-reset {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px dashed var(--chrome-border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.auth-gate-err {
+  font-size: 13px;
+  color: var(--chrome-bad);
+  background: color-mix(in srgb, var(--chrome-bad) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--chrome-bad) 40%, var(--chrome-border));
+  border-radius: 9px;
+  padding: 9px 12px;
+  text-align: left;
+}
+.auth-gate-note {
+  font-size: 13px;
+  color: var(--chrome-good);
+}
+.auth-gate-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--chrome-faint);
+  font-size: 12px;
+}
+.auth-gate-divider::before,
+.auth-gate-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--chrome-border);
+}
+.auth-gate-alt {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.auth-gate-user {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--chrome-border);
+  border-radius: 12px;
+  background: var(--chrome-panel2);
+  text-align: left;
+}
+.auth-gate-user img,
+.auth-gate-user .auth-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.auth-gate-user div {
+  display: flex;
+  flex-direction: column;
+}
+.auth-gate-user span {
+  font-size: 12.5px;
+  color: var(--chrome-muted);
+}
+.auth-gate-foot {
+  font-size: 12px;
+  color: var(--chrome-faint);
+  margin: 0;
+}
+.auth-gate-foot .btn {
+  margin: 0 auto;
+}
 .empty-state {
   display: flex;
   flex-direction: column;
