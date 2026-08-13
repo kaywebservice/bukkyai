@@ -257,6 +257,13 @@ export const SECTION_TEMPLATES: SectionTemplate[] = [
     address: "100 Market Street, San Francisco",
     embedUrl: "",
   })),
+  tpl("embed", "Embed (video/music/booking)", (b) => ({
+    ...b,
+    heading: "Embedded content",
+    url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    caption: "",
+    provider: "youtube",
+  })),
   tpl("logos", "Trusted by", (b) => ({
     ...b,
     heading: "Trusted by teams at",

@@ -2,8 +2,7 @@ import { expect, test, describe } from "vitest";
 import { runSmoke } from "./smoke";
 import { harmonizeDesign, scoreDesign, hueHarmony } from "./harmony";
 import { DEFAULT_DESIGN } from "./blueprint";
-
-describe("site render smoke suite", () => {
+import { parseMarkdown } from "./markdown";describe("site render smoke suite", () => {
   test("all render checks pass", () => {
     const res = runSmoke();
     for (const [name, ok] of res.results) {
@@ -41,5 +40,36 @@ describe("design harmony engine", () => {
     const res = harmonizeDesign(broken);
     expect(res.changes.some((c) => c.includes("curated"))).toBe(true);
     expect(res.design.tokens.fonts.heading).not.toBe("Not A Real Font");
+  });
+});
+
+describe("markdown import", () => {
+  test("parses front matter + body into a post", () => {
+    const md = `---
+title: Launch day
+date: 2026-02-01
+author: Ada
+category: News
+excerpt: We shipped.
+cover: /img/launch.png
+---
+
+## Big news
+
+We shipped **everything** today.
+`;
+    const post = parseMarkdown(md);
+    expect(post).not.toBeNull();
+    expect(post!.title).toBe("Launch day");
+    expect(post!.author).toBe("Ada");
+    expect(post!.category).toBe("News");
+    expect(post!.cover).toBe("/img/launch.png");
+    expect(post!.content).toContain("<h2>Big news</h2>");
+    expect(post!.content).toContain("<strong>everything</strong>");
+    expect(post!.date.slice(0, 10)).toBe("2026-02-01");
+  });
+
+  test("returns null without a title", () => {
+    expect(parseMarkdown("# Just a heading")).toBeNull();
   });
 });

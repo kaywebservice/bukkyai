@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { LLMSettings } from "../lib/types";
 import { defaultModel } from "../lib/llm";
 
-type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string };
+type SiteMeta = { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark" };
 type Props = {
   settings: LLMSettings & { githubToken?: string };
   siteMeta?: SiteMeta;
@@ -27,6 +27,8 @@ export default function SettingsModal(p: Props) {
     cookieText: p.siteMeta?.cookieText ?? "",
     cookiePolicyUrl: p.siteMeta?.cookiePolicyUrl ?? "",
     redirects: p.siteMeta?.redirects ?? "",
+    themeToggle: p.siteMeta?.themeToggle ?? false,
+    themeDefaultMode: p.siteMeta?.themeDefaultMode ?? "auto",
   });
 
   const provider = s.provider;
@@ -192,6 +194,32 @@ export default function SettingsModal(p: Props) {
             onChange={(e) => setMeta({ ...meta, embedBody: e.target.value })}
           />
         </div>
+
+        <div className="panel-label">Appearance</div>
+        <div className="settings-row">
+          <label>
+            <input
+              type="checkbox"
+              checked={Boolean(meta.themeToggle)}
+              onChange={(e) => setMeta({ ...meta, themeToggle: e.target.checked })}
+              style={{ width: "auto" }}
+            />
+            Allow visitors to toggle dark mode
+          </label>
+        </div>
+        {meta.themeToggle && (
+          <div className="settings-row">
+            <label>Default mode</label>
+            <select
+              value={meta.themeDefaultMode}
+              onChange={(e) => setMeta({ ...meta, themeDefaultMode: e.target.value as "auto" | "light" | "dark" })}
+            >
+              <option value="auto">Follow device</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+        )}
 
         <div className="panel-label">Privacy & redirects</div>
         <div className="settings-row">

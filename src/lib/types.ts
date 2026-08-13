@@ -129,6 +129,7 @@ export type SectionContent = {
   };
   video?: { heading: string; url: string; caption: string };
   map?: { heading: string; address: string; embedUrl: string };
+  embed?: { heading: string; url: string; caption: string; provider?: "youtube" | "vimeo" | "spotify" | "cal" | "maps" | "generic" };
   footer?: {
     columns: { title: string; links: { label: string; href: string }[] }[];
     socials: { icon: string; label: string; href: string }[];
@@ -229,6 +230,11 @@ export type CookieConsent = {
   policyUrl?: string;
 };
 
+export type SiteTheme = {
+  defaultMode: "auto" | "light" | "dark";
+  toggle: boolean;
+};
+
 export type SiteBlueprint = {
   version: number;
   meta: { title: string; description: string; lang: string; ogImage?: string };
@@ -245,6 +251,7 @@ export type SiteBlueprint = {
   stripePaymentLink?: string;
   redirects?: RedirectRule[];
   cookieConsent?: CookieConsent;
+  theme?: SiteTheme;
 };
 
 export type CheckpointSource = "init" | "plan" | "design" | "content" | "edit" | "manual";

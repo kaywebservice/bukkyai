@@ -21,6 +21,7 @@ export const SECTION_TYPES: { type: SectionType; label: string }[] = [
   { type: "gallery", label: "Gallery" },
   { type: "video", label: "Video" },
   { type: "map", label: "Map" },
+  { type: "embed", label: "Embed" },
   { type: "newsletter", label: "Newsletter" },
   { type: "cta", label: "Call to action" },
   { type: "contact", label: "Contact" },
@@ -148,6 +149,8 @@ export function emptyContent(type: SectionType): SectionContent[SectionType] {
       return { heading: "", url: "", caption: "" };
     case "map":
       return { heading: "", address: "", embedUrl: "" };
+    case "embed":
+      return { heading: "", url: "", caption: "", provider: "generic" };
     case "footer":
       return {
         columns: [{ title: "", links: [{ label: "", href: "" }] }],

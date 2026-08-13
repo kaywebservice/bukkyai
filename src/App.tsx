@@ -37,7 +37,7 @@ import { harmonizeDesign as harmonize } from "./lib/harmony";
 import { generateOgImage as renderOgImage } from "./lib/ogImage";
 import { canGenerateImages, generateSiteImage } from "./lib/images";
 import { authConfigured, onAuthChange } from "./lib/auth";
-import { deleteCloudProject, listCloudProjects, saveProjectToCloud } from "./lib/cloud";
+import { deleteCloudProject, listCloudProjects, saveProjectToCloud, subscribeCloudProject } from "./lib/cloud";
 import { fetchEntitlement, publishSite, setProUnlocked, startProCheckout } from "./lib/publish";
 import {
   addAsset,
@@ -178,6 +178,21 @@ export default function App() {
     }, 1500);
     return () => window.clearTimeout(t);
   }, [doc, projectId, authUid, cloudOn, projects]);
+
+  // Realtime collaboration: apply remote changes pushed from other devices/tabs.
+  const lastRemoteAt = useRef(0);
+  useEffect(() => {
+    if (!authUid || !cloudOn || !projectId) return;
+    const unsub = subscribeCloudProject(authUid, projectId, (cp) => {
+      if (!cp || !cp.doc || cp.at <= lastRemoteAt.current) return;
+      lastRemoteAt.current = cp.at;
+      setDoc(cp.doc);
+      setAssets(loadAssets(projectId));
+      pushMsg({ role: "system", text: "A change from another device was applied." });
+    });
+    return unsub;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authUid, cloudOn, projectId]);
 
   useEffect(() => {
     if (projectId) persistChat(projectId, messages);
@@ -937,7 +952,7 @@ export default function App() {
     pushMsg({ role: "system", text: `AI provider set to ${s.provider}. Everything still runs locally — no credits, no limits.` });
   };
 
-  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string }) => {
+  const saveSiteMeta = (m: { password?: string; stripePaymentLink?: string; embedHead?: string; embedBody?: string; formEndpoint?: string; analyticsDomain?: string; cookieEnabled?: boolean; cookieText?: string; cookiePolicyUrl?: string; redirects?: string; themeToggle?: boolean; themeDefaultMode?: "auto" | "light" | "dark" }) => {
     if (!doc) return;
     const next = { ...doc };
     if (m.password !== undefined) next.password = m.password;
@@ -955,6 +970,11 @@ export default function App() {
     if (m.cookieEnabled !== undefined) {
       next.cookieConsent = m.cookieEnabled
         ? { enabled: true, text: m.cookieText?.trim() || undefined, policyUrl: m.cookiePolicyUrl?.trim() || undefined }
+        : undefined;
+    }
+    if (m.themeToggle !== undefined) {
+      next.theme = m.themeToggle
+        ? { toggle: true, defaultMode: m.themeDefaultMode ?? "auto" }
         : undefined;
     }
     if (m.redirects !== undefined) {
@@ -1390,6 +1410,8 @@ export default function App() {
             cookieText: doc?.cookieConsent?.text,
             cookiePolicyUrl: doc?.cookieConsent?.policyUrl,
             redirects: (doc?.redirects ?? []).map((r) => `${r.from} → ${r.to}`).join("\n"),
+            themeToggle: doc?.theme?.toggle,
+            themeDefaultMode: doc?.theme?.defaultMode ?? "auto",
           }}
           cloudOn={cloudOn}
           signedIn={Boolean(authUid)}

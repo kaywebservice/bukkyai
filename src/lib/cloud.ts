@@ -86,3 +86,25 @@ export async function deleteCloudProject(uid: string, projectId: string): Promis
     // ignore
   }
 }
+
+export function subscribeCloudProject(
+  uid: string,
+  projectId: string,
+  onRemote: (cp: CloudProject) => void
+): () => void {
+  let unsub: (() => void) | null = null;
+  let cancelled = false;
+  void getDb().then(async (db) => {
+    if (cancelled) return;
+    const { doc, onSnapshot } = await import("firebase/firestore");
+    const ref = doc(db, "users", uid, "projects", projectId);
+    unsub = onSnapshot(ref, (snap) => {
+      if (snap.exists()) onRemote(snap.data() as CloudProject);
+    });
+  });
+  return () => {
+    cancelled = true;
+    unsub?.();
+    unsub = null;
+  };
+}

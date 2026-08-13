@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Post } from "../lib/types";
 import { uid } from "../lib/blueprint";
+import { parseMarkdown, slugify } from "../lib/markdown";
 
 type Props = {
   posts: Post[];
@@ -8,9 +9,6 @@ type Props = {
   onGenerateImage: (field: string) => Promise<string | null>;
   busy?: boolean;
 };
-
-const slugify = (s: string) =>
-  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `post-${Date.now().toString(36)}`;
 
 export default function PostsView(p: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -43,9 +41,33 @@ export default function PostsView(p: Props) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <div className="panel-label">Blog posts</div>
-      <button className="btn btn-primary" style={{ width: "100%" }} onClick={addPost} disabled={p.busy}>
-        + New post
-      </button>
+      <div style={{ display: "flex", gap: 8 }}>
+        <button className="btn btn-primary" style={{ flex: 1 }} onClick={addPost} disabled={p.busy}>
+          + New post
+        </button>
+        <label className="btn btn-ghost" style={{ whiteSpace: "nowrap" }}>
+          Import .md
+          <input
+            type="file"
+            accept=".md,.markdown,text/markdown,text/plain"
+            hidden
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              e.target.value = "";
+              if (!f) return;
+              f.text().then((txt) => {
+                const post = parseMarkdown(txt);
+                if (post) {
+                  p.onChange([post, ...p.posts]);
+                  setEditingId(post.id);
+                } else {
+                  window.alert("Could not parse that Markdown file — make sure it starts with front matter (title: …).");
+                }
+              });
+            }}
+          />
+        </label>
+      </div>
 
       {editing && (
         <div className="inspector-section">
@@ -69,6 +91,10 @@ export default function PostsView(p: Props) {
           <div className="json-field">
             <label>Category</label>
             <input value={editing.category ?? ""} onChange={(e) => update({ ...editing, category: e.target.value })} />
+          </div>
+          <div className="json-field">
+            <label>Author</label>
+            <input value={editing.author ?? ""} onChange={(e) => update({ ...editing, author: e.target.value })} />
           </div>
           <div className="json-field">
             <label>Date</label>

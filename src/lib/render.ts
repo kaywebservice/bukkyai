@@ -138,6 +138,7 @@ window.__BKKY__ = ${JSON.stringify({
     supported: doc.languages?.supported ?? [],
     defaultLang: doc.languages?.default ?? doc.meta.lang,
     cookie: doc.cookieConsent ? { enabled: !!doc.cookieConsent.enabled, text: doc.cookieConsent.text || "", policyUrl: doc.cookieConsent.policyUrl || "" } : null,
+    theme: doc.theme ? { toggle: !!doc.theme.toggle, defaultMode: doc.theme.defaultMode || "auto" } : null,
   })};
 </script>
 <script>
@@ -357,12 +358,15 @@ function renderNav(doc: SiteBlueprint, previewSlugs?: string[]): string {
   const cartBtn = hasProducts
     ? `<button id="bk-cart-toggle" class="bk-cart-toggle" aria-label="Cart">${svgIcon("shopping-cart", 18)}<span id="bk-cart-count" class="bk-cart-count">0</span></button>`
     : "";
+  const themeToggle = doc.theme?.toggle
+    ? `<button id="bk-theme-toggle" class="bk-theme-toggle" aria-label="Toggle dark mode">${svgIcon("moon", 18)}</button>`
+    : "";
   return `
 <header class="bk-nav">
   <div class="bk-nav-inner">
     <a class="bk-nav-brand" href="${brandHref}">${brand}</a>
     ${links || cta ? `<nav class="bk-nav-links" aria-label="Primary">${links}${cta}</nav>` : ""}
-    <div class="bk-nav-extra"><button id="bk-search-toggle" class="bk-search-toggle" aria-label="Search">${svgIcon("search", 18)}</button>${langSwitch}${cartBtn}</div>
+    <div class="bk-nav-extra">${themeToggle}<button id="bk-search-toggle" class="bk-search-toggle" aria-label="Search">${svgIcon("search", 18)}</button>${langSwitch}${cartBtn}</div>
   </div>
 </header>
 <div id="bk-search-overlay" class="bk-search-overlay" aria-hidden="true">
@@ -798,6 +802,39 @@ function renderSection(
       );
     }
 
+    case "embed": {
+      const h = c as typeof c & { heading?: string; url?: string; caption?: string; provider?: string };
+      const raw = h.url ?? "";
+      const provider = h.provider ?? "generic";
+      let src = raw;
+      if (provider === "youtube") {
+        const m = raw.match(/youtube\.com\/watch\?v=([\w-]+)/) || raw.match(/youtu\.be\/([\w-]+)/);
+        if (m) src = `https://www.youtube.com/embed/${m[1]}`;
+        else if (raw.includes("/embed/")) src = raw;
+      } else if (provider === "vimeo") {
+        const m = raw.match(/vimeo\.com\/(\d+)/);
+        if (m) src = `https://player.vimeo.com/video/${m[1]}`;
+      } else if (provider === "spotify") {
+        const m = raw.match(/open\.spotify\.com\/embed\/([\w/]+)/) || raw.match(/open\.spotify\.com\/(track|album|playlist|artist|episode)\/([\w]+)/);
+        if (m) src = m[2] ? `https://open.spotify.com/embed/${m[1]}/${m[2]}` : raw;
+        if (raw.includes("/embed/")) src = raw;
+      } else if (provider === "cal") {
+        const m = raw.match(/cal\.com\/([\w/]+)/);
+        if (m) src = `https://cal.com/${m[1]}/embed`;
+      } else if (provider === "maps") {
+        if (!raw.includes("google.com/maps/embed") && !raw.includes("openstreetmap.org/export/embed")) src = "";
+      }
+      return wrap(
+        `<div class="bk-container"${d}>
+  <div class="bk-section-head">
+    <h2 class="bk-h2">${te(`${r}.heading`, h.heading ?? "", "span")}</h2>
+  </div>
+  ${src ? `<div class="bk-embed"><iframe src="${attrSafe(src)}" title="${esc(h.heading ?? "Embed")}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen loading="lazy" style="border:0"></iframe></div>` : `<div class="bk-video bk-video-empty">${svgIcon("code", 34)}</div>`}
+  ${h.caption ? `<p class="bk-embed-caption"${d}>${te(`${r}.caption`, h.caption, "span")}</p>` : ""}
+</div>`
+      );
+    }
+
     case "footer": {
       const h = c as typeof c & {
         columns?: { title: string; links: { label: string; href: string }[] }[];
@@ -988,6 +1025,27 @@ const SITE_FEATURES_SCRIPT = `(function () {
       }
     }
   }
+  // Theme toggle
+  var themeBtn = document.getElementById("bk-theme-toggle");
+  if (themeBtn && cfg.theme && cfg.theme.toggle) {
+    var themeKey = "bk-theme";
+    var savedTheme = null;
+    try { savedTheme = localStorage.getItem(themeKey); } catch {}
+    var applyTheme = function (dark) {
+      if (dark) document.documentElement.setAttribute("data-theme", "dark");
+      else document.documentElement.removeAttribute("data-theme");
+    };
+    if (savedTheme === "dark") applyTheme(true);
+    else if (savedTheme === "light") applyTheme(false);
+    else if (cfg.theme.defaultMode === "dark") applyTheme(true);
+    else if (cfg.theme.defaultMode === "auto" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) applyTheme(true);
+    themeBtn.addEventListener("click", function () {
+      var dark = document.documentElement.getAttribute("data-theme") === "dark";
+      dark = !dark;
+      applyTheme(dark);
+      try { localStorage.setItem(themeKey, dark ? "dark" : "light"); } catch {}
+    });
+  }
   // Site search
   var searchToggle = document.getElementById("bk-search-toggle");
   var searchOverlay = document.getElementById("bk-search-overlay");
@@ -1057,7 +1115,10 @@ const SITE_FEATURES_SCRIPT = `(function () {
         (post.cover ? '<img class="bk-post-hero" src="' + post.cover + '" alt=""/>' : '') +
         (post.category ? '<span class="bk-post-category">' + post.category + '</span>' : '') +
         '<h2>' + post.title + '</h2>' +
-        '<time>' + new Date(post.date).toLocaleDateString() + '</time>' +
+        '<div class="bk-post-meta">' +
+          '<time>' + new Date(post.date).toLocaleDateString() + '</time>' +
+          (post.author ? ' · ' + post.author : '') +
+        '</div>' +
         '<div class="bk-post-body">' + post.content + '</div>' +
         '</div></div>';
       modal.style.display = "flex";

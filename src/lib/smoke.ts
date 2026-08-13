@@ -28,8 +28,17 @@ export function runSmoke(): SmokeResult {
   seoDoc.languages = { default: "en", supported: ["en", "es"] };
   seoDoc.cookieConsent = { enabled: true, text: "We use cookies.", policyUrl: "/privacy" };
   seoDoc.redirects = [{ from: "/old", to: "/new" }];
+  seoDoc.theme = { toggle: true, defaultMode: "auto" };
   const seoHtml = renderPage(seoDoc, seoDoc.pages[0], false);
   const seoFiles = renderStaticSite(seoDoc).files;
+
+  const embedDoc = JSON.parse(JSON.stringify(doc)) as typeof doc;
+  embedDoc.pages[0].sections.push({
+    id: "emb",
+    type: "embed",
+    content: { heading: "Podcast", url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", provider: "youtube" },
+  });
+  const embedHtml = renderPage(embedDoc, embedDoc.pages[0], false);
 
   const results: [string, boolean][] = [
     ["HTML starts with doctype", html.trimStart().startsWith("<!doctype html>")],
@@ -58,6 +67,9 @@ export function runSmoke(): SmokeResult {
     ["Cookie banner rendered", seoHtml.includes('id="bk-cookie"') && seoHtml.includes("We use cookies.")],
     ["Search overlay rendered", seoHtml.includes('id="bk-search-overlay"')],
     ["Hreflang alternates present", seoHtml.includes('hreflang="es"')],
+    ["Theme toggle rendered", seoHtml.includes('id="bk-theme-toggle"')],
+    ["Dark-mode CSS emitted", renderCss(seoDoc).includes('html[data-theme="dark"]')],
+    ["Embed section renders YouTube iframe", embedHtml.includes('youtube.com/embed/dQw4w9WgXcQ')],
     ["Contrast math sane", contrastRatio("#241a12", "#f7f2ea") > 7],
   ];
 
