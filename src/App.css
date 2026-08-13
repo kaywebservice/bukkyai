@@ -1020,7 +1020,39 @@ input[type="range"] {
   }
 }
 .starter-modal {
-  width: 560px;
+  width: 620px;
+  max-width: calc(100vw - 32px);
+}
+.starter-toggle {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.starter-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.starter-cat {
+  font-size: 11.5px;
+  color: var(--chrome-muted);
+  border: 1px solid var(--chrome-border);
+  border-radius: 999px;
+  background: var(--chrome-panel);
+  padding: 4px 12px;
+  cursor: pointer;
+  font: inherit;
+}
+.starter-cat:hover {
+  color: var(--chrome-text);
+}
+.starter-cat.active {
+  color: var(--chrome-accent);
+  border-color: var(--chrome-accent);
+}
+.starter-thumb.starter-full {
+  background: linear-gradient(135deg, var(--chrome-accent-2), var(--chrome-accent));
 }
 .starter-grid {
   display: grid;

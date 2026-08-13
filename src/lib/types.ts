@@ -65,7 +65,7 @@ export type SectionContent = {
   logos?: { heading: string; items: string[] };
   features?: {
     heading: string;
-    subheading: string;
+    subheading?: string;
     items: { icon: string; title: string; desc: string }[];
   };
   stats?: { heading: string; items: { value: string; label: string }[] };

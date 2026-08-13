@@ -3,6 +3,7 @@ import { renderPage, renderStaticSite } from "./render";
 import { renderCss } from "./renderCss";
 import { singleFileHtml } from "./export";
 import { contrastRatio } from "./color";
+import { FULL_TEMPLATES } from "./templatesFull";
 
 export type SmokeResult = { results: [string, boolean][]; pass: number; total: number };
 
@@ -57,14 +58,25 @@ export function runSmoke(): SmokeResult {
   shopDoc2.forms = { endpoint: "https://formspree.io/f/abcd1234", emailService: { provider: "mailchimp", endpoint: "https://x/list", apiKey: "k", listId: "L" } };
   const shop2Html = renderPage(shopDoc2, shopDoc2.pages[0], false);
 
-  const blogDoc = JSON.parse(JSON.stringify(doc)) as typeof doc;
-  blogDoc.posts = [
+  const blogDoc = JSON.parse(JSON.stringify(doc)) as typeof doc;  blogDoc.posts = [
     { id: "p1", slug: "one", title: "One", excerpt: "", content: "", date: "2026-01-01", category: "News" },
     { id: "p2", slug: "two", title: "Two", excerpt: "", content: "", date: "2026-01-02", category: "Guides" },
   ];
   blogDoc.pages[0].sections.push({ id: "pg_blog", type: "posts", content: { heading: "Blog" } });
   const blogHtml = renderPage(blogDoc, blogDoc.pages[0], false);
 
+  const templatesOk = FULL_TEMPLATES.every((t) => {
+    try {
+      const tpl = t.build();
+      if (tpl.pages.length < 4) return false;
+      return tpl.pages.every((pg) => {
+        const h = renderPage(tpl, pg, false);
+        return h.includes("<!doctype html>") && h.includes("<main");
+      });
+    } catch {
+      return false;
+    }
+  });
   const results: [string, boolean][] = [
     ["HTML starts with doctype", html.trimStart().startsWith("<!doctype html>")],
     ["Page title present", html.includes("<title>")],
@@ -108,6 +120,7 @@ export function runSmoke(): SmokeResult {
     ["Disabled add-to-cart for out-of-stock", shop2Html.includes("data-stock=\"0\" disabled")],
     ["Blog category chips render", blogHtml.includes("bk-chip") && blogHtml.includes("Guides")],
     ["Comment form in post modal", blogHtml.includes("bk-comment-form")],
+    ["Full templates build and render (6, multi-page)", templatesOk],
     ["Contrast math sane", contrastRatio("#241a12", "#f7f2ea") > 7],
   ];
 
