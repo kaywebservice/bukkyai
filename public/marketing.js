@@ -69,8 +69,19 @@
       '</div>' +
     '</div>';
 
-  document.write('<nav class="nav" id="bk-nav">' + navHtml + '</nav>');
-  document.write('<footer>' + footHtml + '</footer>');
+  // Insert the nav at the top of <body> and the footer at the bottom,
+  // regardless of where this script tag sits.
+  var nav = document.createElement("nav");
+  nav.className = "nav";
+  nav.id = "bk-nav";
+  nav.innerHTML = navHtml;
+  document.body.insertBefore(nav, document.body.firstChild);
+
+  var footer = document.createElement("footer");
+  footer.innerHTML = footHtml;
+  document.body.appendChild(footer);
+
+  document.getElementById("year").textContent = new Date().getFullYear();
 
   var burger = document.querySelector(".nav-burger");
   var mobileMenu = document.querySelector(".mobile-menu");
@@ -79,5 +90,4 @@
       mobileMenu.classList.toggle("open");
     });
   }
-  document.getElementById("year").textContent = new Date().getFullYear();
 })();
