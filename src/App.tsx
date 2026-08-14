@@ -106,6 +106,7 @@ import VariantsModal from "./components/VariantsModal";
 import OnboardingTour, { tourCanShow, tourTurnedOff, markTourShown, turnOffTour, type TourStep } from "./components/OnboardingTour";
 import PricingModal from "./components/PricingModal";
 import ReferralModal from "./components/ReferralModal";
+import FullView from "./components/FullView";
 import { starterById } from "./lib/starterSites";
 import { fullTemplateById } from "./lib/templatesFull";
 import type { GeneratedTheme } from "./lib/themeEngine";
@@ -149,6 +150,9 @@ export default function App() {
   const [authOpen, setAuthOpen] = useState(false);
   const [starterOpen, setStarterOpen] = useState(false);
   const [pricingOpen, setPricingOpen] = useState(false);
+  const [view, setView] = useState<"full" | "editor">("editor");
+  const [live, setLive] = useState<{ url: string } | null>(null);
+  const pendingGoLiveRef = useRef(false);
   const [imgBusy, setImgBusy] = useState(false);
   const [fit, setFit] = useState(true);
   const [clipboard, setClipboard] = useState<{ type: SectionType; content: SectionContent[SectionType] } | null>(null);
@@ -542,6 +546,45 @@ export default function App() {
     });
   };
 
+  const publishLive = async (domain: string) => {
+    if (!doc) return;
+    const email = authEmail;
+    if (!email) {
+      setAuthOpen(true);
+      return;
+    }
+    runBusy("Going live — publishing your site…", async () => {
+      const res = await publishSite(doc, email, domain || undefined);
+      if (res.error) {
+        pushMsg({ role: "assistant", text: `Publish failed: ${res.error}`, kind: "error" });
+        showToast("Publish failed");
+        if (res.error.toLowerCase().includes("pro required")) {
+          pendingGoLiveRef.current = true;
+          setPricingOpen(true);
+        }
+        return;
+      }
+      const url = res.url ?? "";
+      setLive({ url });
+      showToast("Your website is live");
+      pushMsg({ role: "assistant", text: `Your website is live at ${url} — share it anywhere.` });
+    });
+  };
+
+  const goLive = (domain: string) => {
+    if (!authEmail) {
+      showToast("Sign in first — Go live is tied to your account");
+      setAuthOpen(true);
+      return;
+    }
+    if (proTier !== "pro" && proTier !== "plus") {
+      pendingGoLiveRef.current = true;
+      setPricingOpen(true);
+      return;
+    }
+    void publishLive(domain);
+  };
+
   // Refresh Pro entitlement when the signed-in email changes, and when a buyer
   // returns from checkout (?creem=success). The worker is the source of truth.
   useEffect(() => {
@@ -553,6 +596,11 @@ export default function App() {
       if (d.active && new URLSearchParams(window.location.search).get("creem") === "success") {
         showToast("Pro unlocked — Publish & share is ready");
         try { window.history.replaceState(null, "", window.location.pathname); } catch {}
+      }
+      if (d.active && pendingGoLiveRef.current) {
+        pendingGoLiveRef.current = false;
+        setPricingOpen(false);
+        void publishLive("");
       }
     });
   }, [authEmail]);
@@ -671,6 +719,8 @@ export default function App() {
       }
       mutate(res.doc, "Site built from brief", "content");
       setPageIdx(0);
+      setLive(null);
+      setView("full");
       setTab("chat");
       const pageCount = res.doc.pages.length;
       pushMsg({
@@ -1742,6 +1792,13 @@ export default function App() {
             >
               ↗ View in browser
             </button>
+            <button
+              className="btn btn-sm"
+              onClick={() => setView("full")}
+              title="See your site full-screen, exactly as visitors will"
+            >
+              ⛶ Full view
+            </button>
             <button className="btn btn-sm" onClick={toggleFullscreen} title="Fullscreen preview">
               ⛶
             </button>
@@ -2065,6 +2122,20 @@ export default function App() {
         onTurnOff={() => turnOffTour()}
       />
       {gateOpen && <AuthGate onClose={() => setGateOpen(false)} />}
+      {view === "full" && doc && (
+        <FullView
+          doc={doc}
+          tier={proTier}
+          busy={busy}
+          live={live}
+          onGoLive={goLive}
+          onEnterEditor={() => setView("editor")}
+          onOpenTab={() => {
+            void publishPreview(doc);
+            showToast("Opened in a new tab");
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -148,6 +148,11 @@ masked errors locally that then broke the clean Vercel build. Keep it this way.
 - Brief is saved to localStorage `bukkyai.brief` on submit; "↺ Reuse last brief" reloads it to build another version. Nothing was deleted — the Chat/plan/approve flow, templates, demo, etc. all still work.
 - Tests: `brief compiler` describe block in `src/lib/smoke.test.ts`.
 
+**App UI — Full view + Go live flow (post-build)**
+- After a fresh build from the brief studio, the site opens in **Full view** (`src/components/FullView.tsx`): fullscreen iframe of `multiPageHtml(doc)` (hash-router multi-page self-contained HTML), floating control bar (desktop/tablet/mobile toggle, New tab, ⚙ Advanced editor), and an approval panel ("Happy with your website?" → Yes, go live / No, advanced editor / Keep browsing).
+- **Go live**: optional custom-domain input → `goLive(domain)` in App.tsx. No account → AuthModal; not Pro → PricingModal with `pendingGoLiveRef` set; on entitlement arrival (post-checkout `?creem=success` or refresh) it auto-publishes via `publishSite(doc, email, domain)` — worker supports custom domains (dedicated repo + CNAME) — then shows the **"Your website is live"** success card with a link to the site.
+- `view: "full" | "editor"` state in App.tsx; editor toolbar has a "⛶ Full view" button. Modals (z-200) render above FullView (z-100).
+
 ---
 
 ## Pending user actions (remind at the start of each session)
