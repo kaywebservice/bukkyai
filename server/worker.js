@@ -90,6 +90,33 @@ export default {
       return new Response(val, { headers: { "content-type": meta.contentType || "image/png", "cache-control": "public, max-age=31536000, immutable" } });
     }
 
+    // ── DNS helpers for the "connect your domain" wizard ────────────────────
+    const githubPagesIps = ["185.199.108.153", "185.199.109.153", "185.199.110.153", "185.199.111.153"];
+    const cnameTarget = `${env.GITHUB_USER || "yourname"}.github.io`;
+
+    if (path === "/api/dnsinfo") {
+      return json({ cnameTarget }, 200, cors());
+    }
+
+    if (path === "/api/dnscheck") {
+      const host = String(url.searchParams.get("host") || "").trim().toLowerCase();
+      if (!host || !/^([a-z0-9-]+\.)+[a-z0-9-]+$/.test(host)) {
+        return json({ ok: false, error: "Enter a valid domain like www.yourbusiness.com" }, 200, cors());
+      }
+      try {
+        const res = await fetch(`https://dns.google/resolve?name=${encodeURIComponent(host)}&type=A`);
+        const data = await res.json();
+        const answers = Array.isArray(data.Answer) ? data.Answer : [];
+        const cname = answers.find((a) => a.type === 5);
+        const aRecs = answers.filter((a) => a.type === 1).map((a) => String(a.data).replace(/\.$/, ""));
+        const okCname = cname && String(cname.data).replace(/\.$/, "").toLowerCase() === cnameTarget;
+        const okA = aRecs.length > 0 && aRecs.every((ip) => githubPagesIps.includes(ip));
+        return json({ ok: !!(okCname || okA), host, cname: cname ? String(cname.data) : null, a: aRecs, target: cnameTarget }, 200, cors());
+      } catch {
+        return json({ ok: false, error: "Couldn't check DNS right now — try again in a moment." }, 200, cors());
+      }
+    }
+
     if (request.method !== "POST") {
       return json({ error: "POST only" }, 405, cors());
     }

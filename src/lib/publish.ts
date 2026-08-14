@@ -136,6 +136,42 @@ function slugifyForRepo(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "site";
 }
 
+export type DnsCheckResult = {
+  ok: boolean;
+  host?: string;
+  cname?: string | null;
+  a?: string[];
+  target?: string;
+  error?: string;
+};
+
+// What the user should point their domain at (CNAME target for GitHub Pages).
+export async function fetchDnsInfo(): Promise<{ cnameTarget: string } | null> {
+  const base = apiBase();
+  if (!base) return null;
+  try {
+    const res = await fetch(`${base}/api/dnsinfo`);
+    if (!res.ok) return null;
+    const data = (await res.json()) as { cnameTarget?: string };
+    return data.cnameTarget ? { cnameTarget: data.cnameTarget } : null;
+  } catch {
+    return null;
+  }
+}
+
+// Ask the worker to check whether the domain's DNS is already pointed at us.
+export async function checkDomainDns(host: string): Promise<DnsCheckResult> {
+  const base = apiBase();
+  if (!base) return { ok: false, error: "DNS check isn't configured yet." };
+  try {
+    const res = await fetch(`${base}/api/dnscheck?host=${encodeURIComponent(host.trim())}`);
+    const data = (await res.json()) as DnsCheckResult;
+    return data;
+  } catch {
+    return { ok: false, error: "Couldn't reach the DNS checker — try again in a moment." };
+  }
+}
+
 export interface ReferralStats {
   code: string;
   count: number;

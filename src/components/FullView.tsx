@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { SiteBlueprint } from "../lib/types";
 import { multiPageHtml } from "../lib/export";
+import { checkDomainDns, fetchDnsInfo } from "../lib/publish";
 
 type Props = {
   doc: SiteBlueprint;
@@ -20,13 +21,72 @@ const DEVICE_WIDTH: Record<Device, string> = {
   mobile: "390px",
 };
 
+type DnsState = "idle" | "checking" | "ok" | "no";
+
 export default function FullView({ doc, tier, busy, live, onGoLive, onEnterEditor, onOpenTab }: Props) {
   const [device, setDevice] = useState<Device>("desktop");
   const [askApproval, setAskApproval] = useState(true);
-  const [goLiveOpen, setGoLiveOpen] = useState(false);
+  const [panel, setPanel] = useState<"none" | "golive" | "domain">("none");
   const [domain, setDomain] = useState("");
+  const [dnsTarget, setDnsTarget] = useState<string>("");
+  const [dnsState, setDnsState] = useState<DnsState>("idle");
+  const [dnsNote, setDnsNote] = useState("");
+  const pollRef = useRef<number | null>(null);
 
   const html = useMemo(() => multiPageHtml(doc), [doc]);
+
+  useEffect(() => {
+    void fetchDnsInfo().then((info) => {
+      if (info) setDnsTarget(info.cnameTarget);
+    });
+    return () => {
+      if (pollRef.current) window.clearInterval(pollRef.current);
+    };
+  }, []);
+
+  const stopPolling = () => {
+    if (pollRef.current) {
+      window.clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  };
+
+  const runDnsCheck = () => {
+    const host = domain.trim();
+    if (!host) {
+      setDnsNote("Enter your domain first.");
+      return;
+    }
+    setDnsState("checking");
+    setDnsNote(`Watching ${host} — checking every few seconds…`);
+    let tries = 0;
+    const tick = async () => {
+      const res = await checkDomainDns(host);
+      if (res.ok) {
+        stopPolling();
+        setDnsState("ok");
+        setDnsNote("");
+        return;
+      }
+      tries += 1;
+      if (tries >= 24) {
+        stopPolling();
+        setDnsState("no");
+        setDnsNote("Still not visible yet. Double-check the record at your registrar and try again.");
+        return;
+      }
+    };
+    void tick();
+    stopPolling();
+    pollRef.current = window.setInterval(tick, 5000);
+  };
+
+  const resetPanel = () => {
+    stopPolling();
+    setDnsState("idle");
+    setDnsNote("");
+    setPanel("none");
+  };
 
   if (live) {
     return (
@@ -94,30 +154,93 @@ export default function FullView({ doc, tier, busy, live, onGoLive, onEnterEdito
         </div>
       </div>
 
-      {goLiveOpen ? (
+      {panel === "golive" && (
         <div className="full-panel">
           <div className="full-panel-head">
             <b>Go live</b>
-            <button className="btn btn-sm btn-ghost" onClick={() => setGoLiveOpen(false)}>Close</button>
+            <button className="btn btn-sm btn-ghost" onClick={resetPanel}>Close</button>
+          </div>
+          <div className="full-tabs">
+            <button className="full-tab on" onClick={() => setPanel("golive")}>Free address</button>
+            <button className="full-tab" onClick={() => setPanel("domain")}>My own domain</button>
           </div>
           <p className="full-panel-text">
-            Publishing puts your site on a real web address. {tier ? "Pro is active — ready when you are." : "It's part of Pro — you'll be guided through checkout in a moment."}
+            Your site goes live instantly at a free bukkyai address — no DNS, no setup. {tier ? "Pro is active — ready when you are." : "It's part of Pro — you'll be guided through checkout in a moment."}
+          </p>
+          <button className="btn btn-primary full-go" disabled={busy} onClick={() => onGoLive("")}>
+            {busy ? "Going live…" : "Publish now — it's instant"}
+          </button>
+        </div>
+      )}
+
+      {panel === "domain" && (
+        <div className="full-panel">
+          <div className="full-panel-head">
+            <b>Connect my own domain</b>
+            <button className="btn btn-sm btn-ghost" onClick={resetPanel}>Close</button>
+          </div>
+          <div className="full-tabs">
+            <button className="full-tab" onClick={() => setPanel("golive")}>Free address</button>
+            <button className="full-tab on" onClick={() => setPanel("domain")}>My own domain</button>
+          </div>
+          <p className="full-panel-text">
+            Use a domain you already own (like <b>www.mybakery.com</b>). One small DNS record at your registrar — and we watch for it automatically.
           </p>
           <label className="full-field">
-            <span>Your custom domain (optional)</span>
+            <span>Your domain</span>
             <input
               type="text"
               placeholder="www.yourbusiness.com"
               value={domain}
-              onChange={(e) => setDomain(e.target.value)}
+              disabled={dnsState === "checking" || dnsState === "ok"}
+              onChange={(e) => {
+                setDomain(e.target.value);
+                setDnsState("idle");
+                setDnsNote("");
+              }}
             />
-            <small>Leave empty for a free bukkyai address. With a custom domain we add it automatically — point its DNS (CNAME) at your GitHub Pages host.</small>
           </label>
-          <button className="btn btn-primary full-go" disabled={busy} onClick={() => onGoLive(domain.trim())}>
-            {busy ? "Going live…" : "Publish my site"}
-          </button>
+          <div className="full-dns">
+            <div className="full-dns-row">
+              <span>Type</span><b>CNAME</b>
+            </div>
+            <div className="full-dns-row">
+              <span>Name</span><b>{domain ? domain.split(".").slice(0, -2).join(".") || "@" : "your subdomain"}</b>
+            </div>
+            <div className="full-dns-row">
+              <span>Value</span>
+              <b className="full-dns-value">
+                {dnsTarget || "username.github.io"}
+                <button
+                  className="btn btn-sm"
+                  onClick={() => {
+                    void navigator.clipboard?.writeText(dnsTarget || "username.github.io");
+                  }}
+                  title="Copy the CNAME value"
+                >
+                  Copy
+                </button>
+              </b>
+            </div>
+          </div>
+          <small className="full-field-note">Add this record at your domain registrar (GoDaddy, Namecheap, Google Domains…) — it usually takes effect within a few minutes.</small>
+          <div className="full-go-row">
+            {dnsState !== "ok" ? (
+              <button className="btn btn-primary full-go" disabled={dnsState === "checking" || !domain.trim()} onClick={runDnsCheck}>
+                {dnsState === "checking" ? "Watching for it…" : "I've added it — check"}
+              </button>
+            ) : (
+              <button className="btn btn-primary full-go" disabled={busy} onClick={() => onGoLive(domain.trim())}>
+                {busy ? "Publishing…" : `Publish on ${domain.trim()}`}
+              </button>
+            )}
+            {dnsState === "ok" && <span className="full-dns-ok">✅ Connected — {domain.trim()} points to us. You're clear to publish.</span>}
+            {dnsNote && <span className={`full-dns-note${dnsState === "no" ? " err" : ""}`}>{dnsNote}</span>}
+          </div>
         </div>
-      ) : (
+      )}
+
+      {panel === "none" && (
         askApproval && (
           <div className="full-panel full-approval">
             <div className="full-approval-q">
@@ -125,7 +248,7 @@ export default function FullView({ doc, tier, busy, live, onGoLive, onEnterEdito
               <span>You can go live right now — or keep refining in the advanced editor.</span>
             </div>
             <div className="full-approval-btns">
-              <button className="btn btn-primary" onClick={() => setGoLiveOpen(true)}>
+              <button className="btn btn-primary" onClick={() => setPanel("golive")}>
                 Yes — go live
               </button>
               <button className="btn" onClick={onEnterEditor}>
