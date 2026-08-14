@@ -96,6 +96,7 @@ import PagesManager from "./components/PagesManager";
 import SeoPanel from "./components/SeoPanel";
 import AnalyticsView from "./components/AnalyticsView";
 import AuthModal from "./components/AuthModal";
+import BriefScreen from "./components/BriefScreen";
 import StarterGallery from "./components/StarterGallery";
 import ShareModal from "./components/ShareModal";
 import FindReplaceModal from "./components/FindReplaceModal";
@@ -1453,15 +1454,15 @@ export default function App() {
 
   const tourSteps: TourStep[] = [
     {
-      target: ".welcome",
+      target: ".brief-studio",
       title: "Welcome to bukkyai",
       body: "Describe your business in a sentence — bukkyai plans your site, designs a design system, and writes every page. This tour walks you through every feature.",
       prepare: () => { if (!projectId) setTab("chat"); },
     },
     {
-      target: ".brief-input",
+      target: ".brief-input-lg",
       title: "1. Write your brief",
-      body: "Type what your site is about here — e.g. \"a bakery in Austin called June & Oak, warm and artisanal\". Then hit Plan my site.",
+      body: "Type what your site is about here — e.g. \"a bakery in Austin called June & Oak, warm and artisanal\". Add features, a theme direction and more below, then hit Design my website.",
       align: "below",
     },
     {
@@ -1786,27 +1787,15 @@ export default function App() {
               fit={fit}
             />
           ) : (
-            <div className="preview-empty">
-              <div className="welcome">
-                <h1>
-                  Describe your site.
-                  <br />
-                  <span className="grad">bukkyai builds it.</span>
-                </h1>
-                <p>A plan first, then a bespoke design system, then every section written for real. Unlimited edits. No credits. You own everything.</p>
-                <textarea
-                  className="brief-input"
-                  placeholder="e.g. A bakery in Austin called June & Oak. Warm, artisanal feel. Menu, story, online ordering."
-                  value={brief}
-                  onChange={(e) => setBrief(e.target.value)}
-                />
-                <div className="btn-row">
-                  <button className="btn btn-primary" disabled={busy || !brief.trim()} onClick={() => startBuild(brief)}>
-                    {busy ? "Planning…" : "Plan my site"}
-                  </button>
-                  <button className="btn" onClick={loadDemo}>Explore the demo site</button>
-                </div>
-              </div>
+            <div className="preview-empty brief-wrap">
+              <BriefScreen
+                busy={busy}
+                tier={proTier}
+                onBuild={startBuild}
+                onDemo={loadDemo}
+                onBrowseTemplates={newProject}
+                onUpgrade={() => setPricingOpen(true)}
+              />
             </div>
           )}
         </div>

@@ -2,7 +2,8 @@ import { expect, test, describe } from "vitest";
 import { runSmoke } from "./smoke";
 import { harmonizeDesign, scoreDesign, hueHarmony } from "./harmony";
 import { DEFAULT_DESIGN } from "./blueprint";
-import { parseMarkdown } from "./markdown";describe("site render smoke suite", () => {
+import { parseMarkdown } from "./markdown";
+import { compileBrief, EMPTY_BRIEF, BRIEF_FEATURES } from "./brief";describe("site render smoke suite", () => {
   test("all render checks pass", () => {
     const res = runSmoke();
     for (const [name, ok] of res.results) {
@@ -71,5 +72,39 @@ We shipped **everything** today.
 
   test("returns null without a title", () => {
     expect(parseMarkdown("# Just a heading")).toBeNull();
+  });
+});
+
+describe("brief compiler", () => {
+  test("compiles a full brief into structured lines", () => {
+    const brief = compileBrief({
+      ...EMPTY_BRIEF,
+      description: "A bakery in Austin called June & Oak.",
+      businessName: "June & Oak",
+      city: "Austin, TX",
+      features: ["store", "contact"],
+      pages: ["about", "blog"],
+      onePager: false,
+      tone: "friendly",
+      goal: "buy",
+      domain: ".store",
+      theme: { kind: "preset", name: "Cream & Ink", palette: ["#faf6ef", "#1d1b16", "#b3541e"], label: "Cream & Ink" },
+    });
+    expect(brief).toContain("TASK: A bakery in Austin called June & Oak.");
+    expect(brief).toContain("BUSINESS NAME: June & Oak.");
+    expect(brief).toContain("SERVICE AREA: Austin, TX.");
+    expect(brief).toContain("Store, Contact form");
+    expect(brief).toContain("full multi-page site");
+    expect(brief).toContain("VOICE & TONE: friendly.");
+    expect(brief).toContain("visitors should primarily buy");
+    expect(brief).toContain("PREFERRED WEB ADDRESS EXTENSION: .store.");
+    expect(brief).toContain("THEME DIRECTION");
+  });
+
+  test("feature ids always resolve to a known section label", () => {
+    for (const f of BRIEF_FEATURES) {
+      expect(f.id.length).toBeGreaterThan(1);
+      expect(f.section.length).toBeGreaterThan(1);
+    }
   });
 });

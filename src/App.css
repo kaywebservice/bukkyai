@@ -2194,3 +2194,361 @@ input[type="range"] {
 .starter-card:hover {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
+
+/* ---------- Brief studio (first-run site brief screen) ---------- */
+.preview-empty.brief-wrap {
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: 36px 28px 48px;
+}
+
+.brief-studio {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.brief-hero h2 {
+  font-size: 30px;
+  letter-spacing: -0.03em;
+  margin: 0 0 6px;
+  line-height: 1.12;
+}
+.brief-hero h2 .grad {
+  background: linear-gradient(120deg, var(--chrome-accent), var(--chrome-accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.brief-hero p {
+  color: var(--chrome-muted);
+  margin: 0;
+  max-width: 560px;
+  font-size: 13.5px;
+}
+
+.brief-card {
+  background: var(--chrome-panel);
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 2px 10px rgba(29, 27, 22, 0.04);
+}
+.brief-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.brief-card-head b {
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}
+.brief-card-head span {
+  color: var(--chrome-faint);
+  font-size: 12px;
+}
+
+.brief-input-lg {
+  width: 100%;
+  min-height: 110px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  padding: 11px 13px;
+  resize: vertical;
+}
+
+.brief-examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+.brief-example {
+  border: 1px dashed var(--chrome-border);
+  background: var(--chrome-panel2);
+  color: var(--chrome-muted);
+  border-radius: var(--radius-md);
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  text-align: left;
+}
+.brief-example:hover {
+  border-color: var(--chrome-accent);
+  color: var(--chrome-accent-2);
+}
+
+.brief-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.brief-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.brief-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.brief-feature-group-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--chrome-faint);
+  margin: 0 0 6px 2px;
+}
+.brief-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.brief-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--chrome-border);
+  background: var(--chrome-panel2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+}
+.brief-check:hover {
+  border-color: color-mix(in srgb, var(--chrome-accent) 45%, var(--chrome-border));
+}
+.brief-check.on {
+  border-color: var(--chrome-accent);
+  background: var(--chrome-accent-soft);
+}
+.brief-check input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.brief-check-box {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  border: 1.5px solid color-mix(in srgb, var(--chrome-muted) 60%, transparent);
+  border-radius: 5px;
+  background: var(--chrome-panel);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+  transition: border-color 0.15s, background 0.15s;
+}
+.brief-check.on .brief-check-box {
+  border-color: var(--chrome-accent);
+  background: var(--chrome-accent);
+}
+.brief-check.on .brief-check-box::after {
+  content: "\2713";
+}
+.brief-check-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.brief-check-hint {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--chrome-faint);
+  white-space: nowrap;
+}
+
+.brief-chip {
+  border: 1px solid var(--chrome-border);
+  background: var(--chrome-panel2);
+  color: var(--chrome-text);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 12.5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.brief-chip:hover {
+  border-color: color-mix(in srgb, var(--chrome-accent) 55%, var(--chrome-border));
+}
+.brief-chip.on {
+  border-color: var(--chrome-accent);
+  background: var(--chrome-accent-soft);
+  color: var(--chrome-accent-2);
+  font-weight: 600;
+}
+.brief-chip .on-box {
+  border-color: var(--chrome-accent);
+  background: var(--chrome-accent);
+}
+.brief-chip .on-box::after {
+  content: "\2713";
+  color: #fff;
+  font-size: 11px;
+  display: inline;
+}
+.brief-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.brief-chips-inline {
+  align-items: center;
+}
+.brief-toggle {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.brief-theme-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.brief-theme-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.brief-theme-row-label {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+.brief-theme-row-label span {
+  font-weight: 500;
+  color: var(--chrome-faint);
+}
+.brief-theme-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.brief-theme {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  border: 1px solid var(--chrome-border);
+  background: var(--chrome-panel2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  min-width: 104px;
+  align-items: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+.brief-theme:hover {
+  border-color: color-mix(in srgb, var(--chrome-accent) 50%, var(--chrome-border));
+}
+.brief-theme.on {
+  border-color: var(--chrome-accent);
+  background: var(--chrome-accent-soft);
+}
+.brief-theme-swatches {
+  display: flex;
+  gap: 3px;
+}
+.brief-theme-swatches span {
+  width: 19px;
+  height: 22px;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  display: block;
+}
+.brief-theme-name {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--chrome-text);
+  text-align: center;
+  line-height: 1.2;
+}
+.brief-theme-lock {
+  font-size: 10px;
+  margin-left: 3px;
+}
+.brief-theme-empty {
+  color: var(--chrome-faint);
+  font-size: 12px;
+  padding: 6px 0;
+}
+
+.brief-fields {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.brief-fields-3 {
+  width: 100%;
+}
+.brief-extra {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.brief-extra-row {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.brief-extra-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--chrome-muted);
+}
+.brief-select {
+  width: auto;
+  flex: none;
+}
+.brief-note {
+  font-size: 11.5px;
+  color: var(--chrome-faint);
+}
+
+.brief-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0 8px;
+}
+.brief-build {
+  padding: 10px 30px;
+  font-size: 14.5px;
+}
+.brief-hint-text {
+  font-size: 12px;
+  color: var(--chrome-muted);
+}
+
+@media (max-width: 1180px) {
+  .brief-grid {
+    grid-template-columns: 1fr;
+  }
+  .brief-features {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 760px) {
+  .brief-fields {
+    grid-template-columns: 1fr;
+  }
+  .brief-features {
+    grid-template-columns: 1fr 1fr;
+  }
+}

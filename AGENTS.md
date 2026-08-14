@@ -59,7 +59,8 @@ masked errors locally that then broke the clean Vercel build. Keep it this way.
 - `src/lib/cloud.ts` — Firestore shared projects, invites, presence.
 - `src/lib/publish.ts` — publish worker client + Creem checkout/entitlement.
 - `src/lib/export.ts` — single-file HTML, ZIP, React project, CMS export, GitHub backup/deploy, print.
-- `src/components/` — Header, LeftRail, Preview, Chat, DesignPanel, Inspector, SeoPanel, AuthModal, AuthGate, ThemeGallery, VariantsModal, ShareModal, OnboardingTour, ShortcutsModal, FindReplaceModal, PagesManager, PostsView, MediaView, AnalyticsView, EmptyState, FieldHint, etc.
+- `src/components/` — Header, LeftRail, Preview, Chat, DesignPanel, Inspector, SeoPanel, AuthModal, AuthGate, ThemeGallery, VariantsModal, ShareModal, OnboardingTour, ShortcutsModal, FindReplaceModal, PagesManager, PostsView, MediaView, AnalyticsView, EmptyState, FieldHint, etc. **BriefScreen** is the first-run screen of `/app` (the "brief studio").
+- `src/lib/brief.ts` — brief-studio constants + `compileBrief()` (turns the screen into a structured free-text brief for the AI pipeline) + load/save (`bukkyai.brief` localStorage key).
 - `server/worker.js` — Cloudflare worker: `/api/checkout`, `/api/webhook`, `/api/entitlement`, `/api/image`, `/img/{id}`, `/checkout`, `/publish`.
 - `scripts/` — `gen-pages.mjs` (programmatic pages), `gen-seo.mjs` (sitemap), `prog-data.mjs` (page data), `gen-icons.cjs`.
 
@@ -140,6 +141,12 @@ masked errors locally that then broke the clean Vercel build. Keep it this way.
 - **Share button** on every generated site: floating share control in the site JS (`render.ts`) — native Web Share API on mobile, copy-link on desktop.
 - **Design system generator**: `/design-system` standalone page (9 moods, WCAG contrast check, CSS output) + linked from `/tools`.
 - **SEO report**: `scripts/seo-report.mjs` — `node scripts/seo-report.mjs --live [--limit N]` crawls all sitemap URLs from bukkyai.duckdns.org and reports 404s/redirects (runs HEAD, concurrency 12). Without `--live`, validates the sitemap only. Exit 1 on errors → wire into CI/launch.
+
+**App UI — Brief studio (first-run screen of `/app`)**
+- Replaces the old `.welcome` block: big description textarea + example prompt chips, feature checkboxes (3 groups: Sell & grow / Content & trust / Connect — mapped to real `SECTION_TYPES`), theme picker (16 free presets + 132 Plus-gated generated themes with 🔒 → opens PricingModal + "Surprise me"), one-pager vs full-site toggle + page chips, business basics (name/tagline/city), goal, voice, image style, optional multilingual (second language from `BRIEF_LANGUAGES`), contact details (phone/email/address), reference-site URL, and preferred domain-extension select.
+- `compileBrief()` (src/lib/brief.ts) merges everything into a structured free-text prompt → `startBuild()` (existing plan → approve → build pipeline, unchanged).
+- Brief is saved to localStorage `bukkyai.brief` on submit; "↺ Reuse last brief" reloads it to build another version. Nothing was deleted — the Chat/plan/approve flow, templates, demo, etc. all still work.
+- Tests: `brief compiler` describe block in `src/lib/smoke.test.ts`.
 
 ---
 
