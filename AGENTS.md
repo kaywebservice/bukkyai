@@ -152,7 +152,13 @@ masked errors locally that then broke the clean Vercel build. Keep it this way.
 **App UI — Full view + Go live flow (post-build)**
 - After a fresh build from the brief studio, the site opens in **Full view** (`src/components/FullView.tsx`): fullscreen iframe of `multiPageHtml(doc)` (hash-router multi-page self-contained HTML), floating control bar (desktop/tablet/mobile toggle, New tab, ⚙ Advanced editor), and an approval panel ("Happy with your website?" → Yes, go live / No, advanced editor / Keep browsing).
 - **Go live**: two-tab panel — **Free address** (instant publish to GitHub Pages, no DNS) or **My own domain** (CNAME wizard: shows target `{GITHUB_USER}.github.io`, copy button, and `runDnsCheck()` auto-polls the worker's `/api/dnscheck` DNS-over-HTTPS endpoint every 5s until the record resolves → "Connected" → publish). No account → AuthModal; not Pro → PricingModal with `pendingGoLiveRef` set; on entitlement arrival (post-checkout `?creem=success` or refresh) it auto-publishes via `publishSite(doc, email, domain)` — worker supports custom domains (dedicated repo + CNAME) — then shows the **"Your website is live"** success card with a link to the site. Worker GET endpoints: `/api/dnsinfo`, `/api/dnscheck?host=` (checks CNAME to `user.github.io` or GitHub Pages A records).
-- `view: "full" | "editor"` state in App.tsx; editor toolbar has a "⛶ Full view" button. Modals (z-200) render above FullView (z-100).
+- `view: "full" | "editor"` state in App.tsx; "Full view" lives in ☰ Menu → Editor tools. Modals (z-200) render above FullView (z-100).
+
+**App UI — Clean editor chrome (default view)**
+- The editor's preview toolbar (Edit mode toggle, desktop/tablet/mobile switcher, Fit/100%, View in browser, Full view, page select) and the right-panel tabs (Chat/Design/Media/Code/Inspect/Plan/History/Posts/Pages/Lang/SEO/Analytics) were **removed from the default view**.
+- All of it lives in **☰ Menu → "Editor tools"** group: opens the tools panel (`panelOpen` state in App.tsx) onto the chosen tab, plus "Full view". The panel has a "✕ Close" topbar. Device preview is still in FullView (`.full-device`).
+- Brief studio is now **full-width** (`.brief-studio` no max-width) and the hero reads "Describe your website" (the gradient "bukkyai builds it." line removed).
+- Tour steps 5–6 updated (`.preview-toolbar` no longer exists — targets `.more-menu`, `prepare: () => setPanelOpen(true)`); cmd-palette "Toggle edit mode" replaced with "Open tools panel".
 
 ---
 
