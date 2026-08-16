@@ -3044,6 +3044,9 @@ input[type="range"] {
 .menu-group > button {
   width: 100%;
 }
+.menu-group .menu-project.on .pop-title {
+  color: var(--chrome-accent);
+}
 .menu-install {
   display: block;
 }

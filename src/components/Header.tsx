@@ -30,6 +30,7 @@ type Props = {
   onAuth: () => void;
   onPricing: () => void;
   onOpenPanel: (tab: string) => void;
+  onAddSection: () => void;
   onFullView: () => void;
   onShare?: () => void;
   onReferral?: () => void;
@@ -65,50 +66,6 @@ export default function Header(p: Props) {
       <div className="brand">
         <span className="brand-mark">b</span>
         <span>bukkyai</span>
-      </div>
-
-      <div className="project-picker">
-        <select
-          className="project-select"
-          value={p.activeId ?? ""}
-          onChange={(e) => p.onSelectProject(e.target.value)}
-        >
-          <option value="" disabled>
-            Select project…
-          </option>
-          {p.projects.map((pr) => (
-            <option key={pr.id} value={pr.id}>
-              {pr.name}
-            </option>
-          ))}
-        </select>
-        <button
-          className="btn btn-sm btn-ghost"
-          onClick={p.onRenameProject}
-          title="Rename the active project"
-          disabled={!p.activeId}
-        >
-          ✎
-        </button>
-        <button
-          className="btn btn-sm btn-ghost"
-          onClick={p.onDuplicateProject}
-          title="Duplicate the active project"
-          disabled={!p.activeId}
-        >
-          ⧉
-        </button>
-        <button
-          className="btn btn-sm btn-ghost"
-          onClick={p.onDeleteProject}
-          title="Delete the active project"
-          disabled={!p.activeId}
-        >
-          ✕
-        </button>
-        <button className="btn btn-sm" onClick={p.onNewProject} title="New project">
-          + New
-        </button>
       </div>
 
       <div className="header-spacer" />
@@ -176,7 +133,40 @@ export default function Header(p: Props) {
                 </button>
               </div>
               <div className="menu-group">
+                <div className="menu-label">Projects</div>
+                <button onClick={() => { p.onNewProject(); close(); }}>
+                  <span className="pop-title">New project (templates)</span>
+                  <span className="pop-desc">Start from a template or a blank canvas</span>
+                </button>
+                {p.projects.map((pr) => (
+                  <button
+                    key={pr.id}
+                    className={`menu-project${pr.id === p.activeId ? " on" : ""}`}
+                    onClick={() => { p.onSelectProject(pr.id); close(); }}
+                  >
+                    <span className="pop-title">{pr.name}</span>
+                    <span className="pop-desc">{pr.id === p.activeId ? "Currently open" : "Open this project"}</span>
+                  </button>
+                ))}
+                <button onClick={() => { p.onRenameProject(); close(); }} disabled={!p.activeId}>
+                  <span className="pop-title">Rename project…</span>
+                  <span className="pop-desc">{p.activeId ? "Rename the open project" : "No project open"}</span>
+                </button>
+                <button onClick={() => { p.onDuplicateProject(); close(); }} disabled={!p.activeId}>
+                  <span className="pop-title">Duplicate project</span>
+                  <span className="pop-desc">{p.activeId ? "Copy the open project" : "No project open"}</span>
+                </button>
+                <button onClick={() => { p.onDeleteProject(); close(); }} disabled={!p.activeId}>
+                  <span className="pop-title">Delete project</span>
+                  <span className="pop-desc">{p.activeId ? "Permanently delete the open project" : "No project open"}</span>
+                </button>
+              </div>
+              <div className="menu-group">
                 <div className="menu-label">Editor tools</div>
+                <button onClick={() => { p.onAddSection(); close(); }} disabled={!p.activeId}>
+                  <span className="pop-title">Add section…</span>
+                  <span className="pop-desc">Add a section to the open page</span>
+                </button>
                 <button onClick={() => { p.onOpenPanel("chat"); close(); }}>
                   <span className="pop-title">Chat &amp; AI</span>
                   <span className="pop-desc">Ask, instruct, discuss — the assistant</span>

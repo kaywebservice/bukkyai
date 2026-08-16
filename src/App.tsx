@@ -13,7 +13,6 @@ import type {
 } from "./lib/types";
 import {
   checkpoint,
-  emptyBlueprint,
   emptyContent,
   SECTION_LABEL,
   SECTION_TYPES,
@@ -79,7 +78,6 @@ import {
   publishPreview,
 } from "./lib/export";
 import Header from "./components/Header";
-import LeftRail from "./components/LeftRail";
 import Preview from "./components/Preview";
 import Chat from "./components/Chat";
 import DesignPanel from "./components/DesignPanel";
@@ -1085,24 +1083,9 @@ export default function App() {
     setSelected(null);
   };
 
-  const addSection = (p: number, type: string) => {
-    if (!doc) return;
-    const next = JSON.parse(JSON.stringify(doc)) as SiteBlueprint;
-    next.pages[p].sections.push({
-      id: uid(),
-      type: type as SectionType,
-      content: emptyContent(type as SectionType),
-    });
-    mutate(next, `Added ${SECTION_LABEL[type as SectionType] ?? type} section`, "manual");
-  };
-
-  const addSectionTemplate = (p: number, templateId: string) => {
-    if (!doc) return;
-    const tpl = SECTION_TEMPLATES.find((t) => t.id === templateId);
-    if (!tpl) return;
-    const next = JSON.parse(JSON.stringify(doc)) as SiteBlueprint;
-    next.pages[p].sections.push(tpl.build());
-    mutate(next, `Added ${tpl.name} section from template`, "manual");
+  const openInsertEnd = () => {
+    if (!doc || doc.pages.length === 0) return;
+    setInsertAt({ p: pageIdx, s: doc.pages[pageIdx].sections.length });
   };
 
   const addPage = () => {
@@ -1494,141 +1477,129 @@ export default function App() {
       align: "below",
     },
     {
-      target: ".project-picker",
-      title: "2. Start from a template",
-      body: "Prefer a head start? Click \"New\" and open Full templates — six ready-made multi-page sites (bakery, SaaS, studio, wellness, hotel, restaurant) with full copy and design, ready to edit.",
-      align: "below",
-    },
-    {
-      target: ".left-rail",
-      title: "3. Pages & sections",
-      body: "Your pages and sections live here. Add new sections from templates, reorder them, or delete ones you don't need.",
-      align: "right",
-    },
-    {
       target: ".preview-area",
-      title: "4. The live preview",
+      title: "2. The live preview",
       body: "Your site renders here in real time. This is exactly what visitors will see — every edit applies instantly.",
       align: "above",
     },
     {
       target: ".more-menu",
-      title: "5. Full view & tools",
+      title: "3. Full view & tools",
       body: "The ☰ Menu holds everything: Publish & export, editor tools, and account. \"Full view\" shows your site full-screen with phone/tablet previews — exactly how visitors will see it.",
       align: "below",
     },
     {
       target: ".right-panel .tabs",
-      title: "6. The tools panel",
+      title: "4. The tools panel",
       body: "The editor stays clean by default — open the tools panel from ☰ Menu → Editor tools. The next steps cover every tab: Chat, Design, Media, Code, Inspect, Plan, History, Posts, Pages, Lang, SEO and Analytics.",
       align: "above",
       prepare: () => setPanelOpen(true),
     },
     {
       target: ".right-panel .tabs button:nth-child(1)",
-      title: "7. Chat",
+      title: "5. Chat",
       body: "Ask anything about your site or type an instruction — \"make the hero CTA red\" — and bukkyai edits the blueprint for you.",
       align: "below",
       prepare: () => setTab("chat"),
     },
     {
       target: ".right-panel .tabs button:nth-child(2)",
-      title: "8. Design",
+      title: "6. Design",
       body: "Voice & tone, one-click design presets, the design-harmony score with a Harmonize button, and uploading a brand kit (logo + colors).",
       align: "below",
       prepare: () => setTab("design"),
     },
     {
       target: ".right-panel .tabs button:nth-child(3)",
-      title: "9. Media",
+      title: "7. Media",
       body: "Your image library. Upload images (auto-compressed), or generate new ones with AI from a prompt.",
       align: "below",
       prepare: () => setTab("media"),
     },
     {
       target: ".right-panel .tabs button:nth-child(4)",
-      title: "10. Code",
+      title: "8. Code",
       body: "The blueprint's code view — inspect the generated CSS and structure, or copy it for your own use.",
       align: "below",
       prepare: () => setTab("code"),
     },
     {
       target: ".right-panel .tabs button:nth-child(5)",
-      title: "11. Inspect",
+      title: "9. Inspect",
       body: "Select any section in the preview, then edit every field here: images, text, layout, animations and even rewrite with AI.",
       align: "below",
       prepare: () => setTab("inspect"),
     },
     {
       target: ".right-panel .tabs button:nth-child(6)",
-      title: "12. Plan",
+      title: "10. Plan",
       body: "See the site structure bukkyai planned — pages and their sections — before or after building.",
       align: "below",
       prepare: () => setTab("plan"),
     },
     {
       target: ".right-panel .tabs button:nth-child(7)",
-      title: "13. History",
+      title: "11. History",
       body: "Every change is checkpointed. Travel back in time to any earlier version of your site and restore it.",
       align: "below",
       prepare: () => setTab("history"),
     },
     {
       target: ".right-panel .tabs button:nth-child(8)",
-      title: "14. Posts",
+      title: "12. Posts",
       body: "Your blog. Write posts, import Markdown files, and set cover images, categories and authors.",
       align: "below",
       prepare: () => setTab("posts"),
     },
     {
       target: ".right-panel .tabs button:nth-child(9)",
-      title: "15. Pages",
+      title: "13. Pages",
       body: "Manage the site's pages — add, rename, and delete them. The site can be as many pages as you want.",
       align: "below",
       prepare: () => setTab("pages"),
     },
     {
       target: ".right-panel .tabs button:nth-child(10)",
-      title: "16. Languages",
+      title: "14. Languages",
       body: "Add languages to make your site multi-lingual. Visitors get a language switcher in the nav.",
       align: "below",
       prepare: () => setTab("langs"),
     },
     {
       target: ".right-panel .tabs button:nth-child(11)",
-      title: "17. SEO",
+      title: "15. SEO",
       body: "A live quality score, WCAG contrast checks, AI auto-fix, and a share-image generator for your pages.",
       align: "below",
       prepare: () => setTab("seo"),
     },
     {
       target: ".right-panel .tabs button:nth-child(12)",
-      title: "18. Analytics",
+      title: "16. Analytics",
       body: "Connect Plausible or GoatCounter in Settings, then view or embed your traffic dashboard here.",
       align: "below",
       prepare: () => setTab("analytics"),
     },
     {
-      target: ".project-picker",
-      title: "19. Projects",
-      body: "Switch projects, create new ones, rename, duplicate, or delete — all from this picker.",
+      target: ".more-menu",
+      title: "17. Projects",
+      body: "All your projects live in ☰ Menu → Projects: switch between them, rename, duplicate, delete, or start a new one from templates.",
       align: "below",
     },
     {
       target: ".header .auth-chip",
-      title: "20. Sign in & cloud sync",
+      title: "18. Sign in & cloud sync",
       body: "Sign in with Google or email to sync projects to the cloud, invite collaborators, and keep working from any device.",
       align: "below",
     },
     {
       target: ".header .btn",
-      title: "21. Settings",
+      title: "19. Settings",
       body: "Configure your AI provider (your key stays local), form endpoints, analytics, cookie consent, redirects, custom fonts, commerce coupons and more.",
       align: "below",
     },
     {
       target: ".header .btn",
-      title: "22. Publish & share",
+      title: "20. Publish & share",
       body: "Open the export menu: publish a live link (Pro), deploy to GitHub Pages, or download a zip / React project / CMS export. You're all set!",
       align: "above",
     },
@@ -1702,6 +1673,7 @@ export default function App() {
           setTab(t as Tab);
           setPanelOpen(true);
         }}
+        onAddSection={openInsertEnd}
         onFullView={() => {
           setPanelOpen(false);
           setView("full");
@@ -1731,21 +1703,6 @@ export default function App() {
       )}
 
       <div className="app-main">
-        <LeftRail
-          doc={doc ?? emptyBlueprint()}
-          pageIdx={pageIdx}
-          selected={selected}
-          onSelectPage={(i) => {
-            setPageIdx(i);
-            setSelected(null);
-          }}
-          onSelectSection={selectSection}
-          onRemoveSection={removeSection}
-          onAddSection={addSection}
-          onAddSectionTemplate={addSectionTemplate}
-          onMoveSection={moveSection}
-        />
-
         <div className="preview-area" ref={previewAreaRef}>
           {hasPages && doc ? (
             <Preview
