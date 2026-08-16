@@ -166,6 +166,8 @@ masked errors locally that then broke the clean Vercel build. Keep it this way.
 - "Add section…" lives in **☰ Menu → Editor tools** — reuses the existing insert modal (`insertSection`, `openInsertEnd()` opens it at the end of the current page; blank types + `SECTION_TEMPLATES`).
 - Section deletion still available via select section → **Inspect tab → "Delete section"**; pages via Pages tab; section reorder via AI chat instructions (`moveSection` still wired to Preview).
 - Tour renumbered (no `.left-rail`/`.project-picker` steps; step 17 covers Menu → Projects).
+- **Layout fix**: `.app-main` is now `display: flex` (`1fr` preview + 400px right panel) — the old `grid-template-columns: 230px 1fr 400px` left an empty 230px column after the rail was removed, pushing the brief studio to the right on wide screens. Mobile: flex column, panel `max-height: 45vh`.
+- **StatusFooter removed** (the sticky bottom bar with "No site yet" / checkpoint count): component + render deleted; `error` state is write-only (`const [, setError]`). Busy state still shows in the header busy-pill.
 
 ---
 
