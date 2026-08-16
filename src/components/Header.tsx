@@ -29,6 +29,8 @@ type Props = {
   onOpenSettings: () => void;
   onAuth: () => void;
   onPricing: () => void;
+  onOpenPanel: (tab: string) => void;
+  onFullView: () => void;
   onShare?: () => void;
   onReferral?: () => void;
   invites?: number;
@@ -171,6 +173,61 @@ export default function Header(p: Props) {
                 <button onClick={() => { p.onDeploy(); close(); }}>
                   <span className="pop-title">Deploy to GitHub Pages</span>
                   <span className="pop-desc">Live at yourname.github.io (token in Settings)</span>
+                </button>
+              </div>
+              <div className="menu-group">
+                <div className="menu-label">Editor tools</div>
+                <button onClick={() => { p.onOpenPanel("chat"); close(); }}>
+                  <span className="pop-title">Chat &amp; AI</span>
+                  <span className="pop-desc">Ask, instruct, discuss — the assistant</span>
+                </button>
+                <button onClick={() => { p.onOpenPanel("design"); close(); }}>
+                  <span className="pop-title">Design</span>
+                  <span className="pop-desc">Design system, themes, harmonize</span>
+                </button>
+                <button onClick={() => { p.onOpenPanel("media"); close(); }}>
+                  <span className="pop-title">Media</span>
+                  <span className="pop-desc">Upload images, generate with AI</span>
+                </button>
+                <button onClick={() => { p.onOpenPanel("code"); close(); }}>
+                  <span className="pop-title">Code</span>
+                  <span className="pop-desc">View / copy / download the HTML + CSS</span>
+                </button>
+                <button onClick={() => { p.onOpenPanel("inspect"); close(); }}>
+                  <span className="pop-title">Inspect</span>
+                  <span className="pop-desc">Element details of the selected part</span>
+                </button>
+                <button onClick={() => { p.onOpenPanel("plan"); close(); }}>
+                  <span className="pop-title">Plan</span>
+                  <span className="pop-desc">Sitemap and page plan</span>
+                </button>
+                <button onClick={() => { p.onOpenPanel("history"); close(); }}>
+                  <span className="pop-title">History</span>
+                  <span className="pop-desc">Undo any change, back to checkpoints</span>
+                </button>
+                <button onClick={() => { p.onOpenPanel("posts"); close(); }}>
+                  <span className="pop-title">Posts</span>
+                  <span className="pop-desc">Blog articles on your site</span>
+                </button>
+                <button onClick={() => { p.onOpenPanel("pages"); close(); }}>
+                  <span className="pop-title">Pages</span>
+                  <span className="pop-desc">Add, rename, delete pages</span>
+                </button>
+                <button onClick={() => { p.onOpenPanel("langs"); close(); }}>
+                  <span className="pop-title">Translations</span>
+                  <span className="pop-desc">Multi-language versions</span>
+                </button>
+                <button onClick={() => { p.onOpenPanel("seo"); close(); }}>
+                  <span className="pop-title">SEO</span>
+                  <span className="pop-desc">Quality score, meta, AI auto-fix</span>
+                </button>
+                <button onClick={() => { p.onOpenPanel("analytics"); close(); }}>
+                  <span className="pop-title">Analytics</span>
+                  <span className="pop-desc">Optional analytics scripts</span>
+                </button>
+                <button onClick={() => { p.onFullView(); close(); }}>
+                  <span className="pop-title">Full view</span>
+                  <span className="pop-desc">See the site full-screen, exactly as visitors will</span>
                 </button>
               </div>
               <div className="menu-group">

@@ -133,8 +133,8 @@ export default function App() {
   const [proTier, setProTier] = useState<"pro" | "plus" | undefined>(undefined);
   const [pageIdx, setPageIdx] = useState(0);
   const [selected, setSelected] = useState<{ p: number; s: number } | null>(null);
-  const [editMode, setEditMode] = useState(false);
   const [tab, setTab] = useState<Tab>("chat");
+  const [panelOpen, setPanelOpen] = useState(false);
   const [settings, setSettings] = useState<LLMSettings & { githubToken?: string }>(loadSettings);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -144,7 +144,6 @@ export default function App() {
   const [brief, setBrief] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const [device, setDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [assets, setAssets] = useState<Array<{ id: string; name: string; dataUrl: string; at: number }>>([]);
   const [cmdOpen, setCmdOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -154,7 +153,6 @@ export default function App() {
   const [live, setLive] = useState<{ url: string } | null>(null);
   const pendingGoLiveRef = useRef(false);
   const [imgBusy, setImgBusy] = useState(false);
-  const [fit, setFit] = useState(true);
   const [clipboard, setClipboard] = useState<{ type: SectionType; content: SectionContent[SectionType] } | null>(null);
   const [authUid, setAuthUid] = useState<string | null>(null);
   const [authEmail, setAuthEmail] = useState<string | null>(null);
@@ -1459,7 +1457,7 @@ export default function App() {
     { category: "Project", label: "Snapshot now", onRun: snapshot },
     { category: "AI", label: "Rewrite this section", onRun: rewriteSection },
     { category: "AI", label: "Regenerate design", onRun: regenerateDesign },
-    { category: "View", label: "Toggle edit mode", onRun: () => setEditMode((v) => !v) },
+    { category: "View", label: "Open tools panel", onRun: () => setPanelOpen(true) },
     { category: "Export", label: "Export site (.zip)", onRun: () => { if (doc) { void downloadStaticZip(doc); showToast("Site exported as zip"); } } },
     { category: "Export", label: "Blueprint JSON", onRun: () => { if (doc) { downloadBlueprintJson(doc); showToast("Blueprint JSON exported"); } } },
   ];
@@ -1480,17 +1478,6 @@ export default function App() {
     return () => window.removeEventListener("keydown", h);
   });
 
-  const toggleFullscreen = () => {
-    const el = previewAreaRef.current;
-    if (!el) return;
-    if (document.fullscreenElement) {
-      void document.exitFullscreen();
-    } else {
-      void el.requestFullscreen().catch(() => {});
-    }
-  };
-
-  const page = doc?.pages[pageIdx];
   const hasPages = Boolean(doc && doc.pages.length > 0);
 
   const tourSteps: TourStep[] = [
@@ -1525,16 +1512,17 @@ export default function App() {
       align: "above",
     },
     {
-      target: ".preview-toolbar",
-      title: "5. Edit mode & devices",
-      body: "Flip on Edit mode to click any text and edit it directly in the preview. Switch between desktop, tablet and mobile, or zoom with Fit / 100%.",
+      target: ".more-menu",
+      title: "5. Full view & tools",
+      body: "The ☰ Menu holds everything: Publish & export, editor tools, and account. \"Full view\" shows your site full-screen with phone/tablet previews — exactly how visitors will see it.",
       align: "below",
     },
     {
       target: ".right-panel .tabs",
-      title: "6. The tabs",
-      body: "The next several steps cover every tab in this panel: Chat, Design, Media, Code, Inspect, Plan, History, Posts, Pages, Lang, SEO and Analytics.",
+      title: "6. The tools panel",
+      body: "The editor stays clean by default — open the tools panel from ☰ Menu → Editor tools. The next steps cover every tab: Chat, Design, Media, Code, Inspect, Plan, History, Posts, Pages, Lang, SEO and Analytics.",
       align: "above",
+      prepare: () => setPanelOpen(true),
     },
     {
       target: ".right-panel .tabs button:nth-child(1)",
@@ -1710,6 +1698,14 @@ export default function App() {
         onReferral={authUid && authEmail ? () => setReferralOpen(true) : undefined}
         invites={invites.length}
         onAcceptInvites={invites.length ? async () => { for (const i of invites) await acceptInviteHandler(i.id); } : undefined}
+        onOpenPanel={(t) => {
+          setTab(t as Tab);
+          setPanelOpen(true);
+        }}
+        onFullView={() => {
+          setPanelOpen(false);
+          setView("full");
+        }}
         onHelp={() => setTourOpen(true)}
         presence={presence.map((p) => ({ name: p.name }))}
       />
@@ -1751,74 +1747,12 @@ export default function App() {
         />
 
         <div className="preview-area" ref={previewAreaRef}>
-          <div className="preview-toolbar">
-            <button className={`toggle${editMode ? " on" : ""}`} onClick={() => setEditMode((v) => !v)}>
-              <span className="preview-dot" />
-              {editMode ? "Editing — click text to edit, drag to reorder" : "Edit mode"}
-            </button>
-            <div className="device-switcher">
-              {(["desktop", "tablet", "mobile"] as const).map((d) => (
-                <button key={d} className={`btn btn-sm ${device === d ? "btn-primary" : ""}`} onClick={() => setDevice(d)}>
-                  {d}
-                </button>
-              ))}
-            </div>
-            <div className="device-switcher">
-              <button className={`btn btn-sm ${fit ? "btn-primary" : ""}`} onClick={() => setFit(true)} title="Fit preview to width">
-                Fit
-              </button>
-              <button className={`btn btn-sm ${!fit ? "btn-primary" : ""}`} onClick={() => setFit(false)} title="Actual pixel size">
-                100%
-              </button>
-            </div>
-            <button
-              className="btn btn-sm btn-primary"
-              onClick={() => {
-                if (doc) {
-                  void publishPreview(doc);
-                  showToast("Opened in browser");
-                }
-              }}
-              title="Open your design in a real browser tab"
-            >
-              ↗ View in browser
-            </button>
-            <button
-              className="btn btn-sm"
-              onClick={() => setView("full")}
-              title="See your site full-screen, exactly as visitors will"
-            >
-              ⛶ Full view
-            </button>
-            <button className="btn btn-sm" onClick={toggleFullscreen} title="Fullscreen preview">
-              ⛶
-            </button>
-            <span style={{ fontSize: 12, color: "var(--chrome-faint)" }}>{page?.title ?? ""}</span>
-            <span style={{ flex: 1 }} />
-            {hasPages && doc && (
-              <select
-                style={{ width: "auto" }}
-                value={pageIdx}
-                onChange={(e) => {
-                  setPageIdx(Number(e.target.value));
-                  setSelected(null);
-                }}
-              >
-                {doc.pages.map((pg, i) => (
-                  <option key={pg.id} value={i}>
-                    {pg.title || pg.slug || "Home"}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-
           {hasPages && doc ? (
             <Preview
               doc={doc}
               pageIdx={pageIdx}
-              device={device}
-              editMode={editMode}
+              device="desktop"
+              editMode={false}
               onInspect={selectSection}
               onNavClick={(slug) => {
                 const idx = doc.pages.findIndex((p) => p.slug === slug);
@@ -1832,7 +1766,7 @@ export default function App() {
               onImageField={(path) => void handleImageField(path)}
               onInsertAt={handleInsertAt}
               busy={busy}
-              fit={fit}
+              fit={true}
             />
           ) : (
             <div className="preview-empty brief-wrap">
@@ -1848,7 +1782,12 @@ export default function App() {
           )}
         </div>
 
+        {panelOpen && (
         <div className="right-panel">
+          <div className="panel-topbar">
+            <span className="panel-topbar-title">Tools</span>
+            <button className="btn btn-sm btn-ghost" onClick={() => setPanelOpen(false)}>✕ Close</button>
+          </div>
           <div className="tabs">
             <button className={`tab${tab === "chat" ? " active" : ""}`} onClick={() => setTab("chat")}>Chat</button>
             <button className={`tab${tab === "design" ? " active" : ""}`} onClick={() => setTab("design")}>Design</button>
@@ -1981,6 +1920,7 @@ export default function App() {
             )}
           </div>
         </div>
+        )}
       </div>
 
       <StatusFooter busy={busy} busyLabel={busyLabel} error={error} hasPages={hasPages} doc={doc} settings={settings} history={history} />

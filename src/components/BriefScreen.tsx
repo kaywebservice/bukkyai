@@ -138,11 +138,7 @@ export default function BriefScreen({ busy, tier, onBuild, onDemo, onBrowseTempl
     <div className="brief-studio">
       <div className="brief-hero">
         <span className="brief-kicker">AI WEBSITE BUILDER</span>
-        <h2>
-          Describe your website.
-          <br />
-          <span className="grad">bukkyai builds it.</span>
-        </h2>
+        <h2>Describe your website</h2>
         <p>A sentence is enough — we plan it, design it, and write every page. Fine-tune below whenever you want.</p>
       </div>
 
