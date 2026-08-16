@@ -160,6 +160,13 @@ masked errors locally that then broke the clean Vercel build. Keep it this way.
 - Brief studio is now **full-width** (`.brief-studio` no max-width) and the hero reads "Describe your website" (the gradient "bukkyai builds it." line removed).
 - Tour steps 5–6 updated (`.preview-toolbar` no longer exists — targets `.more-menu`, `prepare: () => setPanelOpen(true)`); cmd-palette "Toggle edit mode" replaced with "Open tools panel".
 
+**App UI — Sidebar removed (single-pane editor)**
+- **LeftRail removed from the editor** (`App.tsx` no longer renders it; preview now spans the full width). Page/section tree, drag-reorder and inline add-section select are gone from the UI.
+- Header **project picker, rename/duplicate/delete buttons and "+ New" button removed**. All live in **☰ Menu → "Projects"** group: New project (templates gallery), project list (click to open, `.menu-project.on` marks open), Rename / Duplicate / Delete.
+- "Add section…" lives in **☰ Menu → Editor tools** — reuses the existing insert modal (`insertSection`, `openInsertEnd()` opens it at the end of the current page; blank types + `SECTION_TEMPLATES`).
+- Section deletion still available via select section → **Inspect tab → "Delete section"**; pages via Pages tab; section reorder via AI chat instructions (`moveSection` still wired to Preview).
+- Tour renumbered (no `.left-rail`/`.project-picker` steps; step 17 covers Menu → Projects).
+
 ---
 
 ## Pending user actions (remind at the start of each session)
