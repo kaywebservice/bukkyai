@@ -73,9 +73,17 @@ body {
 }
 
 .app-main {
-  display: grid;
-  grid-template-columns: 230px 1fr 400px;
+  display: flex;
+  align-items: stretch;
   min-height: 0;
+}
+.app-main > .preview-area {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.app-main > .right-panel {
+  flex: 0 0 400px;
+  min-width: 0;
 }
 
 button {
@@ -1401,51 +1409,15 @@ input[type="range"] {
   .busy-pill {
     flex: none;
   }
-  .app-main {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 42vh) auto minmax(0, 1fr);
+.app-main {
+    flex-direction: column;
   }
   .app-main > .preview-area {
-    grid-row: 1;
-  }
-  .app-main > .left-rail {
-    grid-row: 2;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    border-right: none;
-    border-bottom: 1px solid var(--chrome-border);
-    padding: 8px 10px;
-    gap: 10px;
-    align-items: flex-start;
+    flex: 1 1 auto;
   }
   .app-main > .right-panel {
-    grid-row: 3;
-    border-left: none;
-    border-top: 1px solid var(--chrome-border);
-  }
-  .left-rail .rail-title {
-    display: none;
-  }
-  .left-rail .rail-page {
-    margin: 0;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 4px;
-  }
-  .left-rail .rail-page-head {
-    white-space: nowrap;
-    padding: 6px 10px;
-  }
-  .left-rail .rail-sec {
-    white-space: nowrap;
-    padding: 6px 10px;
-    padding-left: 10px;
-  }
-.right-panel {
+    flex: none;
+    max-height: 45vh;
     border-left: none;
     border-top: 1px solid var(--chrome-border);
   }

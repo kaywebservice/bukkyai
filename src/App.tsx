@@ -140,7 +140,7 @@ export default function App() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [plan, setPlan] = useState<SitePlan | null>(null);
   const [brief, setBrief] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [assets, setAssets] = useState<Array<{ id: string; name: string; dataUrl: string; at: number }>>([]);
   const [cmdOpen, setCmdOpen] = useState(false);
@@ -1880,8 +1880,6 @@ export default function App() {
         )}
       </div>
 
-      <StatusFooter busy={busy} busyLabel={busyLabel} error={error} hasPages={hasPages} doc={doc} settings={settings} history={history} />
-
       {settingsOpen && (
         <SettingsModal
           settings={settings}
@@ -2024,21 +2022,6 @@ export default function App() {
           }}
         />
       )}
-    </div>
-  );
-}
-
-function StatusFooter({ busy, busyLabel, error, hasPages, doc, settings, history }: { busy: boolean; busyLabel: string; error: string | null; hasPages: boolean; doc: SiteBlueprint | null; settings: LLMSettings & { githubToken?: string }; history: Checkpoint[] }) {
-  return (
-    <div className="status-bar">
-      <span className={`status-dot ${busy ? "busy" : error ? "err" : hasPages ? "ok" : "warn"}`} />
-      <span>
-        {busy ? busyLabel : error ? error : hasPages ? `${doc?.pages.length ?? 0} page${(doc?.pages.length ?? 1) > 1 ? "s" : ""} · ${doc?.design.name ?? ""} design system` : "No site yet — describe one to begin"}
-      </span>
-      <span className="right">
-        <span>{history.length} checkpoint{(history.length === 1 ? "" : "s")} · Ctrl+Z to undo</span>
-        <span>{settings.provider}{settings.model ? ` · ${settings.model}` : ""}{settings.apiKey ? "" : " · no key"}</span>
-      </span>
     </div>
   );
 }
