@@ -2887,3 +2887,195 @@ input[type="range"] {
 .full-dns-note.err {
   color: var(--chrome-bad);
 }
+
+/* ---------- Durable-style brief studio (clean first screen) ---------- */
+.preview-empty.brief-wrap {
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: 8vh 24px 64px;
+}
+
+.brief-studio {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.brief-kicker {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--chrome-faint);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.brief-hero h2 {
+  font-size: 40px;
+  letter-spacing: -0.035em;
+  margin: 0 0 10px;
+  line-height: 1.06;
+  font-weight: 700;
+}
+.brief-hero h2 .grad {
+  background: linear-gradient(120deg, var(--chrome-accent), var(--chrome-accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.brief-hero p {
+  color: var(--chrome-muted);
+  margin: 0;
+  max-width: 520px;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+.brief-input-lg {
+  width: 100%;
+  min-height: 132px;
+  font-size: 17px;
+  line-height: 1.6;
+  padding: 16px 18px;
+  resize: vertical;
+  border-radius: 18px;
+  border-width: 1.5px;
+  box-shadow: 0 10px 36px rgba(29, 27, 22, 0.06);
+  background: var(--chrome-panel);
+}
+.brief-input-lg:focus {
+  box-shadow: 0 10px 36px rgba(179, 84, 30, 0.10);
+}
+
+.brief-examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.brief-example {
+  border: 1.5px solid var(--chrome-border);
+  background: var(--chrome-panel);
+  color: var(--chrome-muted);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  text-align: left;
+}
+.brief-example:hover {
+  border-color: var(--chrome-accent);
+  color: var(--chrome-accent-2);
+}
+
+.brief-cta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 4px;
+}
+.brief-build {
+  padding: 13px 34px;
+  font-size: 15.5px;
+  font-weight: 700;
+  border-radius: 999px;
+}
+.btn-ghost-link {
+  background: none;
+  border: none;
+  color: var(--chrome-muted);
+  font-size: 13px;
+  padding: 6px 4px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--chrome-muted) 40%, transparent);
+}
+.btn-ghost-link:hover {
+  color: var(--chrome-accent-2);
+  text-decoration-color: var(--chrome-accent);
+}
+
+.brief-more {
+  display: flex;
+  justify-content: center;
+  margin: 18px 0 4px;
+}
+.brief-more-toggle {
+  background: var(--chrome-panel);
+  border: 1.5px solid var(--chrome-border);
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--chrome-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.brief-more-toggle:hover {
+  border-color: var(--chrome-accent);
+  color: var(--chrome-accent-2);
+}
+.brief-more-chevron {
+  transition: transform 0.2s;
+  font-size: 11px;
+}
+.brief-more-chevron.open {
+  transform: rotate(180deg);
+}
+.brief-details {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: brief-in 0.25s ease;
+}
+@keyframes brief-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- Consolidated header menu ---------- */
+.menu-pop {
+  min-width: 320px;
+  max-height: min(76vh, 640px);
+  overflow-y: auto;
+}
+.menu-group + .menu-group {
+  border-top: 1px solid var(--chrome-border);
+}
+.menu-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--chrome-faint);
+  padding: 10px 14px 4px;
+}
+.menu-group .more-pop-label,
+.menu-group > button {
+  width: 100%;
+}
+.menu-install {
+  display: block;
+}
+.menu-install button {
+  width: 100% !important;
+  margin: 0 !important;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 9px 14px;
+  cursor: pointer;
+}
+.menu-install button:hover {
+  background: var(--chrome-accent-soft);
+}

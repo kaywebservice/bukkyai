@@ -38,11 +38,9 @@ type Props = {
 };
 
 export default function Header(p: Props) {
-  const [exportOpen, setExportOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<{ email: string | null; name: string | null; photo: string | null } | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
-  const moreRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!authConfigured()) return;
@@ -52,42 +50,13 @@ export default function Header(p: Props) {
 
   useEffect(() => {
     const h = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setExportOpen(false);
-      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
     };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  // Keyboard nav for the export dropdown: arrow keys + Enter + Escape.
-  useEffect(() => {
-    if (!exportOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      const pop = ref.current?.querySelector(".export-pop");
-      if (!pop) return;
-      const items = Array.from(pop.querySelectorAll("button")) as HTMLButtonElement[];
-      const active = document.activeElement as HTMLButtonElement | null;
-      const idx = items.indexOf(active as HTMLButtonElement);
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        items[(idx + 1) % items.length]?.focus();
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        items[(idx - 1 + items.length) % items.length]?.focus();
-      } else if (e.key === "Home") {
-        e.preventDefault();
-        items[0]?.focus();
-      } else if (e.key === "End") {
-        e.preventDefault();
-        items[items.length - 1]?.focus();
-      } else if (e.key === "Escape") {
-        setExportOpen(false);
-        (pop.closest(".export-menu")?.querySelector("button") as HTMLButtonElement)?.focus();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [exportOpen]);
+  const close = () => setMenuOpen(false);
 
   return (
     <div className="header">
@@ -143,137 +112,142 @@ export default function Header(p: Props) {
       <div className="header-spacer" />
 
       <div className="header-actions">
-      {p.busy && (
-        <div className="busy-pill">
-          <span className="spinner" />
-          {p.busyLabel || "Working…"}
-        </div>
-      )}
-
-      <div className="export-menu" ref={ref}>
-        <button className="btn" onClick={() => setExportOpen((v) => !v)} disabled={p.busy}>
-          Export
-        </button>
-        {exportOpen && (
-          <div className="export-pop">
-            <button onClick={() => { p.onExportZip(); setExportOpen(false); }}>
-              <span className="pop-title">Site (.zip)</span>
-              <span className="pop-desc">HTML + robots + sitemap + README — host anywhere</span>
-            </button>
-            <button onClick={() => { p.onExportReact(); setExportOpen(false); }}>
-              <span className="pop-title">React project (.zip)</span>
-              <span className="pop-desc">Vite + React site you can open in VS Code and keep developing</span>
-            </button>
-            <button onClick={() => { p.onExportCms(); setExportOpen(false); }}>
-              <span className="pop-title">CMS export (.zip)</span>
-              <span className="pop-desc">Markdown + JSON blocks for WordPress/Webflow</span>
-            </button>
-            <button onClick={() => { p.onExportSingle(); setExportOpen(false); }}>
-              <span className="pop-title">Single-file HTML</span>
-              <span className="pop-desc">One self-contained page, all CSS inline</span>
-            </button>
-            <button onClick={() => { p.onBlueprintJson?.(); setExportOpen(false); }}>
-              <span className="pop-title">Blueprint JSON</span>
-              <span className="pop-desc">The full editable document — open format, open forever</span>
-            </button>
-            <button onClick={() => { p.onPrintPlan?.(); setExportOpen(false); }}>
-              <span className="pop-title">Print site plan (PDF)</span>
-              <span className="pop-desc">A print-ready summary — save it from the print dialog</span>
-            </button>
-            <button onClick={() => { p.onPublishPreview(); setExportOpen(false); }}>
-              <span className="pop-title">Publish preview</span>
-              <span className="pop-desc">Open the live single-file site in a new tab</span>
-            </button>
-            <button onClick={() => { p.onGithubBackup(); setExportOpen(false); }}>
-              <span className="pop-title">Back up to GitHub</span>
-              <span className="pop-desc">Save a private gist (needs a token in Settings)</span>
-            </button>
-            <button onClick={() => { p.onDeploy(); setExportOpen(false); }}>
-              <span className="pop-title">Deploy to GitHub Pages</span>
-              <span className="pop-desc">Push this site live at yourname.github.io (needs a token in Settings)</span>
-            </button>
-            <button onClick={() => { p.onPublish(); setExportOpen(false); }}>
-              <span className="pop-title">Publish &amp; share</span>
-              <span className="pop-desc">Get a shareable link (Pro, via the publish worker)</span>
-            </button>
+        {p.busy && (
+          <div className="busy-pill">
+            <span className="spinner" />
+            {p.busyLabel || "Working…"}
           </div>
         )}
-      </div>
-
-      <button className="btn" onClick={p.onOpenSettings} title="Settings">
-        Settings
-      </button>
-      <div className="more-menu" ref={moreRef}>
-        <button className="btn btn-ghost" onClick={() => setMoreOpen((v) => !v)} title="More actions" aria-label="More actions">
-          ⋯
-        </button>
-        {moreOpen && (
-          <div className="more-pop">
-            <button onClick={() => { p.onSnapshot(); setMoreOpen(false); }} disabled={p.busy}>
-              <span className="pop-title">Checkpoint</span>
-              <span className="pop-desc">Save a labeled snapshot to undo to later</span>
-            </button>
-            {p.onHelp && (
-              <button onClick={() => { p.onHelp?.(); setMoreOpen(false); }}>
-                <span className="pop-title">Guided tour</span>
-                <span className="pop-desc">Walk through every feature</span>
-              </button>
-            )}
-            {p.onReferral && (
-              <button onClick={() => { p.onReferral?.(); setMoreOpen(false); }}>
-                <span className="pop-title">Refer &amp; earn</span>
-                <span className="pop-desc">Share your link, earn free Pro time</span>
-              </button>
-            )}
-            <div className="more-pop-sep" />
-            <button onClick={() => { p.onDemo(); setMoreOpen(false); }}>
-              <span className="pop-title">Load demo site</span>
-              <span className="pop-desc">Explore the built-in Northwind demo</span>
-            </button>
-            <label className="more-pop-label">
-              <span className="pop-title">Import project</span>
-              <span className="pop-desc">Open a saved blueprint (.json)</span>
-              <input type="file" accept=".json,application/json" hidden onChange={(e) => {
-                const f = e.target.files?.[0]; e.target.value = ""; if (f) p.onImport(f); setMoreOpen(false);
-              }} />
-            </label>
-          </div>
+        {p.presence && p.presence.length > 0 && (
+          <span className="presence-chip" title={`Editing now: ${p.presence.map((u) => u.name).join(", ")}`}>
+            <span className="presence-dot" />
+            {p.presence.map((u) => u.name.slice(0, 1).toUpperCase()).join("")}
+          </span>
         )}
-      </div>
-      {p.presence && p.presence.length > 0 && (
-        <span className="presence-chip" title={`Editing now: ${p.presence.map((u) => u.name).join(", ")}`}>
-          <span className="presence-dot" />
-          {p.presence.map((u) => u.name.slice(0, 1).toUpperCase()).join("")}
-        </span>
-      )}
-      {p.onShare && (
-        <button className="btn btn-ghost" onClick={p.onShare} title="Share the active project">
-          Share
-        </button>
-      )}
-      {p.onAcceptInvites && p.invites ? (
-        <button className="btn btn-ghost" onClick={p.onAcceptInvites} title={`${p.invites} pending invite${p.invites > 1 ? "s" : ""}`}>
-          Invites ({p.invites})
-        </button>
-      ) : null}
-      <button className="btn btn-ghost" onClick={p.onPricing} title="Pricing">
-        Pricing
-      </button>
-      <InstallAppButton />
-      {user ? (
-        <button className="auth-chip" onClick={p.onAuth} title="Account">
-          {user.photo ? (
-            <img src={user.photo} alt="" className="auth-avatar" />
-          ) : (
-            <span className="auth-avatar auth-avatar-fallback">{(user.name ?? user.email ?? "u").slice(0, 1).toUpperCase()}</span>
+        <div className="more-menu" ref={menuRef}>
+          <button className="btn" onClick={() => setMenuOpen((v) => !v)} title="Menu" aria-label="Menu">
+            ☰ Menu
+          </button>
+          {menuOpen && (
+            <div className="more-pop menu-pop">
+              <div className="menu-group">
+                <div className="menu-label">Publish &amp; export</div>
+                <button onClick={() => { p.onPublish(); close(); }} disabled={p.busy}>
+                  <span className="pop-title">Publish &amp; share</span>
+                  <span className="pop-desc">Get a shareable link (Pro, via the publish worker)</span>
+                </button>
+                <button onClick={() => { p.onExportZip(); close(); }}>
+                  <span className="pop-title">Export site (.zip)</span>
+                  <span className="pop-desc">HTML + robots + sitemap + README — host anywhere</span>
+                </button>
+                <button onClick={() => { p.onExportSingle(); close(); }}>
+                  <span className="pop-title">Export single-file HTML</span>
+                  <span className="pop-desc">One self-contained page, all CSS inline</span>
+                </button>
+                <button onClick={() => { p.onExportReact(); close(); }}>
+                  <span className="pop-title">Export React project (.zip)</span>
+                  <span className="pop-desc">Vite + React site you can keep developing</span>
+                </button>
+                <button onClick={() => { p.onExportCms(); close(); }}>
+                  <span className="pop-title">Export CMS (.zip)</span>
+                  <span className="pop-desc">Markdown + JSON blocks for WordPress/Webflow</span>
+                </button>
+                <button onClick={() => { p.onBlueprintJson?.(); close(); }}>
+                  <span className="pop-title">Export blueprint JSON</span>
+                  <span className="pop-desc">The full editable document — open forever</span>
+                </button>
+                <button onClick={() => { p.onPrintPlan?.(); close(); }}>
+                  <span className="pop-title">Print site plan (PDF)</span>
+                  <span className="pop-desc">A print-ready summary</span>
+                </button>
+                <button onClick={() => { p.onPublishPreview(); close(); }}>
+                  <span className="pop-title">Open preview in tab</span>
+                  <span className="pop-desc">The live single-file site in a new tab</span>
+                </button>
+                <button onClick={() => { p.onGithubBackup(); close(); }}>
+                  <span className="pop-title">Back up to GitHub</span>
+                  <span className="pop-desc">Save a private gist (token in Settings)</span>
+                </button>
+                <button onClick={() => { p.onDeploy(); close(); }}>
+                  <span className="pop-title">Deploy to GitHub Pages</span>
+                  <span className="pop-desc">Live at yourname.github.io (token in Settings)</span>
+                </button>
+              </div>
+              <div className="menu-group">
+                <div className="menu-label">Tools</div>
+                <button onClick={() => { p.onOpenSettings(); close(); }}>
+                  <span className="pop-title">Settings</span>
+                  <span className="pop-desc">AI provider, API key, GitHub token</span>
+                </button>
+                {p.onShare && (
+                  <button onClick={() => { p.onShare?.(); close(); }}>
+                    <span className="pop-title">Share project</span>
+                    <span className="pop-desc">Invite teammates or copy the link</span>
+                  </button>
+                )}
+                <button onClick={() => { p.onSnapshot(); close(); }} disabled={p.busy}>
+                  <span className="pop-title">Checkpoint</span>
+                  <span className="pop-desc">Save a labeled snapshot to undo to later</span>
+                </button>
+                {p.onHelp && (
+                  <button onClick={() => { p.onHelp?.(); close(); }}>
+                    <span className="pop-title">Guided tour</span>
+                    <span className="pop-desc">Walk through every feature</span>
+                  </button>
+                )}
+                {p.onReferral && (
+                  <button onClick={() => { p.onReferral?.(); close(); }}>
+                    <span className="pop-title">Refer &amp; earn</span>
+                    <span className="pop-desc">Share your link, earn free Pro time</span>
+                  </button>
+                )}
+                <button onClick={() => { p.onDemo(); close(); }}>
+                  <span className="pop-title">Load demo site</span>
+                  <span className="pop-desc">Explore the built-in Northwind demo</span>
+                </button>
+                <label className="more-pop-label">
+                  <span className="pop-title">Import project</span>
+                  <span className="pop-desc">Open a saved blueprint (.json)</span>
+                  <input type="file" accept=".json,application/json" hidden onChange={(e) => {
+                    const f = e.target.files?.[0]; e.target.value = ""; if (f) p.onImport(f); close();
+                  }} />
+                </label>
+                {p.onAcceptInvites && p.invites ? (
+                  <button onClick={() => { p.onAcceptInvites?.(); close(); }}>
+                    <span className="pop-title">Invites ({p.invites})</span>
+                    <span className="pop-desc">Accept pending team invitations</span>
+                  </button>
+                ) : null}
+                <button onClick={() => { p.onPricing(); close(); }}>
+                  <span className="pop-title">Pricing &amp; upgrade</span>
+                  <span className="pop-desc">Pro / Plus plans</span>
+                </button>
+                <span className="menu-install"><InstallAppButton /></span>
+              </div>
+              <div className="menu-group">
+                <div className="menu-label">Account</div>
+                <button onClick={() => { p.onAuth(); close(); }}>
+                  <span className="pop-title">{user ? (user.name ?? user.email ?? "Account") : "Sign in / create account"}</span>
+                  <span className="pop-desc">{user ? "Manage your account" : "Needed for Go live and sharing"}</span>
+                </button>
+              </div>
+            </div>
           )}
-          <span className="auth-email">{user.name ?? user.email}</span>
-        </button>
-      ) : (
-        <button className="btn btn-ghost" onClick={p.onAuth} title="Sign in / account">
-          Sign in
-        </button>
-      )}
+        </div>
+        {user ? (
+          <button className="auth-chip" onClick={p.onAuth} title="Account">
+            {user.photo ? (
+              <img src={user.photo} alt="" className="auth-avatar" />
+            ) : (
+              <span className="auth-avatar auth-avatar-fallback">{(user.name ?? user.email ?? "u").slice(0, 1).toUpperCase()}</span>
+            )}
+            <span className="auth-email">{user.name ?? user.email}</span>
+          </button>
+        ) : (
+          <button className="btn btn-ghost" onClick={p.onAuth} title="Sign in / account">
+            Sign in
+          </button>
+        )}
       </div>
     </div>
   );
