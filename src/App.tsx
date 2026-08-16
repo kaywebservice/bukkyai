@@ -418,13 +418,6 @@ export default function App() {
 
   useEffect(() => {
     setProjects(listProjects());
-    if (listProjects().length === 0) {
-      const demo = demoProject();
-      openProject(demo.meta.id);
-    } else if (!projectId) {
-      const first = listProjects()[0];
-      openProject(first.id);
-    }
   }, []);
 
   const pushMsg = (m: Omit<ChatMessage, "id">) =>
