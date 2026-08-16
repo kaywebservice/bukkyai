@@ -87,7 +87,7 @@ masked errors locally that then broke the clean Vercel build. Keep it this way.
 **Marketing site (Wix-style)**
 - Multi-page: home, pricing, features, templates, FAQ, contact, tools, made-with
 - Wix-style nav: Product mega-menu (Build/Business/Resources groups) + login/signup via /app gate
-- Login gate: editor requires sign-in (honest guest mode; publishing still requires account)
+- Login gate: `/app` is now **guest-first** — no sign-in wall. The brief studio is the first thing a fresh visitor sees (no auth gate on load; the OnboardingTour only shows to signed-in users so guests get a clean brief screen). Sign-in is required at Go live / publish / share (client-side; real gating is server-side).
 
 **Team collaboration**
 - Shared Firestore `projects/{id}` model: ownerId, members map (owner/editor/viewer), email invites, presence heartbeats

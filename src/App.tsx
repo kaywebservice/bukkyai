@@ -40,7 +40,7 @@ import { harmonizeDesign as harmonize } from "./lib/harmony";
 import { generateOgImage as renderOgImage } from "./lib/ogImage";
 import { canGenerateImages, generateSiteImage } from "./lib/images";
 import { authConfigured, onAuthChange } from "./lib/auth";
-import AuthGate, { guestAccessGranted } from "./components/AuthGate";
+import AuthGate from "./components/AuthGate";
 import { acceptInvite, clearPresence, deleteCloudProject, listCloudProjects, loadCloudProject, saveProjectToCloud, shareProject, subscribeCloudProject, subscribePresence, updatePresence, type PresenceInfo } from "./lib/cloud";
 import { fetchEntitlement, fetchEntitlementDetail, proUnlocked, publishSite, setProUnlocked, startProCheckout } from "./lib/publish";
 import {
@@ -158,7 +158,7 @@ export default function App() {
   const [clipboard, setClipboard] = useState<{ type: SectionType; content: SectionContent[SectionType] } | null>(null);
   const [authUid, setAuthUid] = useState<string | null>(null);
   const [authEmail, setAuthEmail] = useState<string | null>(null);
-  const [gateOpen, setGateOpen] = useState(() => authConfigured() && !guestAccessGranted());
+  const [gateOpen, setGateOpen] = useState(false);
   const [cloudOn, setCloudOn] = useState(() => {
     try { return localStorage.getItem("bukkyai.cloudOn") === "1"; } catch { return false; }
   });
@@ -243,8 +243,8 @@ export default function App() {
     });
   }, []);
 
-  // Onboarding tour — shows up to 3 times, re-triggered by sign-in/sign-out,
-  // with a permanent "Don't show again" opt-out.
+  // Onboarding tour — shows up to 3 times for signed-in users only (guests get
+  // the clean brief studio first), with a permanent "Don't show again" opt-out.
   const lastAuthForTour = useRef<string | null>(null);
   const tourGateShown = useRef(false);
   useEffect(() => {
@@ -252,10 +252,8 @@ export default function App() {
       lastAuthForTour.current = authUid;
       return;
     }
+    if (!authUid) return;
     if (!tourCanShow()) return;
-    // Fires on first load too (authUid may be null) — but only once the
-    // auth gate has been passed, so the guide isn't hidden behind it.
-    if (gateOpen) return;
     if (!tourGateShown.current) {
       tourGateShown.current = true;
       lastAuthForTour.current = authUid;
